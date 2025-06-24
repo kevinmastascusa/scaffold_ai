@@ -1,6 +1,6 @@
 # 🌱 Scaffold AI: Curriculum Recommendation Tool for Sustainability and Climate Resilience
 
-**Collaborators:** Kevin Mastascusa, Joseph Di Stephano
+**Collaborators:** Kevin Mastascusa, Joseph Di Stefano
 
 **Date:** 6/23/2025
 
