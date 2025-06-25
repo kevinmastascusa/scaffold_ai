@@ -78,3 +78,43 @@ Evaluation will include both qualitative feedback from faculty and technical per
 ## 🧾 Conclusion
 
 This tool aims to enhance the integration of sustainability topics in education through transparency, traceability, and collaboration. Stakeholder engagement will guide the development of a practical and impactful final product.
+
+## 📝 TODO Section
+
+### Pending Tasks
+
+1. **Enhance PDF Extraction and Chunking**
+   * Robustly handle Unicode and mathematical formulas.
+   * Ensure Unicode and math symbols are preserved, detected, and reported in outputs.
+   * Fix words that are combined in `chunked_text_extracts.json` (e.g., "environmentalsustainability" → "environmental sustainability").
+
+2. **Integrate Unicode Cleaning Utility**
+   * Add Unicode cleaning utility into the math-aware chunking pipeline.
+
+3. **Resolve Environment and Import Issues**
+   * Ensure smooth execution by addressing compatibility issues.
+
+4. **Optional Enhancements**
+   * Further improve chunking or Unicode/math reporting.
+   * Rebuild or reinstall PyTorch and Sentence Transformers if compatibility issues persist.
+
+5. **Documentation Updates**
+   * Add detailed instructions for running scripts and interpreting outputs.
+   * Include examples of expected outputs for clarity.
+
+## 📅 Week 1 Tasks
+
+1. **Define Preprocessing Methodology**
+   * Establish detailed document preprocessing methodology, including chunking size, format, and metadata extraction.
+
+2. **GitHub Repository Setup**
+   * Set up GitHub repository with appropriate structure, branches, and initial documentation. ✅
+
+3. **Embedding Techniques and Vector Database**
+   * Select embedding techniques and finalize vector database choice (FAISS or Pinecone).
+
+4. **Open-Source License Compliance**
+   * Confirm that all libraries and models used (e.g., LLaMA, FAISS, MLflow) meet open-source license requirements for academic/public use.
+
+5. **README.md Documentation**
+   * Create and incrementally update a single README.md starting in Week 1, finalizing it in Week 11 with full setup instructions, usage examples, and project context. ✅

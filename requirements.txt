@@ -1,0 +1,9 @@
+numpy==1.26.0
+nltk==3.8.1
+faiss-cpu==1.7.4
+sentence-transformers==2.2.2
+torch
+mlflow==2.5.0
+fsspec[http]==2025.3.0
+pyarrow<13,>=4.0.0
+huggingface-hub==0.30.0
