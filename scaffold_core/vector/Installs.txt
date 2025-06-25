@@ -1,0 +1,10 @@
+*Add a 3 after pip (pip3 install...) for mac in terminal*
+Install list:
+
+pip install PyPDF2
+pip install sentence-transformers
+pip install faiss-cpu
+pip install numpy
+pip install tqdm
+pip install PyPDF2 sentence-transformers faiss-cpu numpy openai ollama
+ollama run mistral
