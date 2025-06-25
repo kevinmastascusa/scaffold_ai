@@ -141,7 +141,7 @@ cython_debug/
 Thumbs.db
 
 # Project-specific outputs
-outputs/
+outputs/*
 !outputs/unicode_report.txt
 math_outputs/
 vector_outputs/
