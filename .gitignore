@@ -143,6 +143,7 @@ Thumbs.db
 # Project-specific outputs
 outputs/*
 !outputs/unicode_report.txt
+!outputs/combined_words_analysis_report.txt
 math_outputs/
 vector_outputs/
 math_outputs_backup/
