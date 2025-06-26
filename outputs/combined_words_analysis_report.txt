@@ -1,0 +1,89 @@
+COMBINED WORDS ANALYSIS REPORT
+==================================================
+
+ANALYSIS SUMMARY
+--------------------
+Total chunks analyzed: 4,859
+Chunks with combined words: 4,481
+Percentage of chunks affected: 92.2%
+
+Total combined word occurrences: 59,873
+
+CAMELCASE ANALYSIS
+--------------------
+Total occurrences: 0
+Unique words: 0
+Most common words:
+
+PASCALCASE ANALYSIS
+--------------------
+Total occurrences: 0
+Unique words: 0
+Most common words:
+
+MULTIPLE_CAPS ANALYSIS
+--------------------
+Total occurrences: 0
+Unique words: 0
+Most common words:
+
+VERY_LONG ANALYSIS
+--------------------
+Total occurrences: 5,030
+Unique words: 594
+Most common words:
+  interdisciplinary: 722 occurrences
+  characteristics: 297 occurrences
+  entrepreneurship: 276 occurrences
+  multidisciplinary: 254 occurrences
+  recommendations: 185 occurrences
+  entrepreneurial: 175 occurrences
+  Interdisciplinary: 143 occurrences
+  Entrepreneurship: 143 occurrences
+  environmentally: 134 occurrences
+  responsibilities: 125 occurrences
+  interpretations: 79 occurrences
+  underrepresented: 75 occurrences
+  epistemological: 64 occurrences
+  infrastructures: 64 occurrences
+  representatives: 63 occurrences
+  Entrepreneurial: 62 occurrences
+  experimentation: 55 occurrences
+  transformations: 47 occurrences
+  conceptualization: 42 occurrences
+  extracurricular: 42 occurrences
+
+SUSTAINABILITY_RELATED ANALYSIS
+--------------------
+Total occurrences: 54,843
+Unique words: 31
+Most common words:
+  sustainability: 11879 occurrences
+  engineering: 11667 occurrences
+  education: 8360 occurrences
+  Engineering: 7037 occurrences
+  Education: 5374 occurrences
+  Sustainability: 3576 occurrences
+  environmental: 3236 occurrences
+  educational: 1437 occurrences
+  Environmental: 1242 occurrences
+  Educational: 398 occurrences
+  EDUCATION: 155 occurrences
+  ENGINEERING: 153 occurrences
+  environmentally: 134 occurrences
+  ENVIRONMENTAL: 48 occurrences
+  SUSTAINABILITY: 47 occurrences
+  Environmentally: 30 occurrences
+  environmentalism: 15 occurrences
+  Bioengineering: 11 occurrences
+  EDUCATIONAL: 11 occurrences
+  bioengineering: 10 occurrences
+
+OVERALL ASSESSMENT
+--------------------
+✅ No CamelCase words found
+✅ No PascalCase words found
+⚠️  Many sustainability-related combined words - review needed
+
+Most combined words are legitimate technical/academic terms.
+Post-processing has successfully resolved domain-specific issues.
