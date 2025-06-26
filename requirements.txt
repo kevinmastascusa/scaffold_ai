@@ -1,9 +1,37 @@
+# Core data processing
 numpy==1.26.0
+pandas>=1.5.0
+
+# PDF processing
+PyMuPDF>=1.23.0  # fitz module for PDF text extraction
+PyPDF2>=3.0.0    # Alternative PDF processing
+
+# Natural language processing
 nltk==3.8.1
+spacy>=3.5.0
+
+# Vector embeddings and similarity search
 faiss-cpu==1.7.4
 sentence-transformers==2.2.2
-torch
+torch>=1.13.0
+
+# Machine learning and model management
 mlflow==2.5.0
+scikit-learn>=1.2.0
+
+# File handling and data formats
 fsspec[http]==2025.3.0
 pyarrow<13,>=4.0.0
 huggingface-hub==0.30.0
+
+# Text processing and Unicode
+regex>=2022.0.0
+unidecode>=1.3.0
+
+# Development and utilities
+tqdm>=4.64.0     # Progress bars
+pathlib2>=2.3.0  # Path handling (for older Python versions)
+
+# Optional: For advanced features
+# transformers>=4.20.0  # For advanced language models
+# accelerate>=0.20.0    # For model optimization
