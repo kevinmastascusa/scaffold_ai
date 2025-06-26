@@ -54,7 +54,12 @@ This project involves developing a specialized large language model (LLM)-based 
    
    # Compare different extraction methods
    python scaffold_core/scripts/tests/compare_extractions.py
+   
+   # Programmatically analyze and fix combined words
+   python scaffold_core/scripts/postprocess_combined_words.py
+   python scaffold_core/scripts/generate_combined_words_report.py
    ```
+   - See `outputs/combined_words_analysis_report.txt` for a detailed summary of remaining combined words (now mostly legitimate technical/academic terms).
 
 ### Project Structure
 
@@ -84,6 +89,17 @@ The primary goal is to create a user-friendly, accurate, and literature-grounded
 * 🔍 Ensuring transparency by referencing scholarly sources for every recommendation.
 * 🧩 Facilitating easy integration into existing courses, supporting targeted learning outcomes.
 
+## 🛠️ Combined Words Issue: Solved
+
+- **Combined words (e.g., "environmentalsustainability") are now programmatically detected and fixed.**
+- **Automated post-processing and reporting scripts:**
+  - `scaffold_core/scripts/postprocess_combined_words.py` (fixes combined words)
+  - `scaffold_core/scripts/generate_combined_words_report.py` (generates detailed report)
+- **Final analysis:**
+  - No camelCase or PascalCase issues remain.
+  - Remaining combined words are legitimate technical/academic terms.
+  - See `outputs/combined_words_analysis_report.txt` for details.
+
 ## 🛠️ Proposed System Architecture
 
 The system will include three key components:
@@ -92,7 +108,7 @@ The system will include three key components:
 * **Vector Embeddings:** Pre-process and embed key sustainability and resilience literature into a vector database (e.g., FAISS, Pinecone).
 * **Document Retrieval:** Efficiently search and retrieve relevant sections from scholarly sources based on embedded user queries.
 
-## 🧠 Large Language Model (LLM)
+## 🤖 Large Language Model (LLM)
 
 Open-source models under consideration:
 
@@ -108,8 +124,8 @@ Open-source models under consideration:
 ## 🔄 Technical Workflow
 
 1. 📥 **Corpus Collection:** Curate scholarly papers, reports, and policy documents.
-2. 🧹 **Data Preprocessing:** Clean, segment, and prepare documents.
-3. 🧠 **Embedding and Storage:** Embed corpus data and store in a vector database.
+2. 🗃️ **Data Preprocessing:** Clean, segment, and prepare documents.
+3. 🤖 **Embedding and Storage:** Embed corpus data and store in a vector database.
 4. ⚙️ **Inference Engine:** Retrieve and use embeddings to augment LLM output.
 5. 📝 **Citation Layer:** Annotate outputs with clear citation links.
 
@@ -118,9 +134,9 @@ Open-source models under consideration:
 The project follows a structured timeline with week-by-week development phases. Key phases include:
 
 * 🏗️ Setting up the preprocessing pipeline and repository structure
-* 🧠 Embedding the curated document corpus and validating retrieval quality
-* �� Integrating the LLM and developing the initial prototype
-* 🖼️ Building and refining the user interface
+* 🤖 Embedding the curated document corpus and validating retrieval quality
+* 🧪 Integrating the LLM and developing the initial prototype
+* 🎨 Building and refining the user interface
 * 🧾 Implementing citation tracking and performing usability testing
 * 🧑‍🏫 Engaging stakeholders for feedback and refining the final product
 
@@ -130,7 +146,7 @@ Optional enhancements may include a real-time feedback loop in the UI and tag-ba
 
 The system will be evaluated based on its ability to:
 
-* 🧠 Retrieve relevant and accurate curriculum materials
+* 🤖 Retrieve relevant and accurate curriculum materials
 * 🔍 Generate transparent, literature-backed recommendations
 * ⚡ Provide a responsive and accessible user experience
 * 👥 Satisfy stakeholders through iterative testing and feedback
@@ -143,18 +159,14 @@ Evaluation will include both qualitative feedback from faculty and technical per
 * 🖥️ Intuitive UI ready for pilot use.
 * 📄 Comprehensive documentation for future development.
 
-## 🧾 Conclusion
-
-This tool aims to enhance the integration of sustainability topics in education through transparency, traceability, and collaboration. Stakeholder engagement will guide the development of a practical and impactful final product.
-
-## 📝 TODO Section
+## 🧾 TODO Section
 
 ### Pending Tasks
 
 1. **Enhance PDF Extraction and Chunking**
    * Robustly handle Unicode and mathematical formulas.
    * Ensure Unicode and math symbols are preserved, detected, and reported in outputs.
-   * Fix words that are combined in `chunked_text_extracts.json` (e.g., "environmentalsustainability" → "environmental sustainability").
+   * Combined words issue: **solved** (see above).
 
 2. **Integrate Unicode Cleaning Utility**
    * Add Unicode cleaning utility into the math-aware chunking pipeline.

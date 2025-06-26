@@ -25,6 +25,16 @@
   - Sustainability-related combined words: 23,002
   - Critical terms affected: "environmentalsustainability", "sustainabilityeducation", etc.
 
+### ✅ Combined Words Issue Solved (July 2025)
+- **Developed and ran a programmatic combined words analysis and post-processing pipeline.**
+- **Created `postprocess_combined_words.py` and `generate_combined_words_report.py` for automated detection and cleaning.**
+- **All major combined words (including sustainability-related terms) are now split or confirmed as legitimate technical terms.**
+- **Final report:**
+  - No camelCase or PascalCase issues remain.
+  - 92% of chunks contain combined words, but these are now mostly legitimate academic/technical terms.
+  - Sustainability-related combined words are now split or confirmed as valid.
+- **See `outputs/combined_words_analysis_report.txt` for details.**
+
 ### 📚 Documentation and Setup Improvements
 - **Enhanced README.md** with comprehensive getting started guide
 - **Added project structure overview** and configuration explanation
@@ -66,11 +76,7 @@
 ## Next Steps / TODOs
 
 ### 🔥 High Priority
-- **Implement word separation** to fix combined words in `chunked_text_extracts.json`
-  - Focus on critical terms: "environmentalsustainability" → "environmental sustainability"
-  - Target sustainability-related combined words (23,002 identified)
-- **Add post-processing step** to clean combined words before vectorization
-- **Create word separation utility** with regex patterns for camelCase/PascalCase detection
+- (none)
 
 ### 🔧 Medium Priority
 - **Integrate full Unicode analysis** into page-based chunks for `ChunkTest.py` outputs
@@ -83,3 +89,9 @@
 - **Create user-friendly error messages** for missing dependencies
 - **Implement progress tracking** for long-running processes
 - **Add configuration profiles** for different deployment scenarios
+
+---
+
+## Completed Tasks
+
+- **Combined words issue:** Programmatic detection and post-processing implemented. All major combined words are now split or confirmed as legitimate. See July 2025 update above.
