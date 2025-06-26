@@ -8,6 +8,17 @@ import os
 import unicodedata
 from collections import Counter, defaultdict
 import re
+import sys
+
+# Add workspace root to Python path for module imports
+root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..'))
+sys.path.insert(0, root_dir)
+
+from scaffold_core.config import (
+    CHUNKED_TEXT_EXTRACTS_JSON, FULL_TEXT_EXTRACTS_JSON,
+    VECTOR_PROCESSED_JSON, MATH_AWARE_FULL_EXTRACTS_JSON,
+    MATH_AWARE_CHUNKED_EXTRACTS_JSON
+)
 
 def analyze_unicode_characters(text, sample_size=1000):
     """Analyze unicode characters in text"""
@@ -501,29 +512,23 @@ def compare_math_content(original_data, math_aware_data):
         print("No common documents found for mathematical content comparison")
 
 def main():
-    """Main analysis function"""
+    """Main comparison function"""
     
-    print("Unicode and Extraction Comparison Analysis (Including Math-Aware)")
+    print("EXTRACTION METHOD COMPARISON")
     print("=" * 80)
     
-    # Define file paths - including math-aware outputs
-    original_chunked_path = r"c:\Users\dlaev\OneDrive\Documents\GitHub\scaffold_ai\outputs\chunked_text_extracts.json"
-    original_full_path = r"c:\Users\dlaev\OneDrive\Documents\GitHub\scaffold_ai\outputs\full_text_extracts.json"
-    vector_path = r"c:\Users\dlaev\OneDrive\Documents\GitHub\scaffold_ai\vector_outputs\processed_1.json"
-    math_full_path = r"c:\Users\dlaev\OneDrive\Documents\GitHub\scaffold_ai\math_outputs\math_aware_full_extracts.json"
-    math_chunked_path = r"c:\Users\dlaev\OneDrive\Documents\GitHub\scaffold_ai\math_outputs\math_aware_chunked_extracts.json"
-    
-    # Check which files exist
-    files_to_check = [
-        (original_chunked_path, "Original Chunked"),
-        (original_full_path, "Original Full Text"),
-        (vector_path, "Vector Output"),
-        (math_full_path, "Math-Aware Full Text"),
-        (math_chunked_path, "Math-Aware Chunked")
+    # Define file paths using central configuration
+    files_to_compare = [
+        (str(CHUNKED_TEXT_EXTRACTS_JSON), "Original Chunked"),
+        (str(FULL_TEXT_EXTRACTS_JSON), "Original Full Text"),
+        (str(VECTOR_PROCESSED_JSON), "Vector Output"),
+        (str(MATH_AWARE_FULL_EXTRACTS_JSON), "Math-Aware Full"),
+        (str(MATH_AWARE_CHUNKED_EXTRACTS_JSON), "Math-Aware Chunked")
     ]
     
+    # Check which files exist
     available_files = []
-    for file_path, file_name in files_to_check:
+    for file_path, file_name in files_to_compare:
         if os.path.exists(file_path):
             print(f"✓ Found: {file_name} at {file_path}")
             available_files.append((file_path, file_name))

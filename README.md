@@ -8,6 +8,74 @@
 
 This project involves developing a specialized large language model (LLM)-based tool to assist educators in integrating sustainability and climate resilience topics into academic programs. The tool leverages state-of-the-art AI techniques to recommend high-quality, literature-backed educational materials, case studies, and project ideas.
 
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Python 3.8 or higher
+- Git
+
+### Installation
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/your-username/scaffold_ai.git
+   cd scaffold_ai
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. **Run the setup script:**
+   ```bash
+   python setup.py
+   ```
+
+4. **Add your PDF documents:**
+   Place your PDF files in the `data/` directory. The system will automatically process all PDF files found in this directory and its subdirectories.
+
+### Quick Start
+
+1. **Process your documents:**
+   ```bash
+   # Extract and chunk PDF documents
+   python scaffold_core/scripts/chunk/ChunkTest.py
+   
+   # Create vector embeddings
+   python scaffold_core/vector/main.py
+   ```
+
+2. **Run analysis scripts:**
+   ```bash
+   # Generate Unicode analysis report
+   python scaffold_core/scripts/tests/generate_unicode_report.py
+   
+   # Compare different extraction methods
+   python scaffold_core/scripts/tests/compare_extractions.py
+   ```
+
+### Project Structure
+
+```
+scaffold_ai/
+├── data/                    # Place your PDF documents here
+├── outputs/                 # Chunked text extracts
+├── vector_outputs/          # Vector embeddings and indexes
+├── math_outputs/            # Math-aware processing results
+├── scaffold_core/           # Core processing modules
+│   ├── config.py           # Central configuration
+│   ├── scripts/            # Processing scripts
+│   └── vector/             # Vector processing
+├── setup.py                # Setup script
+└── requirements.txt        # Python dependencies
+```
+
+### Configuration
+
+All paths and settings are centrally managed in `scaffold_core/config.py`. The configuration automatically adapts to your workspace location, making the project portable for anyone who clones the repository.
+
 ## 🎯 Goals and Objectives
 
 The primary goal is to create a user-friendly, accurate, and literature-grounded AI tool capable of:
@@ -51,7 +119,7 @@ The project follows a structured timeline with week-by-week development phases. 
 
 * 🏗️ Setting up the preprocessing pipeline and repository structure
 * 🧠 Embedding the curated document corpus and validating retrieval quality
-* 🔧 Integrating the LLM and developing the initial prototype
+* �� Integrating the LLM and developing the initial prototype
 * 🖼️ Building and refining the user interface
 * 🧾 Implementing citation tracking and performing usability testing
 * 🧑‍🏫 Engaging stakeholders for feedback and refining the final product

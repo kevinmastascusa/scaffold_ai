@@ -1,11 +1,19 @@
 import os
 import json
+import fitz
+import unicodedata
 import re
-import sys
+from pathlib import Path
 
-# Add the parent directory to sys.path to import from main.py
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from vector.main import PDF_INPUT_DIR, OUTPUT_DIR, ITERATION
+# Import central configuration
+from scaffold_core.config import (
+    DATA_DIR, VECTOR_OUTPUTS_DIR, ITERATION, CHUNK_SIZE, CHUNK_OVERLAP,
+    CHUNKED_TEXT_EXTRACTS_JSON, ensure_directories
+)
+
+# Update paths to use central configuration
+PDF_INPUT_DIR = str(DATA_DIR)
+OUTPUT_DIR = str(VECTOR_OUTPUTS_DIR)
 
 # Optional import for PDF processing (fallback only)
 try:
@@ -14,9 +22,6 @@ try:
 except ImportError:
     HAS_PYPDF2 = False
     print("PyPDF2 not available - will use existing chunked data only")
-
-CHUNK_SIZE     = 250
-CHUNK_OVERLAP  = 50
 
 def extract_text_per_page(path):
     if not HAS_PYPDF2:

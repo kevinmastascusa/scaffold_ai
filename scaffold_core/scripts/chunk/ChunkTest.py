@@ -16,13 +16,16 @@ import fitz
 import unicodedata
 import re
 
+# Import central configuration
+from scaffold_core.config import (
+    DATA_DIR, OUTPUTS_DIR, CHUNK_SIZE, CHUNK_OVERLAP,
+    CHUNKED_TEXT_EXTRACTS_JSON, FULL_TEXT_EXTRACTS_JSON
+)
 
-# Update paths to work with current workspace
-PDF_INPUT_DIR  = r"c:\Users\dlaev\OneDrive\Documents\GitHub\scaffold_ai\data"
-OUTPUT_DIR     = r"c:\Users\dlaev\OneDrive\Documents\GitHub\scaffold_ai\outputs"
-CHUNK_SIZE     = 500  # in words (unused - now using complete page chunking)
-CHUNK_OVERLAP  = 50   # in words (unused - now using complete page chunking)
-OUTPUT_NAME    = "processed_test.json"
+# Update paths to use central configuration
+PDF_INPUT_DIR = str(DATA_DIR)
+OUTPUT_DIR = str(OUTPUTS_DIR)
+OUTPUT_NAME = "processed_test.json"
 
 # NOTE: This script now uses page-based chunking (one chunk per complete page)
 # instead of overlapping word-based chunks

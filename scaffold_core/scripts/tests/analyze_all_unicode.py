@@ -1,13 +1,25 @@
 #!/usr/bin/env python3
 """
-Script to comprehensively analyze unicode in ALL documents from vector and original outputs.
+Comprehensive unicode analysis across all document processing outputs.
+Analyzes chunked, full text, and vector outputs for unicode issues.
 """
 
-import json
+import sys
 import os
+import json
 import unicodedata
 from collections import Counter, defaultdict
 import re
+
+# Add workspace root to Python path for module imports
+root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..'))
+sys.path.insert(0, root_dir)
+
+from scaffold_core.config import (
+    CHUNKED_TEXT_EXTRACTS_JSON, FULL_TEXT_EXTRACTS_JSON, 
+    VECTOR_PROCESSED_JSON, MATH_AWARE_FULL_EXTRACTS_JSON,
+    MATH_AWARE_CHUNKED_EXTRACTS_JSON
+)
 
 def analyze_unicode_characters(text):
     """Analyze unicode characters in full text"""
@@ -111,11 +123,11 @@ def main():
     print("COMPREHENSIVE UNICODE ANALYSIS - ALL DOCUMENTS")
     print("=" * 80)
     
-    # Define file paths
+    # Define file paths using central configuration
     files_to_analyze = [
-        (r"c:\Users\dlaev\OneDrive\Documents\GitHub\scaffold_ai\outputs\chunked_text_extracts.json", "Original Chunked"),
-        (r"c:\Users\dlaev\OneDrive\Documents\GitHub\scaffold_ai\outputs\full_text_extracts.json", "Original Full Text"),
-        (r"c:\Users\dlaev\OneDrive\Documents\GitHub\scaffold_ai\vector_outputs\processed_1.json", "Vector Output")
+        (str(CHUNKED_TEXT_EXTRACTS_JSON), "Original Chunked"),
+        (str(FULL_TEXT_EXTRACTS_JSON), "Original Full Text"),
+        (str(VECTOR_PROCESSED_JSON), "Vector Output")
     ]
     
     results = {}
