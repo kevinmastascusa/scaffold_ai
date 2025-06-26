@@ -9,10 +9,19 @@ import re
 
 # Add the parent directory to sys.path to import from main.py
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from vector.main import OUTPUT_DIR, ITERATION, EMBEDDING_MODEL_NAME, FAISS_INDEX_PATH, METADATA_JSON_PATH
+
+# Import central configuration
+from scaffold_core.config import (
+    VECTOR_OUTPUTS_DIR, ITERATION, EMBEDDING_MODEL_NAME,
+    CHUNKED_TEXT_EXTRACTS_JSON, get_faiss_index_path, get_metadata_json_path
+)
 
 # Load precomputed chunks from chunk test output
-CHUNKED_JSON_PATH = os.path.join(OUTPUT_DIR, "chunked_text_extracts.json")
+CHUNKED_JSON_PATH = str(CHUNKED_TEXT_EXTRACTS_JSON)
+
+# Get dynamic paths for this iteration
+FAISS_INDEX_PATH = str(get_faiss_index_path(ITERATION))
+METADATA_JSON_PATH = str(get_metadata_json_path(ITERATION))
 
 # Clean and normalize chunk text for vectorization
 def clean_for_vector(text):

@@ -20,6 +20,13 @@ from huggingface_hub import hf_hub_download
 root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../'))
 sys.path.append(root_dir)
 
+# Import central configuration
+from scaffold_core.config import (
+    DATA_DIR, OUTPUTS_DIR, MATH_OUTPUTS_DIR,
+    MATH_AWARE_FULL_EXTRACTS_JSON, MATH_AWARE_CHUNKED_EXTRACTS_JSON,
+    ensure_directories
+)
+
 # Simple math-preserving clean_text function
 def clean_text_preserve_math(text):
     """Clean text while preserving mathematical symbols and formulas."""
@@ -593,21 +600,20 @@ class MathAwarePDFProcessor:
         }
 
 def main():
-    # Create output directories
-    os.makedirs('outputs', exist_ok=True)
-    os.makedirs('math_outputs', exist_ok=True)
+    # Ensure all necessary directories exist
+    ensure_directories()
     
     # Initialize processor
     processor = MathAwarePDFProcessor()
     
     # Process all PDFs in the data folder
-    data_folder = 'data'
+    data_folder = str(DATA_DIR)
     
     print("Starting math-aware PDF processing...")
     results = processor.process_all_pdfs(data_folder)
     
     # Save full extraction results with math and Unicode analysis
-    full_output_path = 'math_outputs/math_aware_full_extracts.json'
+    full_output_path = str(MATH_AWARE_FULL_EXTRACTS_JSON)
     with open(full_output_path, 'w', encoding='utf-8') as f:
         json.dump(results, f, indent=2, ensure_ascii=False)
     
@@ -644,7 +650,7 @@ def main():
             }
     
     # Save chunked results
-    chunked_output_path = 'math_outputs/math_aware_chunked_extracts.json'
+    chunked_output_path = str(MATH_AWARE_CHUNKED_EXTRACTS_JSON)
     with open(chunked_output_path, 'w', encoding='utf-8') as f:
         json.dump(chunked_results, f, indent=2, ensure_ascii=False)
     
@@ -695,7 +701,7 @@ def main():
     ]
     
     # Save summary
-    summary_output_path = 'math_outputs/math_unicode_summary.json'
+    summary_output_path = str(MATH_OUTPUTS_DIR / 'math_unicode_summary.json')
     with open(summary_output_path, 'w', encoding='utf-8') as f:
         json.dump(summary, f, indent=2, ensure_ascii=False)
     
