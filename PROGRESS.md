@@ -25,7 +25,7 @@
   - Sustainability-related combined words: 23,002
   - Critical terms affected: "environmentalsustainability", "sustainabilityeducation", etc.
 
-### ✅ Combined Words Issue Solved (July 2025)
+### ✅ Combined Words Issue Solved (June 2025)
 - **Developed and ran a programmatic combined words analysis and post-processing pipeline.**
 - **Created `postprocess_combined_words.py` and `generate_combined_words_report.py` for automated detection and cleaning.**
 - **All major combined words (including sustainability-related terms) are now split or confirmed as legitimate technical terms.**
@@ -62,7 +62,7 @@
 
 ---
 
-## Previous Progress (June 2024)
+## Previous Progress (June 2025)
 
 ### Enhanced PDF chunking pipeline:
 - Fixed indentation and syntax issues in `ChunkTest_Math.py`.
@@ -112,5 +112,5 @@
 
 ## Completed Tasks
 
-- **Combined words issue:** Programmatic detection and post-processing implemented. All major combined words are now split or confirmed as legitimate. See July 2025 update above.
+- **Combined words issue:** Programmatic detection and post-processing implemented. All major combined words are now split or confirmed as legitimate. See June 2025 update above.
 - **Vectorization pipeline:** Full embedding generation and FAISS index creation completed. Ready for semantic search operations. See June 2025 update above.
