@@ -2,7 +2,7 @@
 
 **Collaborators:** Kevin Mastascusa, Joseph Di Stefano
 
-**Date:** 6/23/2025
+**Date:** 6/26/2025
 
 ## 🌍 Project Overview
 
@@ -12,7 +12,7 @@ This project involves developing a specialized large language model (LLM)-based 
 
 ### Prerequisites
 
-- Python 3.8 or higher
+- Python 3.11 or higher (recommended: Python 3.11 for best compatibility)
 - Git
 
 ### Installation
@@ -161,40 +161,78 @@ Evaluation will include both qualitative feedback from faculty and technical per
 
 ## 🧾 TODO Section
 
-### Pending Tasks
+### 🔥 High Priority (Current Sprint)
 
-1. **Enhance PDF Extraction and Chunking**
-   * Robustly handle Unicode and mathematical formulas.
-   * Ensure Unicode and math symbols are preserved, detected, and reported in outputs.
-   * Combined words issue: **solved** (see above).
+1. **Implement Semantic Search and Retrieval**
+   * Create query interface for the completed FAISS index
+   * Implement semantic search functionality using vector embeddings
+   * Add query performance testing and optimization
 
-2. **Integrate Unicode Cleaning Utility**
-   * Add Unicode cleaning utility into the math-aware chunking pipeline.
+2. **Build User Interface for Knowledge Base**
+   * Develop web interface for querying the vectorized knowledge base
+   * Create intuitive search interface with result display
+   * Add query result visualization and export functionality
 
-3. **Resolve Environment and Import Issues**
-   * Ensure smooth execution by addressing compatibility issues.
+### 🔧 Medium Priority
 
-4. **Optional Enhancements**
-   * Further improve chunking or Unicode/math reporting.
-   * Rebuild or reinstall PyTorch and Sentence Transformers if compatibility issues persist.
+3. **Enhance PDF Extraction and Chunking**
+   * Integrate full Unicode analysis into page-based chunks
+   * Complete math-aware chunking improvements in `ChunkTest_Math.py`
+   * Re-integrate math-aware chunking with vector pipeline
 
-5. **Documentation Updates**
-   * Add detailed instructions for running scripts and interpreting outputs.
-   * Include examples of expected outputs for clarity.
+4. **Advanced Search Features**
+   * Implement filters and faceted search capabilities
+   * Add relevance scoring and ranking improvements
+   * Create citation tracking and source linking
+
+5. **Testing and Validation**
+   * Implement automated testing for the configuration system
+   * Add comprehensive test suite for vector operations
+   * Create performance benchmarks and validation metrics
+
+### 📈 Future Enhancements
+
+6. **System Optimization**
+   * Add support for incremental updates to the vector database
+   * Implement progress tracking for long-running processes
+   * Add configuration profiles for different deployment scenarios
+
+7. **Documentation and Examples**
+   * Add vector query examples in the README
+   * Create user guides for different use cases
+   * Develop API documentation for programmatic access
+
+8. **Optional Enhancements**
+   * Real-time feedback loop in the UI
+   * Tag-based filtering of recommendations
+   * Advanced analytics and usage reporting
 
 ## 📅 Week 1 Tasks
 
-1. **Define Preprocessing Methodology**
-   * Establish detailed document preprocessing methodology, including chunking size, format, and metadata extraction.
+1. **Define Preprocessing Methodology** 🔄 **LARGELY COMPLETE**
+   * ✅ Established detailed document preprocessing methodology, including chunking size, format, and metadata extraction
+   * ✅ Implemented page-based chunking (one complete page per chunk)
+   * ✅ Created comprehensive Unicode and text analysis pipeline
+   * ✅ Processed 273 PDF documents successfully with 4,859 chunks generated
+   * 🔄 **Still in progress:** Math-aware chunking improvements and full Unicode integration
+   * 📝 **Note:** Methodology is largely defined but refinement may be needed based on downstream LLM integration and user feedback
 
-2. **GitHub Repository Setup**
-   * Set up GitHub repository with appropriate structure, branches, and initial documentation. ✅
+2. **GitHub Repository Setup** ✅ **COMPLETED**
+   * ✅ Set up GitHub repository with appropriate structure, branches, and initial documentation
+   * ✅ Created centralized configuration system for portable deployment
+   * ✅ Implemented automated setup process with `python setup.py`
 
-3. **Embedding Techniques and Vector Database**
-   * Select embedding techniques and finalize vector database choice (FAISS or Pinecone).
+3. **Embedding Techniques and Vector Database** ✅ **COMPLETED**
+   * ✅ Selected sentence-transformers for embedding generation
+   * ✅ Finalized FAISS as vector database choice
+   * ✅ Successfully generated embeddings for all 4,859 text chunks
+   * ✅ Created FAISS index for efficient similarity search and retrieval
+   * ✅ Resolved all dependency conflicts and compatibility issues
 
-4. **Open-Source License Compliance**
-   * Confirm that all libraries and models used (e.g., LLaMA, FAISS, MLflow) meet open-source license requirements for academic/public use.
+4. **Open-Source License Compliance** 🔄 **PENDING**
+   * ✅ Confirmed that current libraries used (sentence-transformers, FAISS, torch) meet open-source license requirements
+   * 🔄 **Pending:** Final LLM model selection and license verification for downstream model integration
 
-5. **README.md Documentation**
-   * Create and incrementally update a single README.md starting in Week 1, finalizing it in Week 11 with full setup instructions, usage examples, and project context. ✅
+5. **README.md Documentation** ✅ **COMPLETED**
+   * ✅ Created and incrementally updated comprehensive README.md with full setup instructions, usage examples, and project context
+   * ✅ Added project structure overview and configuration explanation
