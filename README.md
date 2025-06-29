@@ -14,32 +14,92 @@ This project involves developing a specialized large language model (LLM)-based 
 
 - Python 3.11 or higher (recommended: Python 3.11 for best compatibility)
 - Git
+- 16GB+ RAM recommended for optimal performance
+- Windows: Microsoft Visual C++ Build Tools (for some package installations)
+- Linux: python3-dev and build-essential packages
 
 ### Installation
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/your-username/scaffold_ai.git
-   cd scaffold_core
+   git clone https://github.com/kevinmastascusa/scaffold_ai.git
+   cd scaffold_ai
    ```
 
-2. **Install dependencies:**
+2. **Create and activate virtual environment:**
    ```bash
+   # Windows (PowerShell)
+   Remove-Item -Path scaffold_env -Recurse -Force -ErrorAction SilentlyContinue
+   python -m venv scaffold_env
+   Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
+   .\scaffold_env\Scripts\activate
+
+   # macOS/Linux
+   rm -rf scaffold_env
+   python -m venv scaffold_env
+   source scaffold_env/bin/activate
+   ```
+
+   If you get a permission error, try:
+   - Running PowerShell as administrator (Windows)
+   - Using `sudo` for the commands (Linux/macOS)
+   - Checking if the directory is being used by another process
+
+3. **Install dependencies:**
+   ```bash
+   # Upgrade pip first
+   python -m pip install --upgrade pip
+   # Install requirements (this may take 5-10 minutes)
    pip install -r requirements.txt
    ```
 
-3. **Run the setup script:**
+   Note: 
+   - Some packages are quite large (torch, transformers, etc.) and may take a while to download
+   - If you encounter issues:
+     - Windows: Install Visual C++ Build Tools
+     - Linux: Run `sudo apt-get install python3-dev build-essential`
+
+4. **Run the setup script:**
    ```bash
    python setup.py
    ```
 
-4. **Set up local LLM endpoint (required for full functionality):**
+   This will:
+   - Create necessary directories if they don't exist (data/, outputs/, vector_outputs/, math_outputs/)
+   - Validate the workspace structure
+   - Check for existing PDF files
+   - The script will work even if directories already exist
+
+5. **Set up local LLM endpoint (required for full functionality):**
    - See [Local Setup Guide](documentation/local_setup_guide.md) for detailed instructions
    - Install and configure Ollama for local Mistral model
    - Configure environment variables for secure endpoint access
 
-5. **Add your PDF documents:**
+6. **Add your PDF documents:**
+   ```bash
+   # Create data directory if it doesn't exist (skip if it exists)
+   mkdir -p data
+   ```
    Place your PDF files in the `data/` directory. The system will automatically process all PDF files found in this directory and its subdirectories.
+
+### Troubleshooting
+
+If you encounter issues during installation:
+
+1. **Virtual Environment Issues:**
+   - Delete the existing `scaffold_env` directory and try creating it again
+   - Ensure you have write permissions in the current directory
+   - Try creating the virtual environment in a different location
+
+2. **Package Installation Errors:**
+   - Make sure you're using Python 3.11 (some packages might not work with 3.12+)
+   - Install required system dependencies (Visual C++ Build Tools on Windows, build-essential on Linux)
+   - If a package fails to install, try installing it separately with `pip install package-name`
+
+3. **Setup Script Errors:**
+   - Ensure all directories are writable
+   - Check if any files are locked by other processes
+   - Make sure you're in the correct directory when running the script
 
 ### Quick Start
 
