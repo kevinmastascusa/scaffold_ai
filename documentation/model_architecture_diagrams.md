@@ -167,7 +167,7 @@ flowchart TD
     %% Data Types
     subgraph "Data Types"
         M[Text: String]
-        N[Embeddings: Float32[384]]
+        N[Embeddings: Float32 384-dim]
         O[Scores: Float32]
         P[Metadata: JSON]
     end
