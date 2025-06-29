@@ -41,7 +41,7 @@ flowchart TD
     
     %% LLM Answer Generation
     G2 --> H[LLM Answer Generation]
-    H --> H1[Mistral via Ollama<br/>http://localhost:11434]
+    H --> H1[Mistral via Ollama<br/>Local API Endpoint]
     H1 --> H2[Grounded answer with citations]
     
     %% Output
@@ -125,7 +125,7 @@ flowchart LR
     subgraph "LLM Details"
         F[Model: Mistral-7B]
         G[Platform: Ollama]
-        H[Endpoint: localhost:11434]
+        H[Endpoint: Local API]
         I[Role: Fact-checking assistant]
         J[Constraint: Quote only from chunks]
     end

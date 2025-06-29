@@ -38,14 +38,27 @@ def get_metadata_json_path(iteration: int = 1) -> Path:
     return VECTOR_OUTPUTS_DIR / f"scaffold_metadata_{iteration}.json"
 
 # Processing parameters
-CHUNK_SIZE = 500  # in words (unused - now using complete page chunking)
-CHUNK_OVERLAP = 50  # in words (unused - now using complete page chunking)
+CHUNK_SIZE = 1000  # in words (unused - now using complete page chunking)
+CHUNK_OVERLAP = 200  # in words (unused - now using complete page chunking)
 ITERATION = 1  # bump this when you want a fresh run
 
 # Model configuration
-EMBEDDING_MODEL_NAME = "all-MiniLM-L6-v2"
-OLLAMA_MODEL = "mistral"
-OLLAMA_ENDPOINT = "http://localhost:11434/v1/chat/completions"
+EMBEDDING_MODEL = "all-MiniLM-L6-v2"
+
+# LLM configuration
+LLM_MODEL = "mistral"
+# Local API endpoint - configured via environment or local setup
+LLM_ENDPOINT = "local"  # Generic reference, actual endpoint configured separately
+
+# Cross-encoder model for reranking
+CROSS_ENCODER_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+
+# FAISS index configuration
+FAISS_INDEX_TYPE = "IndexFlatL2"
+
+# Search configuration
+TOP_K_INITIAL = 50
+TOP_K_FINAL = 10
 
 # Ensure directories exist
 def ensure_directories():
