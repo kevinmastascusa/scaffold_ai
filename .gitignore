@@ -239,6 +239,7 @@ local_*
 dev_*
 test_*
 debug_*
+!documentation/local_setup_guide.md
 
 # API keys and credentials
 *.key
