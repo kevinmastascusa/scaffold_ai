@@ -20,7 +20,7 @@ This project involves developing a specialized large language model (LLM)-based 
 1. **Clone the repository:**
    ```bash
    git clone https://github.com/your-username/scaffold_ai.git
-   cd scaffold_ai
+   cd scaffold_core
    ```
 
 2. **Install dependencies:**
@@ -33,7 +33,12 @@ This project involves developing a specialized large language model (LLM)-based 
    python setup.py
    ```
 
-4. **Add your PDF documents:**
+4. **Set up local LLM endpoint (required for full functionality):**
+   - See [Local Setup Guide](documentation/local_setup_guide.md) for detailed instructions
+   - Install and configure Ollama for local Mistral model
+   - Configure environment variables for secure endpoint access
+
+5. **Add your PDF documents:**
    Place your PDF files in the `data/` directory. The system will automatically process all PDF files found in this directory and its subdirectories.
 
 ### Quick Start
