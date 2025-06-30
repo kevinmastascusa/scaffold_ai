@@ -265,10 +265,21 @@ Evaluation will include both qualitative feedback from faculty and technical per
    * ✅ Successfully integrated Mistral-7B-Instruct-v0.2 LLM
    * ✅ All system components tested with 100% success rate
 
-2. **Build User Interface for Knowledge Base**
+2. **Citation Layer Implementation** 🆕 **NEW PRIORITY**
+   * Implement automatic citation extraction and source linking
+   * Add citation formatting (APA, MLA, Chicago) and validation
+   * Display citations in LLM responses with proper attribution
+
+3. **Advanced Query Testing** 🆕 **NEW PRIORITY**
+   * Create comprehensive sustainability query test suite
+   * Add query result quality assessment metrics
+   * Develop A/B testing framework for retrieval strategies
+
+4. **Build User Interface for Knowledge Base**
    * Develop web interface for querying the vectorized knowledge base
    * Create intuitive search interface with result display
    * Add query result visualization and export functionality
+   * Integrate citation display and source linking in UI
 
 ### 🔧 Medium Priority
 
@@ -280,7 +291,8 @@ Evaluation will include both qualitative feedback from faculty and technical per
 4. **Advanced Search Features**
    * Implement filters and faceted search capabilities
    * Add relevance scoring and ranking improvements
-   * Create citation tracking and source linking
+   * Create advanced citation tracking and source linking
+   * Implement citation-based result ranking and credibility scoring
 
 5. **Testing and Validation** ✅ **LARGELY COMPLETED (6/29/2025)**
    * ✅ Implemented comprehensive automated testing system
@@ -291,20 +303,30 @@ Evaluation will include both qualitative feedback from faculty and technical per
 
 ### 📈 Future Enhancements
 
-6. **System Optimization**
+6. **Citation and Source Management**
+   * Citation network analysis and bibliography generation
+   * Citation impact scoring and credibility metrics
+   * Citation export to reference management tools
+
+7. **Advanced Query Analytics**
+   * Query intent classification and auto-completion
+   * Query result personalization and difficulty assessment
+   * Multi-modal query support (text + images + documents)
+
+8. **System Optimization**
    * Add support for incremental updates to the vector database
    * Implement progress tracking for long-running processes
    * Add configuration profiles for different deployment scenarios
 
-7. **Documentation and Examples**
+9. **Documentation and Examples**
    * Add vector query examples in the README
    * Create user guides for different use cases
    * Develop API documentation for programmatic access
 
-8. **Optional Enhancements**
-   * Real-time feedback loop in the UI
-   * Tag-based filtering of recommendations
-   * Advanced analytics and usage reporting
+10. **Optional Enhancements**
+    * Real-time feedback loop in the UI
+    * Tag-based filtering of recommendations
+    * Advanced analytics and usage reporting
 
 ## 📅 Week 1 Tasks
 
