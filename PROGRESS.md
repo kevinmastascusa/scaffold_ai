@@ -145,10 +145,21 @@
 
 ## Next Steps / TODOs
 
-### 🔥 High Priority
-- ✅ **Implement semantic search and retrieval functionality** using the completed FAISS index *(Completed 6/29/2025)*
-- **Create user interface for querying the vectorized knowledge base** *(Next priority)*
-- ✅ **Add query performance testing and optimization** *(Completed 6/29/2025)*
+### 🔥 High Priority (Updated 6/29/2025)
+- ✅ **Semantic search and retrieval functionality** using the completed FAISS index *(Completed 6/29/2025)*
+- ✅ **Query performance testing and optimization** *(Completed 6/29/2025)*
+- 🆕 **Citation Layer Implementation** *(New Priority)*
+  - Automatic citation extraction and source linking
+  - Citation formatting (APA, MLA, Chicago) and validation
+  - Citation display in LLM responses with proper attribution
+- 🆕 **Advanced Query Testing** *(New Priority)*
+  - Comprehensive sustainability query test suite
+  - Query result quality assessment metrics
+  - A/B testing framework for retrieval strategies
+- **User interface for querying the vectorized knowledge base**
+  - Web interface with search and result display
+  - Query result visualization and export functionality
+  - Integrated citation display and source linking
 
 ### 🔧 Medium Priority
 - **Integrate full Unicode analysis** into page-based chunks for `ChunkTest.py` outputs
@@ -158,12 +169,37 @@
 - **Create query result visualization and export functionality**
 
 ### 📈 Future Enhancements
-- **Add configuration validation** to catch path issues early
-- **Create user-friendly error messages** for missing dependencies
-- **Implement progress tracking** for long-running processes
-- **Add configuration profiles** for different deployment scenarios
-- **Implement advanced search features** (filters, faceted search, relevance scoring)
-- **Add support for incremental updates** to the vector database
+- **Citation and Source Management:**
+  - Citation network analysis and bibliography generation
+  - Citation impact scoring and credibility metrics
+  - Citation export to reference management tools
+- **Advanced Query Analytics:**
+  - Query intent classification and auto-completion
+  - Query result personalization and difficulty assessment
+  - Multi-modal query support (text + images + documents)
+- **System Optimization:**
+  - Configuration validation and user-friendly error messages
+  - Progress tracking and configuration profiles
+  - Advanced search features and incremental database updates
+
+---
+
+## Upcoming Milestones (Post June 29, 2025)
+
+### 📋 **Week 2: Citation Layer and Query Testing** *(Target: July 6, 2025)*
+- Citation extraction pipeline and formatting engine (APA, MLA, Chicago)
+- Sustainability-focused query test suite (50+ test queries)
+- Query result quality assessment metrics and A/B testing framework
+
+### 🎯 **Week 3: User Interface and Integration** *(Target: July 13, 2025)*
+- Responsive web interface with citation display and source linking
+- Query result visualization, export features, and search interface
+- System integration with error handling and user feedback
+
+### 🚀 **Week 4: Optimization and Deployment** *(Target: July 20, 2025)*
+- Performance optimization, caching, and scalability improvements
+- Comprehensive system testing and user acceptance testing
+- Final documentation and deployment preparation
 
 ---
 
