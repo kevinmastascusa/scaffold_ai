@@ -51,30 +51,44 @@ class LLMManager:
                 "HUGGINGFACE_TOKEN environment variable not set. "
                 "Please set it to access the model."
             )
-        
+
+        # --- Robust local model caching logic ---
+        # Convert model name to a safe local directory name for cache
+        local_model_dir = os.path.join(
+            "models",
+            LLM_MODEL.replace("/", "_").replace("-", "_")
+        )
+        if not os.path.exists(local_model_dir):
+            os.makedirs(local_model_dir, exist_ok=True)
+            logger.info(f"Ensured local model cache directory exists: {local_model_dir}")
+
         logger.debug("Loading tokenizer...")
+        from transformers import AutoTokenizer
         try:
             self.tokenizer = AutoTokenizer.from_pretrained(
                 LLM_MODEL,
                 token=HF_TOKEN,
-                trust_remote_code=True
+                trust_remote_code=True,
+                cache_dir=local_model_dir,
+                use_fast=False  # Use slow tokenizer to avoid version compatibility issues
             )
         except Exception as e:
             logger.warning(f"Failed to load tokenizer with default method: {e}")
             logger.debug("Trying alternative tokenizer loading method...")
-            # Fallback for Mistral v0.3 tokenizer compatibility
             self.tokenizer = AutoTokenizer.from_pretrained(
                 LLM_MODEL,
                 token=HF_TOKEN,
                 trust_remote_code=True,
-                use_fast=False  # Use slow tokenizer to avoid v3 tokenizer issues
+                cache_dir=local_model_dir,
+                use_fast=False,  # Use slow tokenizer to avoid v3 tokenizer issues
+                legacy=True  # Use legacy mode for better compatibility
             )
-        
         if not self.tokenizer.pad_token:
             self.tokenizer.pad_token = self.tokenizer.eos_token
         logger.debug("Tokenizer loaded successfully")
-        
+
         logger.debug("Loading model...")
+        from transformers import AutoModelForCausalLM
         
         # Configure quantization for faster loading and inference
         if LLM_LOAD_IN_4BIT and LLM_DEVICE == "cuda" and torch.cuda.is_available():
@@ -105,8 +119,8 @@ class LLMManager:
             low_cpu_mem_usage=True,
             trust_remote_code=True,
             quantization_config=quantization_config,
-            # GPU optimizations
-            use_cache=True
+            use_cache=True,
+            cache_dir=local_model_dir
         )
         logger.debug("Model loaded successfully")
         

@@ -59,8 +59,8 @@ LLM_MAX_LENGTH = 1024  # Reduced for faster responses
 LLM_TEMPERATURE = 0.3  # Lower temperature for more focused responses
 LLM_TOP_P = 0.9  # Slightly lower for faster generation
 LLM_BATCH_SIZE = 1  # Batch size for processing
-LLM_LOAD_IN_8BIT = True  # Use 8-bit quantization for faster loading
-LLM_LOAD_IN_4BIT = False  # 4-bit for even faster loading (if needed)
+LLM_LOAD_IN_8BIT = False  # Use 8-bit quantization for faster loading (disabled for Windows)
+LLM_LOAD_IN_4BIT = False  # 4-bit for even faster loading (disabled for Windows)
 
 # Hugging Face token
 HF_TOKEN = os.getenv("HUGGINGFACE_TOKEN")
