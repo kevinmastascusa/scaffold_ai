@@ -5,6 +5,12 @@ All paths are defined relative to the workspace root for portability.
 
 import os
 from pathlib import Path
+import torch
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 # Get the workspace root directory (where this config file is located, going up to scaffold_ai/)
 WORKSPACE_ROOT = Path(__file__).parent.parent.absolute()
@@ -46,9 +52,17 @@ ITERATION = 1  # bump this when you want a fresh run
 EMBEDDING_MODEL = "all-MiniLM-L6-v2"
 
 # LLM configuration
-LLM_MODEL = "mistral"
-# Local API endpoint - configured via environment or local setup
-LLM_ENDPOINT = "local"  # Generic reference, actual endpoint configured separately
+LLM_MODEL = "mistralai/Mistral-7B-Instruct-v0.2"  # Official Mistral v0.2 model
+LLM_TASK = "text-generation"  # Task type for the pipeline
+LLM_DEVICE = "cuda" if torch.cuda.is_available() else "cpu"  # Use GPU if available
+LLM_MAX_LENGTH = 2048  # Maximum length for generated responses
+LLM_TEMPERATURE = 0.7  # Temperature for text generation
+LLM_TOP_P = 0.95  # Top-p sampling parameter
+
+# Hugging Face token
+HF_TOKEN = os.getenv("HUGGINGFACE_TOKEN")
+if not HF_TOKEN:
+    logger.warning("HUGGINGFACE_TOKEN environment variable not set. Some models may not be accessible.")
 
 # Cross-encoder model for reranking
 CROSS_ENCODER_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"
