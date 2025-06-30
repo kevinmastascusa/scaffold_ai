@@ -66,8 +66,9 @@ def main():
         cleaned_text = clean_for_vector(chunk["text"])
         texts.append(cleaned_text)
         
-        # Preserve all metadata except text
+        # Include all metadata AND the cleaned text
         chunk_metadata = {k: v for k, v in chunk.items() if k != "text"}
+        chunk_metadata["text"] = cleaned_text  # Add the cleaned text back
         metadata.append(chunk_metadata)
 
     print(f"✓ Prepared {len(texts)} texts for vectorization")
