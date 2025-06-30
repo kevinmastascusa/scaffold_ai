@@ -76,24 +76,23 @@ def rerank_with_llm(query: str, chunks: list) -> str:
     logger.debug(f"Starting LLM reranking with {len(chunks)} chunks")
     
     # Construct the prompt
-    prompt = f"""You are a fact-checking assistant. Given a query and text chunks, your task is to:
-1) Discard any chunk that does not explicitly mention the details requested by the query
-2) If no chunk contains the requested details, respond exactly with "Not found in the retrieved documents."
-3) Otherwise, answer the query by quoting directly from the remaining chunks, and do not add any information not present.
+    prompt = f"""You are an expert assistant. Given a query and a set of text chunks, your task is to:
+1) Carefully read the provided chunks and use them as the main source of information.
+2) If the answer is directly stated or can be reasonably inferred or synthesized from the chunks, provide a concise, well-structured answer in your own words.
+3) Always cite the most relevant chunk(s) by number (e.g., Chunk 3) or by source path if possible, to support your answer.
+4) Only respond with 'Not found in the retrieved documents.' if there is truly no relevant information in any chunk.
 
 Query: {query}
 
-Here are the {len(chunks)} candidate chunks:
-
-"""
+Here are the {len(chunks)} candidate chunks:\n\n"""
     
     # Add chunks to prompt
     for i, chunk in enumerate(chunks, start=1):
         snippet = chunk["text"].replace("\n", " ")
-        prompt += f"{i}.) {snippet[:500]}…\n\n"
-    
+        prompt += f"{i}.) {snippet[:500]}…\nSource: {chunk.get('source','')}\n\n"
+
     logger.debug("Constructed prompt for LLM reranking")
-    
+
     # Generate response
     try:
         logger.debug("Generating LLM response...")
@@ -195,15 +194,6 @@ def main():
                     print(f"--- #{i} (score={r['score']:.4f}) {r['source']} ---")
                     print(snippet[:500] + ("…" if len(r["text"]) > 500 else ""))
                     print()
-
-                # Filter by document type if available
-                logger.debug("Filtering by document type...")
-                doc_candidates = [c for c in candidates if KEYWORD_DOC in c["source"].lower()]
-                if doc_candidates:
-                    logger.debug(f"Found {len(doc_candidates)} document-specific candidates")
-                    candidates = doc_candidates
-                else:
-                    logger.debug("No document-specific candidates found, using all candidates")
 
                 # Cross-encoder reranking
                 logger.debug(f"Starting cross-encoder reranking with model: {CROSS_ENCODER_MODEL}")

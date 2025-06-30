@@ -72,7 +72,7 @@ FAISS_INDEX_TYPE = "IndexFlatL2"
 
 # Search configuration
 TOP_K_INITIAL = 50
-TOP_K_FINAL = 10
+TOP_K_FINAL = 20
 
 # Ensure directories exist
 def ensure_directories():
@@ -92,4 +92,4 @@ def ensure_directories():
 # These will be removed once all files are updated to use the new config
 PDF_INPUT_DIR = str(DATA_DIR)
 OUTPUT_DIR = str(OUTPUTS_DIR)
-ROOT_DIR = str(WORKSPACE_ROOT) 
+ROOT_DIR = str(WORKSPACE_ROOT)
