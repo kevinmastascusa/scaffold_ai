@@ -33,6 +33,9 @@ from scaffold_core.config import (
     LLM_MAX_LENGTH,
     LLM_TEMPERATURE,
     LLM_TOP_P,
+    LLM_BATCH_SIZE,
+    LLM_LOAD_IN_8BIT,
+    LLM_LOAD_IN_4BIT,
     HF_TOKEN
 )
 logger.debug("Configuration imported successfully")
@@ -72,13 +75,38 @@ class LLMManager:
         logger.debug("Tokenizer loaded successfully")
         
         logger.debug("Loading model...")
+        
+        # Configure quantization for faster loading and inference
+        if LLM_LOAD_IN_4BIT and LLM_DEVICE == "cuda" and torch.cuda.is_available():
+            from transformers import BitsAndBytesConfig
+            quantization_config = BitsAndBytesConfig(
+                load_in_4bit=True,
+                bnb_4bit_compute_dtype=torch.float16,
+                bnb_4bit_use_double_quant=True,
+                bnb_4bit_quant_type="nf4"
+            )
+            logger.debug("Using 4-bit quantization")
+        elif LLM_LOAD_IN_8BIT and LLM_DEVICE == "cuda" and torch.cuda.is_available():
+            from transformers import BitsAndBytesConfig
+            quantization_config = BitsAndBytesConfig(
+                load_in_8bit=True,
+                llm_int8_threshold=6.0
+            )
+            logger.debug("Using 8-bit quantization")
+        else:
+            quantization_config = None
+            logger.debug("Using full precision (no quantization)")
+        
         self.model = AutoModelForCausalLM.from_pretrained(
             LLM_MODEL,
             token=HF_TOKEN,
             torch_dtype=torch.float16 if LLM_DEVICE == "cuda" else torch.float32,
-            device_map="auto",
+            device_map="auto" if LLM_DEVICE == "cuda" else None,
             low_cpu_mem_usage=True,
-            trust_remote_code=True
+            trust_remote_code=True,
+            quantization_config=quantization_config,
+            # GPU optimizations
+            use_cache=True
         )
         logger.debug("Model loaded successfully")
         
@@ -90,7 +118,12 @@ class LLMManager:
             max_length=LLM_MAX_LENGTH,
             temperature=LLM_TEMPERATURE,
             top_p=LLM_TOP_P,
-            trust_remote_code=True
+            batch_size=LLM_BATCH_SIZE,
+            trust_remote_code=True,
+            # Performance optimizations
+            do_sample=True,
+            pad_token_id=self.tokenizer.pad_token_id,
+            return_full_text=False  # Only return generated text, not input
         )
         logger.debug("Pipeline created successfully")
     
