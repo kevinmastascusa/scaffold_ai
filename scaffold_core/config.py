@@ -55,9 +55,12 @@ EMBEDDING_MODEL = "all-MiniLM-L6-v2"
 LLM_MODEL = "mistralai/Mistral-7B-Instruct-v0.2"  # Official Mistral v0.2 model
 LLM_TASK = "text-generation"  # Task type for the pipeline
 LLM_DEVICE = "cuda" if torch.cuda.is_available() else "cpu"  # Use GPU if available
-LLM_MAX_LENGTH = 2048  # Maximum length for generated responses
-LLM_TEMPERATURE = 0.7  # Temperature for text generation
-LLM_TOP_P = 0.95  # Top-p sampling parameter
+LLM_MAX_LENGTH = 1024  # Reduced for faster responses
+LLM_TEMPERATURE = 0.3  # Lower temperature for more focused responses
+LLM_TOP_P = 0.9  # Slightly lower for faster generation
+LLM_BATCH_SIZE = 1  # Batch size for processing
+LLM_LOAD_IN_8BIT = True  # Use 8-bit quantization for faster loading
+LLM_LOAD_IN_4BIT = False  # 4-bit for even faster loading (if needed)
 
 # Hugging Face token
 HF_TOKEN = os.getenv("HUGGINGFACE_TOKEN")
@@ -71,8 +74,8 @@ CROSS_ENCODER_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"
 FAISS_INDEX_TYPE = "IndexFlatL2"
 
 # Search configuration
-TOP_K_INITIAL = 50
-TOP_K_FINAL = 20
+TOP_K_INITIAL = 25  # Reduced for faster processing
+TOP_K_FINAL = 5     # Reduced for faster processing
 
 # Ensure directories exist
 def ensure_directories():
