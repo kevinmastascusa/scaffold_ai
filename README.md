@@ -2,7 +2,7 @@
 
 **Collaborators:** Kevin Mastascusa, Joseph Di Stefano
 
-**Date:** 6/26/2025
+**Date:** 6/26/2025 | **Last Updated:** 6/29/2025
 
 ## 🌍 Project Overview
 
@@ -15,6 +15,7 @@ This project involves developing a specialized large language model (LLM)-based 
 - Python 3.11 or higher (recommended: Python 3.11 for best compatibility)
 - Git
 - 16GB+ RAM recommended for optimal performance
+- NVIDIA GPU recommended but not required
 - Windows: Microsoft Visual C++ Build Tools (for some package installations)
 - Linux: python3-dev and build-essential packages
 
@@ -70,10 +71,12 @@ This project involves developing a specialized large language model (LLM)-based 
    - Check for existing PDF files
    - The script will work even if directories already exist
 
-5. **Set up local LLM endpoint (required for full functionality):**
-   - See [Local Setup Guide](documentation/local_setup_guide.md) for detailed instructions
-   - Install and configure Ollama for local Mistral model
-   - Configure environment variables for secure endpoint access
+5. **Configure Hugging Face (optional):**
+   - For some models (like Llama 2), get your token from https://huggingface.co/settings/tokens
+   - Create a `.env` file:
+     ```bash
+     HUGGINGFACE_TOKEN=your_token_here
+     ```
 
 6. **Add your PDF documents:**
    ```bash
@@ -126,6 +129,16 @@ If you encounter issues during installation:
    ```
    - See `outputs/combined_words_analysis_report.txt` for a detailed summary of remaining combined words (now mostly legitimate technical/academic terms).
 
+3. **Test the query system (Added 6/29/2025):**
+   ```bash
+   # Run comprehensive system tests
+   python scaffold_core/scripts/run_tests.py
+   
+   # Generate detailed test report
+   python scaffold_core/scripts/generate_test_report.py
+   ```
+   - See `documentation/query_system_test_report.md` for comprehensive system analysis and test results.
+
 ### Project Structure
 
 ```
@@ -136,6 +149,7 @@ scaffold_ai/
 ├── math_outputs/            # Math-aware processing results
 ├── scaffold_core/           # Core processing modules
 │   ├── config.py           # Central configuration
+│   ├── llm.py            # Hugging Face LLM integration
 │   ├── scripts/            # Processing scripts
 │   └── vector/             # Vector processing
 ├── setup.py                # Setup script
@@ -145,6 +159,16 @@ scaffold_ai/
 ### Configuration
 
 All paths and settings are centrally managed in `scaffold_core/config.py`. The configuration automatically adapts to your workspace location, making the project portable for anyone who clones the repository.
+
+### LLM Integration
+
+The project uses Hugging Face's Transformers library with the following features:
+- Mistral-7B-Instruct model by default
+- Automatic GPU acceleration when available
+- Mixed precision for better memory efficiency
+- Easy model switching and parameter tuning
+
+For detailed setup and configuration options, see the [Local Setup Guide](documentation/local_setup_guide.md).
 
 ## 🎯 Goals and Objectives
 
@@ -175,10 +199,16 @@ The system will include three key components:
 
 ## 🤖 Large Language Model (LLM)
 
-Open-source models under consideration:
+**Current Implementation (6/29/2025):**
+* **Mistral-7B-Instruct-v0.2** - Successfully integrated and tested
+  - Official Mistral AI model with 7B parameters
+  - Hugging Face Transformers integration with proper tokenization
+  - CPU-based inference with mixed precision support
+  - Comprehensive testing shows 100% success rate
 
+**Previously Considered Models:**
 * **Llama 3 (Meta):** meta-llama/Llama-3.1-8B-Instruct, Llama-3.2-1B
-* **Mistral-7B (Mistral AI):** Mistral-7B-v0.1, Mistral-7B-Instruct-v0.2, v0.3
+* **Other Mistral Variants:** Mistral-7B-v0.1, Mistral-7B-Instruct-v0.3
 * **Phi-3 Mini (Microsoft):** Phi-3.5-mini-instruct, Phi-3-mini-4k-instruct
 
 ## 🔗 Citation Tracking and Transparency
@@ -228,10 +258,12 @@ Evaluation will include both qualitative feedback from faculty and technical per
 
 ### 🔥 High Priority (Current Sprint)
 
-1. **Implement Semantic Search and Retrieval**
-   * Create query interface for the completed FAISS index
-   * Implement semantic search functionality using vector embeddings
-   * Add query performance testing and optimization
+1. **Semantic Search and Retrieval** ✅ **COMPLETED (6/29/2025)**
+   * ✅ Created query interface for the completed FAISS index
+   * ✅ Implemented semantic search functionality using vector embeddings
+   * ✅ Added comprehensive query performance testing and optimization
+   * ✅ Successfully integrated Mistral-7B-Instruct-v0.2 LLM
+   * ✅ All system components tested with 100% success rate
 
 2. **Build User Interface for Knowledge Base**
    * Develop web interface for querying the vectorized knowledge base
@@ -250,10 +282,12 @@ Evaluation will include both qualitative feedback from faculty and technical per
    * Add relevance scoring and ranking improvements
    * Create citation tracking and source linking
 
-5. **Testing and Validation**
-   * Implement automated testing for the configuration system
-   * Add comprehensive test suite for vector operations
-   * Create performance benchmarks and validation metrics
+5. **Testing and Validation** ✅ **LARGELY COMPLETED (6/29/2025)**
+   * ✅ Implemented comprehensive automated testing system
+   * ✅ Added full test suite for vector operations and LLM integration
+   * ✅ Created performance benchmarks and validation metrics
+   * ✅ Generated detailed test reports with system specifications
+   * 🔄 **Remaining:** Configuration system validation tests
 
 ### 📈 Future Enhancements
 
@@ -293,6 +327,7 @@ Evaluation will include both qualitative feedback from faculty and technical per
    * ✅ Successfully generated embeddings for all 4,859 text chunks
    * ✅ Created FAISS index for efficient similarity search and retrieval
    * ✅ Resolved all dependency conflicts and compatibility issues
+   * ✅ **Added 6/29/2025:** Implemented full query system with LLM integration
 
 4. **Open-Source License Compliance** 🔄 **PENDING**
    * ✅ Confirmed that current libraries used (sentence-transformers, FAISS, torch) meet open-source license requirements

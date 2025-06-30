@@ -12,7 +12,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Import central configuration
 from scaffold_core.config import (
-    VECTOR_OUTPUTS_DIR, ITERATION, EMBEDDING_MODEL_NAME,
+    VECTOR_OUTPUTS_DIR, ITERATION, EMBEDDING_MODEL,
     CHUNKED_TEXT_EXTRACTS_JSON, get_faiss_index_path, get_metadata_json_path
 )
 
@@ -73,8 +73,8 @@ def main():
     print(f"✓ Prepared {len(texts)} texts for vectorization")
     
     # Load the embedding model
-    print(f"Loading embedding model: {EMBEDDING_MODEL_NAME}")
-    model = SentenceTransformer(EMBEDDING_MODEL_NAME)
+    print(f"Loading embedding model: {EMBEDDING_MODEL}")
+    model = SentenceTransformer(EMBEDDING_MODEL)
     
     # Generate embeddings
     print("Generating embeddings...")

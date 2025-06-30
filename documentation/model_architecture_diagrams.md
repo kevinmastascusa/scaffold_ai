@@ -1,5 +1,8 @@
 # Model Architecture Diagrams
 
+**Last Updated:** June 29, 2025  
+**Status:** Updated for Hugging Face Integration
+
 This document contains visual diagrams of the confirmed working models in the Scaffold AI pipeline, based on the actual implemented codebase.
 
 ---
@@ -41,7 +44,7 @@ flowchart TD
     
     %% LLM Answer Generation
     G2 --> H[LLM Answer Generation]
-    H --> H1[Mistral via Ollama<br/>Local API Endpoint]
+    H --> H1[Mistral-7B-Instruct-v0.2<br/>Hugging Face Transformers]
     H1 --> H2[Grounded answer with citations]
     
     %% Output
@@ -114,7 +117,7 @@ flowchart LR
     class E,F,G,H,I details
 ```
 
-### LLM Model: Mistral via Ollama
+### LLM Model: Mistral via Hugging Face
 ```mermaid
 flowchart LR
     A[User Query] --> D[Mistral LLM]
@@ -123,9 +126,9 @@ flowchart LR
     D --> E[Grounded Answer]
     
     subgraph "LLM Details"
-        F[Model: Mistral-7B]
-        G[Platform: Ollama]
-        H[Endpoint: Local API]
+        F[Model: Mistral-7B-Instruct-v0.2]
+        G[Platform: Hugging Face Transformers]
+        H[Integration: Python API]
         I[Role: Fact-checking assistant]
         J[Constraint: Quote only from chunks]
     end
@@ -176,7 +179,7 @@ flowchart TD
     subgraph "Model Interactions"
         Q[Embedding Model<br/>all-MiniLM-L6-v2]
         R[Cross-Encoder<br/>ms-marco-MiniLM-L-6-v2]
-        S[LLM<br/>Mistral via Ollama]
+        S[LLM<br/>Mistral via Hugging Face]
     end
     
     classDef data fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
@@ -196,7 +199,7 @@ flowchart TD
 |-------|---------------|----------|--------|
 | **Embedding** | `all-MiniLM-L6-v2` | `scaffold_core/config.py` | ✅ Working |
 | **Cross-Encoder** | `cross-encoder/ms-marco-MiniLM-L-6-v2` | `scaffold_core/vector/query.py` | ✅ Working |
-| **LLM** | `mistral` (Ollama) | `scaffold_core/config.py` | ✅ Working |
+| **LLM** | `mistralai/Mistral-7B-Instruct-v0.2` (Hugging Face) | `scaffold_core/config.py` | ✅ Working |
 | **FAISS Index** | `IndexFlatL2` | `scaffold_core/vector/transformVector.py` | ✅ Working |
 
 ---
@@ -217,9 +220,9 @@ flowchart TD
 
 ### LLM Model
 - **Speed**: ~2-5 seconds per query
-- **Memory**: ~4GB (Mistral-7B)
-- **Quality**: Good reasoning with constraints
-- **Platform**: Local Ollama server
+- **Memory**: ~7GB (Mistral-7B-Instruct-v0.2)
+- **Quality**: High-quality reasoning with constraints
+- **Platform**: Hugging Face Transformers (Python API)
 
 ---
 
@@ -232,23 +235,24 @@ graph TD
     D[torch] --> A
     E[transformers] --> A
     F[faiss-cpu] --> G[FAISS Index]
-    H[ollama] --> I[Mistral LLM]
+    H[transformers] --> I[Mistral LLM]
+    J[huggingface-hub] --> I
     
     subgraph "Python Dependencies"
-        J[numpy]
-        K[requests]
-        L[PyMuPDF]
+        K[numpy]
+        L[requests]
+        M[PyMuPDF]
+        N[sentencepiece]
+        O[accelerate]
     end
     
     classDef library fill:#e3f2fd,stroke:#1976d2,stroke-width:2px
     classDef model fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
-    classDef external fill:#fff3e0,stroke:#f57c00,stroke-width:2px
     
-    class A,D,E,F,J,K,L library
+    class A,D,E,F,H,J,K,L,M,N,O library
     class B,C,G,I model
-    class H external
 ```
 
 ---
 
-*These diagrams reflect the current working implementation as of the latest codebase analysis. All models shown are confirmed to be functional and integrated into the pipeline.* 
+*These diagrams reflect the current working implementation as of June 29, 2025. All models shown are confirmed to be functional and integrated into the pipeline. The system has been successfully migrated from Ollama to Hugging Face Transformers for LLM functionality.* 

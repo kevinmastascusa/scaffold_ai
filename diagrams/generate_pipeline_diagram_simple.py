@@ -64,11 +64,16 @@ def generate_pipeline_diagram():
     F2 --> G
     F3 --> G
     G --> G1[query.py - Semantic Search]
-    G --> G2[User Interface]
-    G --> G3[Process User Queries]
-    G --> G4[Retrieve Relevant Chunks]
-    G --> G5[Rank by Similarity]
-    G --> G6[Curriculum Recommendations]
+    G1 --> G2[FAISS Similarity Search]
+    G2 --> G3[Cross-Encoder Reranking]
+    G3 --> G4[Top 10 Relevant Chunks]
+    
+    %% LLM Integration Stage
+    G4 --> I[LLM ANSWER GENERATION]
+    I --> I1[llm.py - LLMManager]
+    I1 --> I2[Mistral-7B-Instruct-v0.2<br/>Hugging Face Transformers]
+    I2 --> I3[Generate Grounded Response]
+    I3 --> I4[Curriculum Recommendations<br/>with Citations]
     
     %% Reports and Analysis
     D8 --> H[Analysis Reports]
@@ -83,13 +88,15 @@ def generate_pipeline_diagram():
     classDef stage4 fill:#fff2e6,stroke:#cc6600,stroke-width:2px
     classDef stage5 fill:#f0f0ff,stroke:#6600cc,stroke-width:2px
     classDef stage6 fill:#f5f5f5,stroke:#333333,stroke-width:2px
+    classDef stage7 fill:#ffe6f0,stroke:#cc0066,stroke-width:2px
     
     class A,B,B1,B2,B3,B4 stage1
     class C,C1,C2,C3,C4,C5,C6,C7 stage2
     class D,D1,D2,D3,D4,D5,D6,D7,D8 stage3
     class E,E1,E2,E3,E4,E5,E6 stage4
     class F1,F2,F3 stage5
-    class G,G1,G2,G3,G4,G5,G6,H,H1,H2,H3 stage6'''
+    class G,G1,G2,G3,G4,H,H1,H2,H3 stage6
+    class I,I1,I2,I3,I4 stage7'''
     
     return mermaid_diagram
 

@@ -1,5 +1,8 @@
 # Model Summary and Selection
 
+**Last Updated:** June 29, 2025  
+**Status:** Updated for Hugging Face Integration
+
 This document summarizes the models used in the Scaffold AI project and the rationale for their selection, reflecting the current codebase and configuration.
 
 ---
@@ -13,7 +16,7 @@ This document summarizes the models used in the Scaffold AI project and the rati
   - Used in the vectorization pipeline to create the FAISS index for similarity search and retrieval.
 - **Location in Codebase:**
   - Used in `scaffold_core/vector/transformVector.py` for embedding generation.
-  - Referenced in `scaffold_core/config.py` as `EMBEDDING_MODEL_NAME`.
+  - Referenced in `scaffold_core/config.py` as `EMBEDDING_MODEL`.
 
 ---
 
@@ -31,18 +34,26 @@ This document summarizes the models used in the Scaffold AI project and the rati
 
 ## 3. Large Language Model (LLM) for Answer Generation
 
-- **Models Under Consideration:**
-  - **Llama 3 (Meta):** meta-llama/Llama-3.1-8B-Instruct, Llama-3.2-1B
-  - **Mistral-7B (Mistral AI):** Mistral-7B-v0.1, Mistral-7B-Instruct-v0.2, v0.3
-  - **Phi-3 Mini (Microsoft):** Phi-3.5-mini-instruct, Phi-3-mini-4k-instruct
-- **Current Default:**
-  - **Mistral** (via Ollama, as set in `scaffold_core/config.py` with `OLLAMA_MODEL = "mistral"`)
+- **Current Implementation (June 29, 2025):**
+  - **Model:** `mistralai/Mistral-7B-Instruct-v0.2`
+  - **Platform:** Hugging Face Transformers
+  - **Integration:** Python API via `scaffold_core/llm.py`
+  - **Status:** ✅ Fully tested and operational (100% test success rate)
+
+- **Previously Tested Models:**
+  - **TinyLlama/TinyLlama-1.1B-Chat-v1.0** - Smaller, faster alternative
+  - **teknium/OpenHermes-2.5-Mistral-7B** - Community Mistral variant
+  - **mistralai/Mistral-7B-Instruct-v0.3** - Had tokenizer compatibility issues
+
 - **Purpose:**
   - Generates the final answer to the user's query, using only the retrieved and reranked chunks as context.
   - Ensures answers are grounded in the source material and can provide citations.
+  - Uses Mistral's `[INST]...[/INST]` chat format for proper instruction following.
+
 - **Location in Codebase:**
-  - Used in `scaffold_core/vector/query.py` in the `rerank_with_ollama` function.
-  - Model and endpoint are set in `scaffold_core/config.py`.
+  - **LLM Manager:** `scaffold_core/llm.py` - Handles model loading and text generation
+  - **Query Integration:** `scaffold_core/vector/query.py` - Integrates LLM with retrieval pipeline
+  - **Configuration:** `scaffold_core/config.py` - Model settings and parameters
 
 ---
 
@@ -58,8 +69,9 @@ This document summarizes the models used in the Scaffold AI project and the rati
 
 - **LLM:**
   - Open-source models are prioritized for transparency, cost, and local deployment.
-  - Mistral is set as the default for its strong performance and compatibility with Ollama.
-  - Llama 3 and Phi-3 are also considered for future or alternative deployments, depending on licensing, performance, and hardware requirements.
+  - Mistral-7B-Instruct-v0.2 was selected for its excellent performance and official support.
+  - Hugging Face Transformers provides better integration, debugging, and cross-platform compatibility than Ollama.
+  - The migration from Ollama to Hugging Face resolved setup issues and improved system reliability.
 
 ---
 
@@ -69,18 +81,36 @@ This document summarizes the models used in the Scaffold AI project and the rati
 |----------------------|-----------------------------------|-----------------------|-----------------------------------------|
 | Embedding            | all-MiniLM-L6-v2                  | sentence-transformers | Chunk embedding for FAISS search        |
 | Reranking            | cross-encoder/ms-marco-MiniLM-L-6-v2 | sentence-transformers | Rerank top retrieved chunks             |
-| LLM (Answer Gen)     | Mistral (default), Llama 3, Phi-3 | Ollama, open-source   | Generate grounded, cited answers        |
+| LLM (Answer Gen)     | mistralai/Mistral-7B-Instruct-v0.2 | Hugging Face Transformers | Generate grounded, cited answers        |
 
 ---
 
 ## How to Change Models
 
 - **Embedding or Cross-Encoder:**
-  - Update the model name in `scaffold_core/config.py` or directly in the relevant script.
+  - Update the model name in `scaffold_core/config.py` (use `EMBEDDING_MODEL` and `CROSS_ENCODER_MODEL`).
+  - The system will automatically download and cache the new models.
+
 - **LLM:**
-  - Change the `OLLAMA_MODEL` value in `scaffold_core/config.py`.
-  - Ensure the model is available in your Ollama or LLM serving environment.
+  - Change the `LLM_MODEL` value in `scaffold_core/config.py`.
+  - For gated models, ensure you have proper Hugging Face token access.
+  - See `documentation/huggingface_migration_guide.md` for detailed setup instructions.
+
+- **Testing Changes:**
+  - Run `python scaffold_core/scripts/run_tests.py` to verify all models work correctly.
+  - Generate a test report with `python scaffold_core/scripts/generate_test_report.py`.
 
 ---
 
-For more details, see the code in `scaffold_core/vector/` and the configuration in `scaffold_core/config.py`. 
+## Migration Notes (June 29, 2025)
+
+The system was successfully migrated from Ollama to Hugging Face Transformers:
+- **Reason:** Ollama setup issues and cross-platform compatibility problems
+- **Benefits:** Better Python integration, easier debugging, comprehensive testing
+- **Status:** 100% test success rate with all components functional
+
+For more details, see:
+- **Code:** `scaffold_core/vector/` and `scaffold_core/llm.py`
+- **Configuration:** `scaffold_core/config.py`
+- **Migration Guide:** `documentation/huggingface_migration_guide.md`
+- **Test Results:** `documentation/query_system_test_report.md` 

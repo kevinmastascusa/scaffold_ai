@@ -1,185 +1,146 @@
 # Local Setup Guide
 
-This guide explains how to set up the local components required for the Scaffold AI pipeline, specifically the Ollama LLM endpoint.
+This guide explains how to set up the local components required for the Scaffold AI pipeline, specifically the Hugging Face integration for LLM functionality.
 
 ## Prerequisites
 
-- Python 3.8+ installed
+- Python 3.11+ installed
 - Git repository cloned
-- Basic familiarity with command line tools
+- 16GB+ RAM recommended
+- NVIDIA GPU recommended but not required
 
-## Setting Up Ollama
+## Setting Up the Environment
 
-### 1. Install Ollama
+1. **Create and activate virtual environment:**
+   ```bash
+   # Windows (PowerShell)
+   python -m venv scaffold_env
+   Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
+   .\scaffold_env\Scripts\activate
 
-**Windows:**
-```bash
-# Download from https://ollama.ai/download
-# Or use winget
-winget install Ollama.Ollama
-```
+   # macOS/Linux
+   python -m venv scaffold_env
+   source scaffold_env/bin/activate
+   ```
 
-**macOS:**
-```bash
-# Download from https://ollama.ai/download
-# Or use Homebrew
-brew install ollama
-```
+2. **Install dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-**Linux:**
-```bash
-# Download from https://ollama.ai/download
-# Or use curl
-curl -fsSL https://ollama.ai/install.sh | sh
-```
+## LLM Configuration
 
-### 2. Start Ollama Service
-
-```bash
-# Start the Ollama service
-ollama serve
-```
-
-The service will start on the default local endpoint. Keep this terminal window open while using the application.
-
-### 3. Pull the Mistral Model
-
-```bash
-# Pull the Mistral model (this may take several minutes)
-ollama pull mistral
-```
-
-### 4. Verify Installation
-
-```bash
-# Test that Ollama is working
-ollama list
-```
-
-You should see the `mistral` model listed.
-
-## Configuration
-
-### Environment Variables (Recommended)
-
-Create a `.env` file in your project root:
-
-```bash
-# .env file
-OLLAMA_ENDPOINT=http://localhost:11434/v1/chat/completions
-OLLAMA_MODEL=mistral
-```
-
-### Alternative: Direct Configuration
-
-If you prefer to configure directly in code, you can modify the configuration in `scaffold_core/config.py`:
+The project uses Hugging Face's Transformers library with the Mistral-7B-Instruct model. The configuration is defined in `scaffold_core/config.py`:
 
 ```python
-# Only for local development - do not commit these changes
-LLM_ENDPOINT = "http://localhost:11434/v1/chat/completions"
+# LLM configuration
+LLM_MODEL = "mistralai/Mistral-7B-Instruct-v0.2"  # Hugging Face model ID
+LLM_TASK = "text-generation"
+LLM_DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+LLM_MAX_LENGTH = 2048
+LLM_TEMPERATURE = 0.7
+LLM_TOP_P = 0.95
 ```
 
-**⚠️ Security Note:** Never commit localhost endpoints to version control. Use environment variables instead.
+### GPU Acceleration
 
-## Testing the Setup
+If you have an NVIDIA GPU:
+1. The model will automatically use GPU if available
+2. Mixed precision (FP16) is enabled by default for better memory efficiency
+3. The model uses the 'auto' device map for optimal GPU memory usage
 
-### 1. Test Ollama Connection
+If no GPU is available, the model will run on CPU with FP32 precision.
 
-```bash
-# Test the API endpoint
-curl -X POST http://localhost:11434/v1/chat/completions \
-  -H "Content-Type: application/json" \
-  -d '{
-    "model": "mistral",
-    "messages": [{"role": "user", "content": "Hello, world!"}]
-  }'
-```
+### Changing Models
 
-### 2. Test with Python
+To use a different model:
+
+1. Update `LLM_MODEL` in `config.py` to any Hugging Face model ID
+2. Ensure the model is compatible with text generation
+3. Adjust generation parameters as needed:
+   - `LLM_MAX_LENGTH`: Maximum length of generated responses
+   - `LLM_TEMPERATURE`: Controls randomness (0.0 to 1.0)
+   - `LLM_TOP_P`: Controls nucleus sampling
+
+Example alternative models:
+- `meta-llama/Llama-2-7b-chat-hf` (requires Hugging Face access token)
+- `TinyLlama/TinyLlama-1.1B-Chat-v1.0` (smaller model, faster inference)
+- `microsoft/phi-2` (good balance of size and performance)
+
+## Using the LLM
+
+The LLM functionality is implemented in `scaffold_core/llm.py`. Here's how to use it:
 
 ```python
-import requests
-import json
+from scaffold_core.llm import llm
 
-url = "http://localhost:11434/v1/chat/completions"
-data = {
-    "model": "mistral",
-    "messages": [{"role": "user", "content": "Hello, world!"}]
-}
+# Single response generation
+response = llm.generate_response(
+    "What are the key principles of sustainability?",
+    temperature=0.7  # Optional: override default temperature
+)
 
-response = requests.post(url, json=data)
-print(response.json())
+# Batch generation
+prompts = [
+    "What is climate resilience?",
+    "How does sustainability affect education?"
+]
+responses = llm.batch_generate(prompts)
 ```
+
+## Environment Variables
+
+For some models (like Llama 2), you'll need to set up a Hugging Face access token:
+
+1. Get your token from https://huggingface.co/settings/tokens
+2. Create a `.env` file in your project root:
+   ```bash
+   HUGGINGFACE_TOKEN=your_token_here
+   ```
 
 ## Troubleshooting
 
 ### Common Issues
 
-1. **Ollama service not running**
-   - Make sure `ollama serve` is running in a terminal
-   - Check if the service is running: `ollama list`
+1. **Out of Memory (OOM) errors**
+   - Try a smaller model
+   - Reduce batch size
+   - Enable gradient checkpointing
+   - Use CPU if GPU memory is insufficient
 
-2. **Model not found**
-   - Pull the model: `ollama pull mistral`
-   - Check available models: `ollama list`
+2. **Slow inference on CPU**
+   - Consider using a smaller model
+   - Reduce context length
+   - Use quantized models (8-bit or 4-bit)
 
-3. **Connection refused**
-   - Verify Ollama is running on the correct port
-   - Check firewall settings
-   - Ensure no other service is using the port
+3. **Model download issues**
+   - Check your internet connection
+   - Verify Hugging Face token if using gated models
+   - Try downloading the model manually
 
-4. **Permission errors**
-   - Run with appropriate permissions
-   - Check file/directory permissions
+### Performance Tips
 
-### Port Configuration
+1. **For faster inference:**
+   - Use GPU when available
+   - Keep prompts concise
+   - Use appropriate `max_length`
+   - Consider quantized models
 
-By default, Ollama runs on port 11434. If you need to change this:
-
-1. Set the `OLLAMA_HOST` environment variable:
-   ```bash
-   export OLLAMA_HOST=0.0.0.0:8080  # Example: different port
-   ```
-
-2. Update your endpoint configuration accordingly:
-   ```bash
-   OLLAMA_ENDPOINT=http://localhost:8080/v1/chat/completions
-   ```
-
-## Security Considerations
-
-### Local Development Only
-
-- The localhost endpoint should only be used for local development
-- Never expose this endpoint to the internet
-- Use environment variables for configuration
-- Don't commit endpoint URLs to version control
-
-### Production Deployment
-
-For production use, consider:
-- Using a cloud-based LLM service
-- Implementing proper authentication
-- Using secure API gateways
-- Setting up monitoring and logging
+2. **For better quality:**
+   - Adjust temperature and top_p
+   - Use well-structured prompts
+   - Consider larger models if resources allow
 
 ## Next Steps
 
-Once Ollama is set up and running:
-
-1. Install Python dependencies: `pip install -r requirements.txt`
-2. Run the text processing pipeline
-3. Test the complete workflow with a sample query
+1. Run the text processing pipeline
+2. Test the complete workflow
+3. Adjust model parameters as needed
 
 ## Support
 
 If you encounter issues:
-
-1. Check the [Ollama documentation](https://ollama.ai/docs)
-2. Review the troubleshooting section above
+1. Check the [Hugging Face documentation](https://huggingface.co/docs)
+2. Review model-specific documentation
 3. Check the project's issue tracker
-4. Ensure all prerequisites are met
-
----
-
-**Remember:** Keep your localhost endpoint configuration secure and never expose it in public documentation or version control. 
+4. Ensure all prerequisites are met 
