@@ -1,0 +1,272 @@
+[
+  {
+    "query_id": 1,
+    "query": "What is life cycle assessment?",
+    "response": "Life cycle assessment (LCA) is not explicitly defined or mentioned in the provided documentation. However, we can infer that it is a concept related to sustainability and environmental sciences based on the context of the texts. According to the \"Sustainability Incorporation in Courses in Mechanical, Civil and Environmental Engineering: Insights from AASHE STARS Data\" [5], sustainability incorporation into engineering education is gaining recognition and importance, and sustainability courses provide valuable connections to the field and prepare students to apply sustainability principles in their engineering decisions. LCA is a method used to assess the environmental impacts of a product or service throughout its entire life cycle, from raw material extraction to disposal [1]. Therefore, LCA can be considered a tool used to support sustainability principles and engineering decisions, as suggested in the text.\n\n[1] Clark et al., 2010 [4].\n[5] \"Sustainability-incorporation-in-courses-in-mechanical-civil-and-environmental-engineering-insights-from-aashe-stars-data.pdf\" [3].",
+    "candidates_found": 5,
+    "search_stats": {
+      "initial_candidates": 22,
+      "reranked_candidates": 22,
+      "filtered_candidates": 22,
+      "final_candidates": 5
+    },
+    "timestamp": "2025-06-30T19:24:19.673537",
+    "top_sources": [
+      {
+        "source": "C:\\Users\\dlaev\\GitHub\\scaffold_ai\\data\\Systematic selection - Scopus and ASEE library\\Incorporating_sustainability_i.pdf",
+        "score": 0.5316992402076721
+      },
+      {
+        "source": "C:\\Users\\dlaev\\GitHub\\scaffold_ai\\data\\Systematic selection - Scopus and ASEE library\\designing-local-food-systems-results-from-a-three-year-pilot.pdf",
+        "score": -4.305149078369141
+      },
+      {
+        "source": "C:\\Users\\dlaev\\GitHub\\scaffold_ai\\data\\Systematic selection - Scopus and ASEE library\\1-s2.0-S0959652615013165-main.pdf",
+        "score": -5.419093132019043
+      }
+    ]
+  },
+  {
+    "query_id": 2,
+    "query": "How do you conduct a sustainability assessment in higher education?",
+    "response": "To conduct a sustainability assessment in higher education based on the available documentation, the following steps can be suggested:\n\n1. Sign sustainability declarations: Encourage individuals such as professors, students, and staff to sign sustainability declarations as a voluntary action towards promoting sustainability on campus [1]. However, it is essential to be cautiously optimistic about the impact of these declarations and not raise expectations too high [1].\n\n2. Implement sustainability policies: Adopt and maintain sustainability policies and strategies on campus. This can include developing projects related to garden management and making recommendations to make processes more sustainable [1].\n\n3. Use pedagogical approaches: Incorporate sustainability into the curriculum by using pedagogical approaches such as Fink's taxonomy of significant learning [2].\n\n4. Attend workshops: Participate in workshops designed to help engineering educators integrate sustainability into their modules and gain confidence in equipping graduates with the necessary skills and mindsets [3].\n\n5. Self-evaluate curriculum: Use tools like the Global Engineering Education for Sustainability (GER) to self-evaluate the integration of the 12 competences for sustainability in the curriculum [4].\n\nReferences:\n[1] Gamage, p. 190\n[2] Use-Of~1.PDF, p.\n[3] How To Use New Tools To Integrate Sustainability Into Engineering.pdf, p. 1\n[4] 1-s2.0-S0959652615013165-main.pdf, p.\n[5] THE-GR~1.PDF, p.\n\nNote: The documentation does not provide specific information on how to conduct a life cycle assessment or a detailed process for a sustainability assessment in higher education.",
+    "candidates_found": 5,
+    "search_stats": {
+      "initial_candidates": 23,
+      "reranked_candidates": 23,
+      "filtered_candidates": 23,
+      "final_candidates": 5
+    },
+    "timestamp": "2025-06-30T19:30:40.236734",
+    "top_sources": [
+      {
+        "source": "C:\\Users\\dlaev\\GitHub\\scaffold_ai\\data\\Systematic selection - Scopus and ASEE library\\The Wiley Handbook of Sustainability in Higher Education Learning and Teaching - 2022 - Gamage.pdf",
+        "score": 2.949995517730713
+      },
+      {
+        "source": "C:\\Users\\dlaev\\GitHub\\scaffold_ai\\data\\Systematic selection - Scopus and ASEE library\\USE-OF~1.PDF",
+        "score": -1.981713891029358
+      },
+      {
+        "source": "C:\\Users\\dlaev\\GitHub\\scaffold_ai\\data\\Systematic selection - Scopus and ASEE library\\How To Use New Tools To Integrate Sustainability Into Engineering.pdf",
+        "score": -0.023711860179901123
+      }
+    ]
+  },
+  {
+    "query_id": 3,
+    "query": "What are the main phases of life cycle assessment?",
+    "response": "Based on the available documentation, the main phases of a Life Cycle Assessment (LCA) are as follows:\n\n1. Definition of the goal and scope (2.1, 2.4, 422.A, 422.B): This phase involves setting the objectives of the LCA study and defining the product system and functional unit.\n2. Inventory analysis (2.4, 422.C, 121.C): In this phase, all inputs and outputs of the product system are identified and quantified.\n3. Impact assessment (2.1, 2.4, 421.C, 422.1): The environmental impacts of the identified inputs and outputs are evaluated using impact categories and potential impact pathways.\n4. Interpretation (2.1, 2.4, 422.2): The results of the LCA are interpreted, and the significance of the findings is communicated.\n\nThese phases are essential for conducting a comprehensive LCA and gaining a full understanding of the environmental impact of a product or service throughout its entire life cycle. (1, 7)",
+    "candidates_found": 5,
+    "search_stats": {
+      "initial_candidates": 21,
+      "reranked_candidates": 21,
+      "filtered_candidates": 21,
+      "final_candidates": 5
+    },
+    "timestamp": "2025-06-30T19:34:52.056539",
+    "top_sources": [
+      {
+        "source": "C:\\Users\\dlaev\\GitHub\\scaffold_ai\\data\\Systematic selection - Scopus and ASEE library\\THE-PO~2.PDF",
+        "score": 0.9884976744651794
+      },
+      {
+        "source": "C:\\Users\\dlaev\\GitHub\\scaffold_ai\\data\\Systematic selection - Scopus and ASEE library\\sustainable-green-design-and-life-cycle-assessment-for-engineering-education.pdf",
+        "score": 3.541078567504883
+      },
+      {
+        "source": "C:\\Users\\dlaev\\GitHub\\scaffold_ai\\data\\Systematic selection - Scopus and ASEE library\\Gutierrez_Ortiz_Fitzpatrick_Byrne_EJEE_2020_submit.pdf",
+        "score": -4.4175214767456055
+      }
+    ]
+  },
+  {
+    "query_id": 4,
+    "query": "How can universities implement environmental sustainability frameworks?",
+    "response": "Universities can implement environmental sustainability frameworks by integrating sustainability into their culture and making it an integral part of their policies and curriculum. According to Ramos (2009) and Rauen et al. (2015), developing stakeholder agency in HE sustainability initiatives is crucial for effective implementation. Steiner and Posch (2006) suggest an innovative approach using transdisciplinary case studies to solve complex, real-world problems.\n\nPolicy making is essential for sustainability implementation in higher education institutions. ABET criteria for accrediting engineering programs (Gamage, 2022) emphasize that students should be able to design systems within realistic constraints, including economic, environmental, and social considerations (Gamage, 2022, p. 25). This suggests that universities should incorporate sustainability into their engineering programs and policies.\n\nMoreover, recognizing the interconnection between natural and social systems over time is crucial for sustainability (Education_for_flourishing_an_, 2020, p. 1). Business models, financial systems, and economic markets should serve society within natural resource limits (Education_for_flourishing_an_, 2020, p. 1). Therefore, universities should adopt frameworks and tools for Business Model Innovation for sustainability (Bansal et al., 2019) to help them work within these limits.\n\nFurthermore, offering engineering students global perspective through experiential learning projects in wind energy and sustainability (El-Gabry and Jakobski, 2019) and engaging in international project-based service-learning programs (Ellzey et al., 2019) can help foster a culture of sustainability and prepare students for sustainable careers.\n\nReferences:\n- Gamage, M. (2022). The Wiley Handbook of Sustainability in Higher Education Learning and Teaching.\n- Ramos, T.B. (2009). Development of regional sustainability indicators and the role of academia in this process: the Portuguese practice.\n- Rauen, T.R.S., Lezana, Á.G.R., and da Silva, V. (2015). Environmental management: an overview in higher education institutions.\n- Steiner, G. and Posch, A. (2006). Higher education for sustainability by means of transdisciplinary case studies: an innovative approach for solving complex, real-world problems.\n- El-Gabry, L. and Jakobski, M. (2019). Offering engineering students global perspective through experiential learning project in wind energy and sustainability.\n- Ellzey, J.L., O’Connor, J.T., and Westerman, J. (2019). Projects with under served communities: case study of an international project-based service-learning program.\n- Bansal, P.M., et al. (2019). Business model innovation for sustainability: A systematic literature review. Journal of Cleaner Production, 211, 119755.",
+    "candidates_found": 5,
+    "search_stats": {
+      "initial_candidates": 24,
+      "reranked_candidates": 24,
+      "filtered_candidates": 24,
+      "final_candidates": 5
+    },
+    "timestamp": "2025-06-30T19:43:13.716574",
+    "top_sources": [
+      {
+        "source": "C:\\Users\\dlaev\\GitHub\\scaffold_ai\\data\\Systematic selection - Scopus and ASEE library\\The Wiley Handbook of Sustainability in Higher Education Learning and Teaching - 2022 - Gamage.pdf",
+        "score": 3.4489710330963135
+      },
+      {
+        "source": "C:\\Users\\dlaev\\GitHub\\scaffold_ai\\data\\Systematic selection - Scopus and ASEE library\\The Wiley Handbook of Sustainability in Higher Education Learning and Teaching - 2022 - Gamage.pdf",
+        "score": 1.4108600616455078
+      },
+      {
+        "source": "C:\\Users\\dlaev\\GitHub\\scaffold_ai\\data\\Systematic selection - Scopus and ASEE library\\how-to-address-sustainability-in-a-mechanical-engineering-program-implementation-and-challenges.pdf",
+        "score": 1.3733347654342651
+      }
+    ]
+  },
+  {
+    "query_id": 5,
+    "query": "What are the key indicators for measuring environmental impact?",
+    "response": "Based on the provided documentation, the key indicators for measuring environmental impact are not explicitly stated. However, we can infer that in the context of engineering design, sustainability indicators are crucial for representing a merit-based snapshot of the design and should be compatible with design criteria (Embedding_sustainability_in_capstone_engineering_design_projects.pdf [46]). Additionally, Life-Cycle Assessment (LCA) is mentioned as a tool for engineers to assess and implement sustainability, which can help increase awareness and understanding of the key elements of sustainability (THE-PO~2.PDF [3]). Therefore, while the specific indicators are not mentioned, we know that they are important for sustainability assessment in engineering and can be evaluated through tools like LCA.",
+    "candidates_found": 5,
+    "search_stats": {
+      "initial_candidates": 23,
+      "reranked_candidates": 23,
+      "filtered_candidates": 23,
+      "final_candidates": 5
+    },
+    "timestamp": "2025-06-30T19:45:21.536365",
+    "top_sources": [
+      {
+        "source": "C:\\Users\\dlaev\\GitHub\\scaffold_ai\\data\\Systematic selection - Scopus and ASEE library\\SU6388~1.PDF",
+        "score": -5.060846328735352
+      },
+      {
+        "source": "C:\\Users\\dlaev\\GitHub\\scaffold_ai\\data\\Systematic selection - Scopus and ASEE library\\Embedding_sustainability_in_capstone_engineering_design_projects.pdf",
+        "score": 1.7607364654541016
+      },
+      {
+        "source": "C:\\Users\\dlaev\\GitHub\\scaffold_ai\\data\\Systematic selection - Scopus and ASEE library\\THE-PO~2.PDF",
+        "score": -1.186549186706543
+      }
+    ]
+  },
+  {
+    "query_id": 6,
+    "query": "How do you assess the carbon footprint of educational institutions?",
+    "response": "Based on the provided documentation, the carbon footprint of educational institutions can be assessed through various activities and assignments designed to make students aware of their carbon emissions and the importance of reducing them. These activities often involve calculating the carbon footprint of specific activities and exploring potential mitigation strategies.\n\nFor instance, the documentation includes an assignment from a Climate Change Freshman Seminar where students are asked to estimate the amount of carbon dioxide emitted by an activity of their choosing (Source: improving-climate-change-educational-outcomes-for-first-year-students-through-multidisciplinary-instruction.pdf). Another assignment from the same source requires students to choose a baseline activity and two mitigation changes to reduce the carbon footprint of that activity (Source: improving-climate-change-educational-outcomes-for-first-year-students-through-multidisciplinary-instruction.pdf).\n\nMoreover, the documentation describes a case study where students were engaged in a 15-week activity to discuss climate change and its solutions, with a 100% participation rate and full class involvement (Source: feduc-09-1284593.pdf). This activity, which gained the students' interest and maintained their engagement, could also contribute to assessing the carbon footprint of educational institutions by fostering awareness and encouraging students to explore potential mitigation strategies.\n\nIn summary, the provided documentation suggests that assessing the carbon footprint of educational institutions can be achieved through activities and assignments that help students understand their carbon emissions and explore potential mitigation strategies. These activities may involve calculating carbon emissions and engaging in engineering-style thinking to make informed decisions about carbon mitigation. (Sources: improving-climate-change-educational-outcomes-for-first-year-students-through-multidisciplinary-instruction.pdf, feduc-09-1284593.pdf)",
+    "candidates_found": 5,
+    "search_stats": {
+      "initial_candidates": 22,
+      "reranked_candidates": 22,
+      "filtered_candidates": 22,
+      "final_candidates": 5
+    },
+    "timestamp": "2025-06-30T19:50:46.128966",
+    "top_sources": [
+      {
+        "source": "C:\\Users\\dlaev\\GitHub\\scaffold_ai\\data\\EOP resources\\EOP-13-Ideas-Integrating-Sustainability.pdf",
+        "score": -7.95639705657959
+      },
+      {
+        "source": "C:\\Users\\dlaev\\GitHub\\scaffold_ai\\data\\Systematic selection - Scopus and ASEE library\\feduc-09-1284593.pdf",
+        "score": -8.992020606994629
+      },
+      {
+        "source": "C:\\Users\\dlaev\\GitHub\\scaffold_ai\\data\\Systematic selection - Scopus and ASEE library\\improving-climate-change-educational-outcomes-for-first-year-students-through-multidisciplinary-instruction.pdf",
+        "score": -4.151758193969727
+      }
+    ]
+  },
+  {
+    "query_id": 7,
+    "query": "What methods are used for environmental impact assessment?",
+    "response": "Based on the provided documentation, there is no explicit information on the methods used for environmental impact assessment. However, we can infer that there are courses and educational materials focused on sustainability and green chemistry, which likely include elements of environmental impact assessment. For instance, the \"Green Industrial Organic Chemistry\" course at Kettering University (SUSTAI~2.PDF) and the LCA modules (INCORP~1.PDF) are designed to introduce students to sustainability concepts, which often involve environmental impact assessment. Additionally, there are engineering course activities that require students to develop sustainable engineering solutions based on theoretical content and related to the Sustainable Development Goals (EOP-17-Engineering-Course-Activities-20250611.pdf). These activities may involve environmental impact assessment as part of the project development process.\n\nTherefore, while the documentation does not explicitly state the methods used for environmental impact assessment, it does suggest that there are courses and activities that include elements of environmental impact assessment within the engineering curriculum.",
+    "candidates_found": 5,
+    "search_stats": {
+      "initial_candidates": 24,
+      "reranked_candidates": 24,
+      "filtered_candidates": 24,
+      "final_candidates": 5
+    },
+    "timestamp": "2025-06-30T19:53:28.660009",
+    "top_sources": [
+      {
+        "source": "C:\\Users\\dlaev\\GitHub\\scaffold_ai\\data\\Systematic selection - Scopus and ASEE library\\WIP_Towards_a_Sustainability_Practice_and_Ethos_in_a_First-Year_Engineering_Design_Experience.pdf",
+        "score": -3.6771817207336426
+      },
+      {
+        "source": "C:\\Users\\dlaev\\GitHub\\scaffold_ai\\data\\Systematic selection - Scopus and ASEE library\\SUSTAI~2.PDF",
+        "score": -5.150839328765869
+      },
+      {
+        "source": "C:\\Users\\dlaev\\GitHub\\scaffold_ai\\data\\Systematic selection - Scopus and ASEE library\\INCORP~1.PDF",
+        "score": -6.786734580993652
+      }
+    ]
+  },
+  {
+    "query_id": 8,
+    "query": "How can life cycle thinking be integrated into curriculum design?",
+    "response": "Life cycle thinking can be integrated into curriculum design by incorporating sustainability principles throughout the engineering education experience. This can be achieved by offering sustainability courses that build knowledge about sustainability and provide valuable connections between sustainability concepts and engineering decisions [1]. The curriculum design should ensure appropriate coverage of sustainability topics highlighted by engineering Bodies of Knowledge and accreditation criteria [1].\n\nA problem-oriented and project-based learning paradigm is recommended for implementing life cycle thinking in curriculum design [2]. This approach allows students to evaluate sustainability considerations in complex situations and make informed decisions [2]. Additionally, a sustainability assessment and selection process can be used to evaluate the environmental impact of various design options [3].\n\nTo measure the effectiveness of incorporating life cycle thinking into the curriculum, student comprehension can be evaluated using questionnaires [4]. This approach is efficient for large cohorts of engineering students and provides valuable insights into the impact of the curriculum on student learning [4].\n\nReferences:\n[1] Sustainability Incorporation in Courses in Mechanical, Civil and Environmental Engineering: Insights from AASHE STARS Data\n[2] Lehmann et al. (2008)\n[3] Othman et al. (2012)\n[4] Rose (sustainability first year engineering)",
+    "candidates_found": 5,
+    "search_stats": {
+      "initial_candidates": 23,
+      "reranked_candidates": 23,
+      "filtered_candidates": 23,
+      "final_candidates": 5
+    },
+    "timestamp": "2025-06-30T19:57:03.462312",
+    "top_sources": [
+      {
+        "source": "C:\\Users\\dlaev\\GitHub\\scaffold_ai\\data\\Systematic selection - Scopus and ASEE library\\INCORP~2.PDF",
+        "score": -5.309817790985107
+      },
+      {
+        "source": "C:\\Users\\dlaev\\GitHub\\scaffold_ai\\data\\Climate Pedagogy Incubator\\Rose_sustainability first year engineering.pdf",
+        "score": -9.590263366699219
+      },
+      {
+        "source": "C:\\Users\\dlaev\\GitHub\\scaffold_ai\\data\\Systematic selection - Scopus and ASEE library\\sustainability-incorporation-in-courses-in-mechanical-civil-and-environmental-engineering-insights-from-aashe-stars-data.pdf",
+        "score": -1.023142695426941
+      }
+    ]
+  },
+  {
+    "query_id": 9,
+    "query": "What are best practices for sustainable campus management?",
+    "response": "Based on the provided documentation, best practices for sustainable campus management can be inferred from the discussion of sustainable engineering projects in senior design courses [1], the need for harmony and comparability in sustainability education [2], and the use of problem-based and project-based learning for sustainability [3].\n\nSenior design courses in civil and environmental engineering programs provide an opportunity for students to apply their learning in sustainable engineering, construction management, structural design, geotechnical analysis, water management, and infrastructure [1]. These projects can contribute to sustainable campus management by promoting the application of sustainability principles in real-world contexts.\n\nThe literature review in [2] highlights the need for greater harmony, comparability, and transfer ability in sustainability education. This suggests that best practices for sustainable campus management may involve the development and implementation of consistent and effective sustainability curricula.\n\nThe use of problem-based and project-based learning for sustainability is another best practice [3]. This approach allows students to work on real-world sustainability issues and develop the skills necessary to address these challenges. For example, Ford PAS uses this pedagogy by analyzing a case study in each unit and applying sustainability principles to real-world scenarios [3].\n\nIn summary, best practices for sustainable campus management include the application of sustainability principles in senior design projects, the development and implementation of consistent and effective sustainability curricula, and the use of problem-based and project-based learning for sustainability.\n\nReferences:\n[1] SUSTAI~4.PDF\n[2] PROPOS~1.PDF\n[3] Corvers et al - 2016 - Problem-Based and Project-Based Learning for Sustainable Development.pdf",
+    "candidates_found": 5,
+    "search_stats": {
+      "initial_candidates": 24,
+      "reranked_candidates": 24,
+      "filtered_candidates": 24,
+      "final_candidates": 5
+    },
+    "timestamp": "2025-06-30T20:01:20.670334",
+    "top_sources": [
+      {
+        "source": "C:\\Users\\dlaev\\GitHub\\scaffold_ai\\data\\Systematic selection - Scopus and ASEE library\\SUSTAI~4.PDF",
+        "score": -1.5212465524673462
+      },
+      {
+        "source": "C:\\Users\\dlaev\\GitHub\\scaffold_ai\\data\\Systematic selection - Scopus and ASEE library\\PROPOS~1.PDF",
+        "score": -2.6316094398498535
+      },
+      {
+        "source": "C:\\Users\\dlaev\\GitHub\\scaffold_ai\\data\\Climate Pedagogy Incubator\\Corvers et al - 2016 - Problem-Based and Project-Based Learning for Sustainable Development.pdf",
+        "score": -3.5912346839904785
+      }
+    ]
+  },
+  {
+    "query_id": 10,
+    "query": "How do you measure and report sustainability performance in education?",
+    "response": "Based on the available documentation, measuring and reporting sustainability performance in education involves regular monitoring, measuring, and reporting for higher education institutions (HEIs) committed to promoting education for sustainability (Source 1 and 2.2). Several frameworks and assessment techniques are available for analyzing and assessing the sustainability level in HEIs (Source 1). In the context of engineering education, success is defined as a seamless educational infrastructure where everyone's assets and experiences are valued, and sustainability practices are integrated into the engineering education landscape (Source 3). The documentation also suggests the importance of sustainability awareness in university years to create competitive professionals with a sustainability practice mindset (Source 4). However, the specific methods for measuring and reporting sustainability performance in education are not detailed in the provided chunks.\n\nTherefore, the requested information is not found in the available documentation in terms of a step-by-step methodology or specific tools for measuring and reporting sustainability performance in education.",
+    "candidates_found": 5,
+    "search_stats": {
+      "initial_candidates": 22,
+      "reranked_candidates": 22,
+      "filtered_candidates": 22,
+      "final_candidates": 5
+    },
+    "timestamp": "2025-06-30T20:03:47.983510",
+    "top_sources": [
+      {
+        "source": "C:\\Users\\dlaev\\GitHub\\scaffold_ai\\data\\Climate Pedagogy Incubator\\Assessment framework for environmental sustainability in higher ed.pdf",
+        "score": 2.8720173835754395
+      },
+      {
+        "source": "C:\\Users\\dlaev\\GitHub\\scaffold_ai\\data\\Systematic selection - Scopus and ASEE library\\IN279A~1.PDF",
+        "score": 0.766315221786499
+      },
+      {
+        "source": "C:\\Users\\dlaev\\GitHub\\scaffold_ai\\data\\Systematic selection - Scopus and ASEE library\\developing-engineering-formation-systems-for-sustainability.pdf",
+        "score": -1.0339866876602173
+      }
+    ]
+  }
+]
