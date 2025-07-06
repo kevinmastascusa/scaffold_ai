@@ -27,6 +27,10 @@ tqdm>=4.64.0
 pathlib2>=2.3.0
 requests>=2.25.0
 
+# Web UI dependencies
+Flask==3.0.0
+Flask-CORS==4.0.0
+
 # Optional: For advanced features
 # accelerate>=0.20.0
 # datasets>=2.0.0
