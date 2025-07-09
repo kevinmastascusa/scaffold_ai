@@ -358,3 +358,16 @@ Evaluation will include both qualitative feedback from faculty and technical per
 5. **README.md Documentation** ✅ **COMPLETED**
    * ✅ Created and incrementally updated comprehensive README.md with full setup instructions, usage examples, and project context
    * ✅ Added project structure overview and configuration explanation
+
+## 📝 Model Version/Hash Logging
+- Log all model names, descriptions, and hashes for reproducibility:
+  ```bash
+  python -m scaffold_core.model_logging
+  ```
+- See `outputs/model_version_log.json` for the log.
+
+## ⚡ Model Benchmarking
+- Benchmark all models for latency, memory, and output:
+  ```bash
+  python -m scaffold_core.benchmark_models
+  ```

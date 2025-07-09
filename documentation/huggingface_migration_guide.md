@@ -72,7 +72,7 @@ For models like `mistralai/Mistral-7B-Instruct-v0.2`:
 
 ```bash
 # Windows (PowerShell)
-$env:HUGGINGFACE_TOKEN = "hf_your_actual_token_here"
+$env:HUGGINGFACE_TOKEN = ""
 [Environment]::SetEnvironmentVariable("HUGGINGFACE_TOKEN", "hf_your_actual_token_here", "User")
 
 # Linux/macOS
@@ -492,4 +492,26 @@ Potential improvements for the Hugging Face integration:
 
 ---
 
-**Need Help?** Check the test reports in `documentation/query_system_test_report.md` or run the diagnostic tests with `python scaffold_core/scripts/run_tests.py`. 
+**Need Help?** Check the test reports in `documentation/query_system_test_report.md` or run the diagnostic tests with `python scaffold_core/scripts/run_tests.py`.
+
+---
+
+## 🔄 Model Switching & Troubleshooting (July 2025)
+
+- All model selection is now centralized in `scaffold_core/config.py`.
+- To switch models, change the `SELECTED_*_MODEL` variables for embedding, cross-encoder, and LLM.
+- See `MODEL_REGISTRY` in config.py for all tested models and their status.
+- For Mixtral, the API key is set in `MIXTRAL_API_KEY` (default provided).
+- If a model fails to load:
+  - Check your Hugging Face token and permissions.
+  - Ensure the model is compatible with your Python and torch version.
+  - Use the benchmarking script to verify model loading and performance.
+
+---
+
+## 📝 Model Version/Hash Logging
+- Use `python -m scaffold_core.model_logging` to log all model names, descriptions, and hashes for reproducibility.
+- See `outputs/model_version_log.json` for the log.
+
+## ⚡ Model Benchmarking
+- Use `python -m scaffold_core.benchmark_models` to benchmark all registered models for latency, memory, and output.
