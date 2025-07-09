@@ -48,11 +48,107 @@ CHUNK_SIZE = 1000  # in words (unused - now using complete page chunking)
 CHUNK_OVERLAP = 200  # in words (unused - now using complete page chunking)
 ITERATION = 1  # bump this when you want a fresh run
 
-# Model configuration
-EMBEDDING_MODEL = "all-MiniLM-L6-v2"
+# -------------------
+# MODEL REGISTRIES & SELECTION
+# -------------------
 
-# LLM configuration
-LLM_MODEL = "mistralai/Mistral-7B-Instruct-v0.2"  # Official Mistral v0.2 model
+# Embedding Models Registry
+EMBEDDING_MODELS = {
+    # Recommended (default)
+    "miniLM": {
+        "name": "all-MiniLM-L6-v2",
+        "desc": "Recommended: Fast, high-quality, widely supported."
+    },
+    # Alternatives
+    "mpnet": {
+        "name": "all-mpnet-base-v2",
+        "desc": "Larger, higher quality, slower."
+    },
+    "distiluse": {
+        "name": "distiluse-base-multilingual-cased-v2",
+        "desc": "Multilingual support."
+    },
+    # Add more as needed
+}
+SELECTED_EMBEDDING_MODEL = EMBEDDING_MODELS["miniLM"]["name"]
+
+# Cross-Encoder Models Registry
+CROSS_ENCODER_MODELS = {
+    "miniLM": {
+        "name": "cross-encoder/ms-marco-MiniLM-L-6-v2",
+        "desc": "Recommended: Fast, accurate reranker."
+    },
+    "mpnet": {
+        "name": "cross-encoder/ms-marco-MiniLM-L-12-v2",
+        "desc": "Larger, more accurate, slower."
+    },
+    # Add more as needed
+}
+SELECTED_CROSS_ENCODER_MODEL = CROSS_ENCODER_MODELS["miniLM"]["name"]
+
+# LLM Models Registry
+LLM_MODELS = {
+    # Recommended
+    "mistral": {
+        "name": "mistralai/Mistral-7B-Instruct-v0.2",
+        "desc": "Recommended: Good balance of quality and speed."
+    },
+    # Alternatives
+    "mixtral": {
+        "name": "mistralai/Mixtral-8x7B-Instruct-v0.1",
+        "desc": "Larger, higher quality, more resource intensive."
+    },
+    "tinyllama": {
+        "name": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+        "desc": "Very fast, low resource, lower quality."
+    },
+    # Add more as needed
+}
+SELECTED_LLM_MODEL = LLM_MODELS["mixtral"]["name"]
+
+# Model registry for tracking status/compatibility
+MODEL_REGISTRY = {
+    "embedding": EMBEDDING_MODELS,
+    "cross_encoder": CROSS_ENCODER_MODELS,
+    "llm": LLM_MODELS
+}
+
+# -------------------
+# Model selection variables (used throughout the codebase)
+# -------------------
+EMBEDDING_MODEL = SELECTED_EMBEDDING_MODEL
+CROSS_ENCODER_MODEL = SELECTED_CROSS_ENCODER_MODEL
+LLM_MODEL = SELECTED_LLM_MODEL
+
+# -------------------
+# Model API Keys
+# -------------------
+# Hugging Face token (default)
+HF_TOKEN = os.getenv("HUGGINGFACE_TOKEN")
+# Mixtral API key (override if using Mixtral)
+MIXTRAL_API_KEY = os.getenv("MIXTRAL_API_KEY", "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")
+
+# Use Mixtral key if Mixtral model is selected
+if LLM_MODEL == LLM_MODELS["mixtral"]["name"]:
+    HF_TOKEN = MIXTRAL_API_KEY
+    logger.info("Using Mixtral API key for Mixtral model.")
+
+if not HF_TOKEN:
+    logger.warning("HUGGINGFACE_TOKEN environment variable not set. Some models may not be accessible.")
+
+# Cross-encoder model for reranking
+#CROSS_ENCODER_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+
+# FAISS index configuration
+FAISS_INDEX_TYPE = "IndexFlatL2"
+
+# Search configuration
+TOP_K_INITIAL = 25  # Reduced for faster processing
+TOP_K_FINAL = 5     # Reduced for faster processing
+
+# -------------------
+# LLM pipeline/task configuration (required by llm.py and pipeline)
+# -------------------
 LLM_TASK = "text-generation"  # Task type for the pipeline
 LLM_DEVICE = "cuda" if torch.cuda.is_available() else "cpu"  # Use GPU if available
 LLM_MAX_LENGTH = 2048  # Increased for more detailed responses
@@ -61,21 +157,6 @@ LLM_TOP_P = 0.9  # Slightly lower for faster generation
 LLM_BATCH_SIZE = 1  # Batch size for processing
 LLM_LOAD_IN_8BIT = False  # Use 8-bit quantization for faster loading (disabled for Windows)
 LLM_LOAD_IN_4BIT = False  # 4-bit for even faster loading (disabled for Windows)
-
-# Hugging Face token
-HF_TOKEN = os.getenv("HUGGINGFACE_TOKEN")
-if not HF_TOKEN:
-    logger.warning("HUGGINGFACE_TOKEN environment variable not set. Some models may not be accessible.")
-
-# Cross-encoder model for reranking
-CROSS_ENCODER_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"
-
-# FAISS index configuration
-FAISS_INDEX_TYPE = "IndexFlatL2"
-
-# Search configuration
-TOP_K_INITIAL = 25  # Reduced for faster processing
-TOP_K_FINAL = 5     # Reduced for faster processing
 
 # Ensure directories exist
 def ensure_directories():
@@ -86,7 +167,6 @@ def ensure_directories():
         VECTOR_OUTPUTS_DIR,
         MATH_OUTPUTS_DIR
     ]
-    
     for directory in directories:
         directory.mkdir(parents=True, exist_ok=True)
         print(f"✓ Ensured directory exists: {directory}")

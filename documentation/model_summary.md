@@ -1,116 +1,61 @@
 # Model Summary and Selection
 
-**Last Updated:** June 29, 2025  
-**Status:** Updated for Hugging Face Integration
-
-This document summarizes the models used in the Scaffold AI project and the rationale for their selection, reflecting the current codebase and configuration.
+**Last Updated:** July 9, 2025  
+**Status:** Updated for Model Registry, Benchmarking, and Mixtral Support
 
 ---
 
-## 1. Sentence Embedding Model
+## Model Selection Interface
 
-- **Model:** `all-MiniLM-L6-v2`
-- **Library:** sentence-transformers
-- **Purpose:**
-  - Converts text chunks into dense vector embeddings for semantic search.
-  - Used in the vectorization pipeline to create the FAISS index for similarity search and retrieval.
-- **Location in Codebase:**
-  - Used in `scaffold_core/vector/transformVector.py` for embedding generation.
-  - Referenced in `scaffold_core/config.py` as `EMBEDDING_MODEL`.
+Model selection is now centralized in `scaffold_core/config.py` using registries for each model type:
+- **Embedding Models:** `EMBEDDING_MODELS` (MiniLM, MPNet, DistilUSE, etc.)
+- **Cross-Encoder Models:** `CROSS_ENCODER_MODELS` (MiniLM, MPNet, etc.)
+- **LLM Models:** `LLM_MODELS` (Mistral, Mixtral, TinyLlama, etc.)
 
----
+Switch models by changing the `SELECTED_*_MODEL` variables in `config.py`.
 
-## 2. Cross-Encoder Model (Reranking)
+### Example (config.py):
+```python
+SELECTED_EMBEDDING_MODEL = EMBEDDING_MODELS["miniLM"]["name"]
+SELECTED_CROSS_ENCODER_MODEL = CROSS_ENCODER_MODELS["miniLM"]["name"]
+SELECTED_LLM_MODEL = LLM_MODELS["mistral"]["name"]
+```
 
-- **Model:** `cross-encoder/ms-marco-MiniLM-L-6-v2`
-- **Library:** sentence-transformers (CrossEncoder)
-- **Purpose:**
-  - Reranks the top candidate chunks retrieved from the FAISS index based on their relevance to the user query.
-  - Provides more accurate ranking by considering the query and chunk together.
-- **Location in Codebase:**
-  - Used in `scaffold_core/vector/query.py` as `CROSS_ENCODER_MODEL`.
+## Available Models
 
----
+| Type           | Key        | Model Name                                   | Description                                 |
+|----------------|------------|----------------------------------------------|---------------------------------------------|
+| Embedding      | miniLM     | all-MiniLM-L6-v2                             | Recommended: Fast, high-quality             |
+| Embedding      | mpnet      | all-mpnet-base-v2                            | Larger, higher quality, slower              |
+| Embedding      | distiluse  | distiluse-base-multilingual-cased-v2         | Multilingual support                        |
+| Cross-Encoder  | miniLM     | cross-encoder/ms-marco-MiniLM-L-6-v2         | Recommended: Fast, accurate reranker        |
+| Cross-Encoder  | mpnet      | cross-encoder/ms-marco-MiniLM-L-12-v2        | Larger, more accurate, slower               |
+| LLM            | mistral    | mistralai/Mistral-7B-Instruct-v0.2           | Recommended: Good balance                   |
+| LLM            | mixtral    | mistralai/Mixtral-8x7B-Instruct-v0.1         | Larger, higher quality, more resources      |
+| LLM            | tinyllama  | TinyLlama/TinyLlama-1.1B-Chat-v1.0           | Very fast, low resource, lower quality      |
 
-## 3. Large Language Model (LLM) for Answer Generation
+## Model Version/Hash Logging
 
-- **Current Implementation (June 29, 2025):**
-  - **Model:** `mistralai/Mistral-7B-Instruct-v0.2`
-  - **Platform:** Hugging Face Transformers
-  - **Integration:** Python API via `scaffold_core/llm.py`
-  - **Status:** ✅ Fully tested and operational (100% test success rate)
+- All model names, descriptions, and (if available) model card hashes are logged to `outputs/model_version_log.json` using `scaffold_core/model_logging.py`.
+- To log all model versions/hashes:
+  ```bash
+  python -m scaffold_core.model_logging
+  ```
+- This supports reproducibility and experiment tracking.
 
-- **Previously Tested Models:**
-  - **TinyLlama/TinyLlama-1.1B-Chat-v1.0** - Smaller, faster alternative
-  - **teknium/OpenHermes-2.5-Mistral-7B** - Community Mistral variant
-  - **mistralai/Mistral-7B-Instruct-v0.3** - Had tokenizer compatibility issues
+## Benchmarking
 
-- **Purpose:**
-  - Generates the final answer to the user's query, using only the retrieved and reranked chunks as context.
-  - Ensures answers are grounded in the source material and can provide citations.
-  - Uses Mistral's `[INST]...[/INST]` chat format for proper instruction following.
+- Use `scaffold_core/benchmark_models.py` to benchmark all registered models for latency, memory, and output.
+- Example usage:
+  ```bash
+  python -m scaffold_core.benchmark_models
+  ```
+- Outputs summary tables for all embedding, cross-encoder, and LLM models.
 
-- **Location in Codebase:**
-  - **LLM Manager:** `scaffold_core/llm.py` - Handles model loading and text generation
-  - **Query Integration:** `scaffold_core/vector/query.py` - Integrates LLM with retrieval pipeline
-  - **Configuration:** `scaffold_core/config.py` - Model settings and parameters
+## Model Switching & Troubleshooting
+- To switch models, edit the `SELECTED_*_MODEL` variables in `config.py`.
+- For Mixtral, the API key is set in `MIXTRAL_API_KEY` (see config.py).
+- If a model fails to load, check the Hugging Face token and model compatibility.
 
----
-
-## Model Selection Rationale
-
-- **Embedding Model:**
-  - Chosen for its balance of speed, accuracy, and resource efficiency.
-  - `all-MiniLM-L6-v2` is a widely used, lightweight model suitable for large-scale document embedding.
-
-- **Cross-Encoder:**
-  - Selected to improve retrieval quality by reranking based on both query and chunk content.
-  - `ms-marco-MiniLM-L-6-v2` is a standard for semantic search reranking.
-
-- **LLM:**
-  - Open-source models are prioritized for transparency, cost, and local deployment.
-  - Mistral-7B-Instruct-v0.2 was selected for its excellent performance and official support.
-  - Hugging Face Transformers provides better integration, debugging, and cross-platform compatibility than Ollama.
-  - The migration from Ollama to Hugging Face resolved setup issues and improved system reliability.
-
----
-
-## Summary Table
-
-| Stage                | Model Name                        | Library/Platform      | Purpose                                 |
-|----------------------|-----------------------------------|-----------------------|-----------------------------------------|
-| Embedding            | all-MiniLM-L6-v2                  | sentence-transformers | Chunk embedding for FAISS search        |
-| Reranking            | cross-encoder/ms-marco-MiniLM-L-6-v2 | sentence-transformers | Rerank top retrieved chunks             |
-| LLM (Answer Gen)     | mistralai/Mistral-7B-Instruct-v0.2 | Hugging Face Transformers | Generate grounded, cited answers        |
-
----
-
-## How to Change Models
-
-- **Embedding or Cross-Encoder:**
-  - Update the model name in `scaffold_core/config.py` (use `EMBEDDING_MODEL` and `CROSS_ENCODER_MODEL`).
-  - The system will automatically download and cache the new models.
-
-- **LLM:**
-  - Change the `LLM_MODEL` value in `scaffold_core/config.py`.
-  - For gated models, ensure you have proper Hugging Face token access.
-  - See `documentation/huggingface_migration_guide.md` for detailed setup instructions.
-
-- **Testing Changes:**
-  - Run `python scaffold_core/scripts/run_tests.py` to verify all models work correctly.
-  - Generate a test report with `python scaffold_core/scripts/generate_test_report.py`.
-
----
-
-## Migration Notes (June 29, 2025)
-
-The system was successfully migrated from Ollama to Hugging Face Transformers:
-- **Reason:** Ollama setup issues and cross-platform compatibility problems
-- **Benefits:** Better Python integration, easier debugging, comprehensive testing
-- **Status:** 100% test success rate with all components functional
-
-For more details, see:
-- **Code:** `scaffold_core/vector/` and `scaffold_core/llm.py`
-- **Configuration:** `scaffold_core/config.py`
-- **Migration Guide:** `documentation/huggingface_migration_guide.md`
-- **Test Results:** `documentation/query_system_test_report.md` 
+## Migration Guide
+See `documentation/huggingface_migration_guide.md` for details on switching models, troubleshooting, and best practices.
