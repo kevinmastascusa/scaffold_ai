@@ -1,8 +1,28 @@
 # Project Progress Log
 
-**Date:** June 26, 2025 | **Last Updated:** June 29, 2025
+**Date:** June 26, 2025 | **Last Updated:** July 11, 2025
 
-## Latest Achievements (June 29, 2025)
+## Latest Achievements (July 11, 2025)
+
+### 🧹 Environment and Project Structure Overhaul
+- **Upgraded to Python 3.12.10:** Successfully migrated the project environment to Python 3.12, including extensive dependency troubleshooting and updates to `requirements.txt`.
+- **Major Script Cleanup:** Audited and removed over half a dozen redundant or one-time-use scripts, significantly decluttering the `scripts` directory.
+- **Improved Project Organization:**
+  - Relocated all test and analysis scripts into a centralized `scaffold_core/scripts/tests` directory.
+  - Created a new `scaffold_core/scripts/utils` directory for shared utility scripts.
+  - Moved all UI-related files (`app.py`, `templates/`, etc.) into a new top-level `frontend` directory.
+- **Code Linting and Quality:** Fixed numerous linter errors across the codebase, improving overall code quality and consistency.
+
+### 📚 Citation Layer Implementation
+- **Created `Citation` Class:** Implemented a new `scaffold_core/citation_handler.py` module to provide a structured approach for managing source documents. This class automatically generates clean, human-readable names and unique IDs from raw file paths.
+- **Integrated Citations into RAG Pipeline:**
+  - The `EnhancedQuerySystem` now uses the `Citation` class to process sources during retrieval.
+  - The LLM prompt has been enhanced to include a formatted list of cited sources, ensuring that generated responses can properly attribute information.
+- **Foundation for Advanced Features:** This new layer provides the necessary foundation for future enhancements, such as citation export and validation.
+
+---
+
+## Recent Major Improvements (June 29, 2025)
 
 ### 🚀 Complete Query System Implementation
 - **Successfully migrated from Ollama to Hugging Face** for LLM functionality
