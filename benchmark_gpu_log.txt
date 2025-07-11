@@ -1,0 +1,18 @@
+[32m2025-07-11 14:08:47 - root - INFO - Logging configured: Console and file handlers active.[0m
+[32m2025-07-11 14:08:47 - __main__ - INFO - --- Starting EMBEDDING MODEL Benchmarks ---[0m
+[32m2025-07-11 14:08:47 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2[0m
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|##########| 1/1 [00:00<00:00,  2.18it/s]Batches: 100%|##########| 1/1 [00:00<00:00,  2.18it/s]
+[32m2025-07-11 14:08:53 - __main__ - INFO - all-MiniLM-L6-v2                              |   5.56s |     16.3 MB | Recommended: Fast, high-quality, widely supported.[0m
+[32m2025-07-11 14:08:53 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: all-mpnet-base-v2[0m
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|##########| 1/1 [00:00<00:00, 13.16it/s]
+[32m2025-07-11 14:08:56 - __main__ - INFO - all-mpnet-base-v2                             |   3.49s |      6.1 MB | Larger, higher quality, slower.[0m
+[32m2025-07-11 14:08:56 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: distiluse-base-multilingual-cased-v2[0m
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|##########| 1/1 [00:00<00:00, 117.43it/s]
+[32m2025-07-11 14:08:58 - __main__ - INFO - distiluse-base-multilingual-cased-v2          |   2.41s |     25.4 MB | Multilingual support.[0m
+[32m2025-07-11 14:08:58 - __main__ - INFO - --- Starting CROSS-ENCODER MODEL Benchmarks ---[0m
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|##########| 1/1 [00:00<00:00, 37.03it/s]
+[32m2025-07-11 14:09:00 - __main__ - INFO - cross-encoder/ms-marco-MiniLM-L-6-v2          |   1.29s |      0.5 MB | Recommended: Fast, accurate reranker.[0m
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|##########| 1/1 [00:00<00:00, 35.72it/s]
+[32m2025-07-11 14:09:01 - __main__ - INFO - cross-encoder/ms-marco-MiniLM-L-12-v2         |   1.37s |      0.8 MB | Larger, more accurate, slower.[0m
+[32m2025-07-11 14:09:01 - __main__ - INFO - --- Starting LLM MODEL Benchmarks ---[0m
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]Loading checkpoint shards:  67%|######6   | 2/3 [00:00<00:00, 16.46it/s]

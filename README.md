@@ -124,7 +124,7 @@ If you encounter issues during installation:
    python scaffold_core/scripts/tests/compare_extractions.py
    
    # Programmatically analyze and fix combined words
-   python scaffold_core/scripts/postprocess_combined_words.py
+   python scaffold_core/scripts/utils/postprocess_combined_words.py
    python scaffold_core/scripts/generate_combined_words_report.py
    ```
    - See `outputs/combined_words_analysis_report.txt` for a detailed summary of remaining combined words (now mostly legitimate technical/academic terms).
@@ -182,7 +182,7 @@ The primary goal is to create a user-friendly, accurate, and literature-grounded
 
 - **Combined words (e.g., "environmentalsustainability") are now programmatically detected and fixed.**
 - **Automated post-processing and reporting scripts:**
-  - `scaffold_core/scripts/postprocess_combined_words.py` (fixes combined words)
+  - `scaffold_core/scripts/utils/postprocess_combined_words.py` (fixes combined words)
   - `scaffold_core/scripts/generate_combined_words_report.py` (generates detailed report)
 - **Final analysis:**
   - No camelCase or PascalCase issues remain.

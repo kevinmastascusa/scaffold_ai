@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 """
-Generate a comprehensive report on combined words in cleaned chunked text extracts.
+Generate a comprehensive report on combined words in cleaned chunked text
+extracts.
 """
 import json
 import re
 from pathlib import Path
-from collections import Counter, defaultdict
+from collections import Counter
 
 CLEANED_PATH = Path("outputs/chunked_text_extracts_cleaned.json")
 REPORT_PATH = Path("outputs/combined_words_analysis_report.txt")
+
 
 def categorize_combined_words(text):
     """Categorize combined words by type."""
@@ -48,6 +50,7 @@ def categorize_combined_words(text):
         categories['sustainability_related'].extend(matches)
     
     return categories
+
 
 def analyze_combined_words():
     """Analyze combined words in cleaned chunks."""
@@ -95,59 +98,76 @@ def analyze_combined_words():
     
     return stats, total_chunks_with_combined, len(chunks)
 
+
 def generate_report(stats, chunks_with_combined, total_chunks):
     """Generate a comprehensive report."""
     with open(REPORT_PATH, 'w', encoding='utf-8') as f:
         f.write("COMBINED WORDS ANALYSIS REPORT\n")
         f.write("=" * 50 + "\n\n")
-        
-        f.write(f"ANALYSIS SUMMARY\n")
+
+        f.write("ANALYSIS SUMMARY\n")
         f.write("-" * 20 + "\n")
         f.write(f"Total chunks analyzed: {total_chunks:,}\n")
         f.write(f"Chunks with combined words: {chunks_with_combined:,}\n")
-        f.write(f"Percentage of chunks affected: {chunks_with_combined/total_chunks*100:.1f}%\n\n")
-        
+        f.write(
+            f"Percentage of chunks affected: "
+            f"{chunks_with_combined/total_chunks*100:.1f}%\n\n"
+        )
+
         total_combined = sum(stats[cat]['total_occurrences'] for cat in stats)
         f.write(f"Total combined word occurrences: {total_combined:,}\n\n")
-        
+
         for category, data in stats.items():
             f.write(f"{category.upper()} ANALYSIS\n")
             f.write("-" * 20 + "\n")
             f.write(f"Total occurrences: {data['total_occurrences']:,}\n")
             f.write(f"Unique words: {data['unique_words']:,}\n")
-            f.write(f"Most common words:\n")
-            
+            f.write("Most common words:\n")
+
             for word, count in data['most_common']:
                 f.write(f"  {word}: {count} occurrences\n")
             f.write("\n")
-        
+
         # Overall assessment
         f.write("OVERALL ASSESSMENT\n")
         f.write("-" * 20 + "\n")
-        
+
         if stats['camelCase']['total_occurrences'] > 0:
             f.write("⚠️  CamelCase words detected - may need attention\n")
         else:
             f.write("✅ No CamelCase words found\n")
-            
+
         if stats['PascalCase']['total_occurrences'] > 0:
             f.write("⚠️  PascalCase words detected - may need attention\n")
         else:
             f.write("✅ No PascalCase words found\n")
-            
+
         if stats['sustainability_related']['total_occurrences'] > 100:
-            f.write("⚠️  Many sustainability-related combined words - review needed\n")
+            f.write(
+                "⚠️  Many sustainability-related combined words - "
+                "review needed\n"
+            )
         else:
-            f.write("✅ Sustainability-related combined words are minimal\n")
-        
-        f.write(f"\nMost combined words are legitimate technical/academic terms.\n")
-        f.write(f"Post-processing has successfully resolved domain-specific issues.\n")
+            f.write(
+                "✅ Sustainability-related combined words are minimal\n"
+            )
+
+        f.write(
+            "\nMost combined words are legitimate technical/academic terms.\n"
+        )
+        f.write(
+            "Post-processing has successfully resolved domain-specific "
+            "issues.\n"
+        )
+
 
 def main():
+    """Main function for the script."""
     print("Generating combined words analysis report...")
     stats, chunks_with_combined, total_chunks = analyze_combined_words()
     generate_report(stats, chunks_with_combined, total_chunks)
     print(f"Report generated: {REPORT_PATH}")
+
 
 if __name__ == "__main__":
     main() 

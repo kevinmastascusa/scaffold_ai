@@ -1,0 +1,31 @@
+Traceback (most recent call last):
+  File "C:\Users\dlaev\GitHub\scaffold_ai\scaffold_core\benchmark_models.py", line 15, in <module>
+    from sentence_transformers import CrossEncoder, SentenceTransformer
+  File "C:\Users\dlaev\GitHub\scaffold_ai\scaffold_env\Lib\site-packages\sentence_transformers\__init__.py", line 15, in <module>
+    from sentence_transformers.cross_encoder import (
+  File "C:\Users\dlaev\GitHub\scaffold_ai\scaffold_env\Lib\site-packages\sentence_transformers\cross_encoder\__init__.py", line 3, in <module>
+    from .CrossEncoder import CrossEncoder
+  File "C:\Users\dlaev\GitHub\scaffold_ai\scaffold_env\Lib\site-packages\sentence_transformers\cross_encoder\CrossEncoder.py", line 31, in <module>
+    from sentence_transformers.cross_encoder.fit_mixin import FitMixin
+  File "C:\Users\dlaev\GitHub\scaffold_ai\scaffold_env\Lib\site-packages\sentence_transformers\cross_encoder\fit_mixin.py", line 19, in <module>
+    from sentence_transformers.datasets.NoDuplicatesDataLoader import NoDuplicatesDataLoader
+  File "C:\Users\dlaev\GitHub\scaffold_ai\scaffold_env\Lib\site-packages\sentence_transformers\datasets\__init__.py", line 13, in <module>
+    from .ParallelSentencesDataset import ParallelSentencesDataset
+  File "C:\Users\dlaev\GitHub\scaffold_ai\scaffold_env\Lib\site-packages\sentence_transformers\datasets\ParallelSentencesDataset.py", line 19, in <module>
+    from sentence_transformers import SentenceTransformer
+  File "C:\Users\dlaev\GitHub\scaffold_ai\scaffold_env\Lib\site-packages\sentence_transformers\SentenceTransformer.py", line 36, in <module>
+    from sentence_transformers.model_card import SentenceTransformerModelCardData, generate_model_card
+  File "C:\Users\dlaev\GitHub\scaffold_ai\scaffold_env\Lib\site-packages\sentence_transformers\model_card.py", line 37, in <module>
+    from datasets import Dataset, DatasetDict, IterableDataset, IterableDatasetDict, Value
+  File "C:\Users\dlaev\GitHub\scaffold_ai\scaffold_env\Lib\site-packages\datasets\__init__.py", line 17, in <module>
+    from .arrow_dataset import Column, Dataset
+  File "C:\Users\dlaev\GitHub\scaffold_ai\scaffold_env\Lib\site-packages\datasets\arrow_dataset.py", line 58, in <module>
+    import pandas as pd
+  File "C:\Users\dlaev\GitHub\scaffold_ai\scaffold_env\Lib\site-packages\pandas\__init__.py", line 61, in <module>
+    from pandas.core.api import (
+  File "C:\Users\dlaev\GitHub\scaffold_ai\scaffold_env\Lib\site-packages\pandas\core\api.py", line 1, in <module>
+    from pandas._libs import (
+  File "C:\Users\dlaev\GitHub\scaffold_ai\scaffold_env\Lib\site-packages\pandas\_libs\__init__.py", line 16, in <module>
+    import pandas._libs.pandas_parser  # isort: skip # type: ignore[reportUnusedImport]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'pandas._libs.pandas_parser'
