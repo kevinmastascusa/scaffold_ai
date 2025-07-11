@@ -118,7 +118,7 @@ sympy==1.13.1
 thinc==8.3.4
 threadpoolctl==3.6.0
 tokenizers==0.21.2
-torch==2.5.1+cu121
+torch==2.7.1
 torchaudio==2.5.1+cu121
 torchvision==0.20.1+cu121
 tqdm==4.67.1
