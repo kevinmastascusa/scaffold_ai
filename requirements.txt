@@ -64,7 +64,7 @@ multidict==6.6.2
 multiprocess==0.70.16
 murmurhash==1.0.13
 networkx==3.5
-nltk==3.8.1
+nltk==3.9
 numpy==1.26.4
 nvidia-cublas-cu12==12.9.1.4
 nvidia-cuda-runtime-cu12==12.9.79
