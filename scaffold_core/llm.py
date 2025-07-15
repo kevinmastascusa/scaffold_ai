@@ -31,6 +31,7 @@ from scaffold_core.config import (
     LLM_TASK,
     LLM_DEVICE,
     LLM_MAX_LENGTH,
+    LLM_MAX_NEW_TOKENS,
     LLM_TEMPERATURE,
     LLM_TOP_P,
     LLM_BATCH_SIZE,
@@ -129,7 +130,7 @@ class LLMManager:
             LLM_TASK,
             model=self.model,
             tokenizer=self.tokenizer,
-            max_length=LLM_MAX_LENGTH,
+            max_new_tokens=LLM_MAX_NEW_TOKENS,
             temperature=LLM_TEMPERATURE,
             top_p=LLM_TOP_P,
             batch_size=LLM_BATCH_SIZE,
@@ -144,7 +145,7 @@ class LLMManager:
     def generate_response(
         self, 
         prompt: str,
-        max_length: Optional[int] = None,
+        max_new_tokens: Optional[int] = None,
         temperature: Optional[float] = None,
         top_p: Optional[float] = None
     ) -> str:
@@ -173,7 +174,7 @@ class LLMManager:
             # Generate response
             outputs = self.pipeline(
                 formatted_prompt,
-                max_length=max_length or LLM_MAX_LENGTH,
+                max_new_tokens=max_new_tokens or LLM_MAX_NEW_TOKENS,
                 temperature=temperature or LLM_TEMPERATURE,
                 top_p=top_p or LLM_TOP_P,
                 do_sample=True,
@@ -213,7 +214,7 @@ class LLMManager:
     def batch_generate(
         self,
         prompts: List[str],
-        max_length: Optional[int] = None,
+        max_new_tokens: Optional[int] = None,
         temperature: Optional[float] = None,
         top_p: Optional[float] = None
     ) -> List[str]:
@@ -222,7 +223,7 @@ class LLMManager:
         
         Args:
             prompts: List of input prompts
-            max_length: Optional override for max response length
+            max_new_tokens: Optional override for max new tokens to generate
             temperature: Optional override for temperature
             top_p: Optional override for top-p sampling
             
@@ -232,7 +233,7 @@ class LLMManager:
         return [
             self.generate_response(
                 prompt,
-                max_length=max_length,
+                max_new_tokens=max_new_tokens,
                 temperature=temperature,
                 top_p=top_p
             )
