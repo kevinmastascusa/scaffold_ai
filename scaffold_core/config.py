@@ -148,7 +148,7 @@ FAISS_INDEX_TYPE = "IndexFlatL2"
 
 # Search configuration
 TOP_K_INITIAL = 50
-TOP_K_FINAL = 10
+TOP_K_FINAL = 3  # Reduced from 10 to prevent token limit issues
 
 # -------------------
 # LLM pipeline/task configuration

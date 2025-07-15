@@ -287,13 +287,28 @@ class EnhancedQuerySystem:
         """
         context = ""
         citation_refs = []
+        
+        # Estimate token count (rough approximation: 1 token ≈ 4 characters)
+        estimated_tokens = 0
+        max_context_tokens = 1500  # Leave room for query, instructions, and response
+        
         for i, chunk in enumerate(chunks):
+            chunk_text = chunk['text']
+            chunk_tokens = len(chunk_text) // 4  # Rough token estimation
+            
+            # Check if adding this chunk would exceed the limit
+            if estimated_tokens + chunk_tokens > max_context_tokens:
+                logger.warning(f"Truncating context at chunk {i+1} to stay within token limits")
+                break
+                
             source = chunk.get('source', {})
             citation_id = source.get('id', f'source_{i+1}')
             citation_name = source.get('name', 'Unknown Source')
             # Create a unique reference tag like [1], [2]
             ref = f"[{i+1}]"
-            context += f"Source {ref}:\n{chunk['text']}\n\n"
+            context += f"Source {ref}:\n{chunk_text}\n\n"
+            estimated_tokens += chunk_tokens
+            
             # Store the full citation details for later lookup
             if citation_id not in [c['id'] for c in citation_refs]:
                 citation_refs.append({
@@ -323,6 +338,11 @@ class EnhancedQuerySystem:
             f"\n\n---"
             "\n**ANSWER** (with citations):"
         )
+        
+        # Log estimated token count
+        total_estimated_tokens = len(prompt) // 4
+        logger.info(f"Generated prompt with ~{total_estimated_tokens} tokens")
+        
         return prompt
 
     def query(self, query: str) -> Dict[str, Any]:
