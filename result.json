@@ -1,0 +1,75 @@
+DEBUG: Script starting...
+DEBUG: Added project root to path: C:\Users\dlaev\GitHub\scaffold_ai
+DEBUG: Script entry point reached
+DEBUG: main() function starting...
+DEBUG: Parsed arguments - json: True, query: What is sustainability in engineering?
+DEBUG: Running with provided query...
+Running query: What is sustainability in engineering?
+DEBUG: About to import query_enhanced...
+PyPDF2 not available - will use existing chunked data only
+DEBUG: Successfully imported query_enhanced
+Processing query...
+DEBUG: Query completed successfully
+DEBUG: About to print JSON...
+{
+  "query": "What is sustainability in engineering?",
+  "response": "Sustainability incorporation in engineering education is gaining in recognition and importance. Sustainability courses provide valuable connections in the notions of sustainability and they build knowledge about sustainability. Integrating sustainability concepts throughout the curriculum gives the students a broad understanding of the field and prepares students to apply sustainability principles in their engineering decisions. This work seeks to answer the question: \"To what extent is sustainability integration occurring in education in civil/environmental engineering and in mechanical engineering?\" The Sustainability Tracking And Reporting System (STARS) by the Association for the Advancement of Sustainability in Higher Education (AASHE) provides a source of data to probe this question. Institutions report information about sustainability incorporation into their courses to the AASHE STARS system, which provides useful knowledge of existing courses and methods of sustainability integration in the curricula. Data representing 30 universities was included in this study and shows that there is approximately 4.25 times the number of courses with sustainability incorporation in civil and environmental engineering compared to mechanical engineering. An overlay of the data and course structure between the two departments yields interesting observations and areas for potential leveraging of advancements within the two disciplines.",
+  "candidates": [
+    {
+      "chunk_id": 3839,
+      "score": 0.7228298017771702,
+      "text": "Sustainability Incorporation in Courses in Mechanical, Civil and Environmental Engineering: Insights from AASHE STARS Data Abstract Sustainability incorporation into engineering education is gaining in recognition and importance. Sustainability courses provide valuable connections in the notions of sustainability and they build knowledge about sustainability. Integrating sustainability concepts throughout the curriculum gives the students a broad understanding of the field and prepares students to apply sustainability principles in their engineering decisions. This work seeks to answer the question: ‘To what extent is sustainability integration occurring in education in civil/environmental engineering and in mechanical engineering?’ The Sustainability Tracking And Reporting System (STARS) by the Association for the Advancement of Sustainability in Higher Education (AASHE) provides a source of data to probe this question. Institutions report information about sustainability incorporation into their courses to the AASHE STARS system, which provides useful knowledge of existing courses and methods of sustainability integration in the curricula. Data representing 30 universities was included in this study and shows there is approximately 4.25 times the number of courses with sustainability incorporation in civil and environmental engineering compared to mechanical engineering. An overlay of the data and course structure between the two departments yields interesting observations and areas for potential leveraging of advancements within the two disciplines. Introduction “Education is the most powerful path to sustainability. Economic and technological solutions, political regulations or financial incentives are not enough. We need a fundamental change in the way we think and act.” Irina Bokova, Director - General of UNESCO [1] Sustainability awareness and action are of growing importance for the care and protection of people, societies and cultures; profit, economic feasibility and responsibility; and for the environment and life preservation. Engineers have profound impacts on sustainability and its development or lack thereof. And thus, it is desirable that engineers are trained in the university to attend to sustainability in their engineering decisions. Sustainability incorporation into engineering education is gaining in recognition and importance [2]. It is recognized that ‘how’ sustainability is taught and integrated into engineering education has profound impacts on the effectiveness of what is learned [3]. Initial approaches to sustainability incorporation relied heavily on dedicated sustainable engineering courses, focusing on the use of tools designed to address complex systems at a relatively large scale (for example Life Cycle Assessment) [4]. This is called vertical integration and it provides solid value. However, with additional experience it has been shown that there is great merit in ‘across the curriculum integration’. Across the curriculum integration, also known as horizontal integration, includes",
+      "source": {
+        "id": "f33dafd0",
+        "name": "sustainability incorporation in courses in mechanical civil and environmental engineering insights from aashe stars data",
+        "raw_path": "C:\\Users\\dlaev\\GitHub\\scaffold_ai\\data\\Systematic selection - Scopus and ASEE library\\sustainability-incorporation-in-courses-in-mechanical-civil-and-environmental-engineering-insights-from-aashe-stars-data.pdf"
+      },
+      "search_type": "keyword",
+      "keyword_matches": 5,
+      "semantic_score": 0.0,
+      "keyword_score": 0.7228298017771702,
+      "cross_score": 4.243017673492432,
+      "contextual_score": 5
+    },
+    {
+      "chunk_id": 4777,
+      "score": 0.7211144496039333,
+      "text": "Educ. Sci. 2023, 13, 1537 of 21•Engineering practice The LOs provide the underpinning principles that are critical to becoming a practicing engineering professional. It should be noted that fulfilling the LOs is likely to occur across the course concurrently. Sustainability is one element of the engineer and society learning area, along with ethics, risk, security, and equality diversity and inclusion. Within UK higher education, three-year undergraduate bachelor degrees and one- to two-year masters degrees are the most common qualification acquired on the road to becoming an engineering professional, particularly with chartered status. As masters degrees aremore advanced, they have the greatest level of requirements to fulfil in order to meet an LO [27]. The environmental or sustainability LOs for a masters level degree are presented for AHEP3 [31] in comparison to the updated AHEP4 [27] in Figure 3.Evaluate the environmental and societal impact of solutions to complex problems (to include the entire life-cycle of a product or process) and minimise adverse impacts. AHEP4 The Engineer and society (2021–) Awareness that engineering activities should promote sustainable development and ability to apply quantitative techniques where appropriate. AHEP3 Economic, legal, social, ethical and environmental context (2014–2021) Figure 3. The sustainability learning outcomes from AHEP3 [29] and AHEP4 [27].Juxtaposed against the third edition, the AHEP4 sustainability guidelines move be-yond mere awareness of environmental issues and expect students to be able to evaluate the impact of solutions and minimise adverse impacts [28]. However, the AHEP4 alone does not provide direction on how engineering course materials and assessments can be ad-justed to comply with these updates. It calls for higher education professionals to consider the impacts from and to the environment and include them in engineering curricula forthe purpose of sustainability and conservation. Sustainability in AHEP4 remains loosely defined, which allows us to smoothly transition from the current to an adjusted curriculum,not deviating from the existing content, rather highlighting the aspects of the environment and climate change more explicitly.The GETA curriculum key was the culmination of a series of studies between 2007and 2011 to assess the inclusion of sustainable development (as per the Brundtland report definition [19]) in the curriculum delivered in Icelandic schools over a decade ago. In developing the method for data analysis, the seven characteristics included in the GET A curriculum key were considered for analysis, these are [3]:1.Indications of values, opinions, and feelings about nature and environment.2.Identification of knowledge contributing to a sensible use of nature.3.Statements about welfare and public health.4.Indications of democracy, participation, and action.5.Recognition of equality and multicultural issues.6.Indications of awareness and understanding of global issues.7.References to economic development and future prospects.There is substantial overlap between the seven GETA key characteristics and the five learning areas within the engineer and society aspect of AHEP4, as illustrated in Table 1.This is encouraging as it demonstrates that the development of accredited higher education engineering programmes has attempted to capture sustainable elements in line with the UN SDGs. The engineer in society learning areas capture a broader skillset needed by engineering professionals and goes beyond technical expertise. The first area of learning is sustainability (see Figure 3) which corresponds with GETA characteristics 1 and 2. The",
+      "source": {
+        "id": "ce916c54",
+        "name": "What Are We Teaching Engineers about Climate Change Presenting the MACC Evaluation of Climate Change EducationEducation Sciences",
+        "raw_path": "C:\\Users\\dlaev\\GitHub\\scaffold_ai\\data\\Systematic selection - Scopus and ASEE library\\What-Are-We-Teaching-Engineers-about-Climate-Change-Presenting-the-MACC-Evaluation-of-Climate-Change-EducationEducation-Sciences.pdf"
+      },
+      "search_type": "keyword",
+      "keyword_matches": 5,
+      "semantic_score": 0.0,
+      "keyword_score": 0.7211144496039333,
+      "cross_score": 3.5276224613189697,
+      "contextual_score": 5
+    },
+    {
+      "chunk_id": 1512,
+      "score": 0.7226107226107226,
+      "text": "Civil engineering curricula and sustainability education: An international cross-case analysis of alignments and gaps Abstract Engineering is essential to progress towards a sustainable future. Achieving this goal is supported in part by the profession’s fundamental mission: to address basic human needs and improve quality of life. However, analysis shows that when the preparation of engineers at universities focuses on traditional and technical skills, such a curriculum is insufficient for preparing graduates to tackle current global challenges, such as climate change, poverty, and the humanitarian crisis. As with the Washington Accord, engineering accreditation bodies increasingly recognise that these challenges demand a new kind of engineer equipped with a new set of competencies and capacities. In some cases, this has led to evolution, if not revolution, in engineering curricula as the social compact comes to the fore. This study examines what is happening and which initiatives are promoted to embed sustainability considerations in two civil engineering curriculums: one aligned with the Washington Accord (in Australia) and one not (from Colombia). The study proceeds from the understanding that while the volume and breadth of research about ensuring engineering education addresses sustainability well have increased rapidly during this century, there have been few empirical studies beyond a single institution's case. Furthermore, many case studies have also been limited to documenting changes in course maps or the explicit curriculum, i.e., what is overt in the documentation. In light of this, this research presents findings from a doctoral thesis that analyses educators’ and students’ experiences of the explicit and implicit—which is learnt from the organisation, intentions, attitudes and behaviours of the educators, for example, and what is not taught respectively—to provide a richer picture of what is understood and experienced as the intended and enacted curriculum. In general, findings suggest that accreditation systems (such as the Washington Accord) highly influence the adoption of educational responses towards sustainability in the civil engineering curriculum. The accreditation requirements ensure that sustainability is addressed in specific discipline-based units, and to a greater extent, in the capstone unit. Barriers, however, occur in both cases because sustainability considerations are not scaffold ed. The cross-case analysis also shows that while project-based environments were the most common type of educational responses implemented to strengthen students’ sustainability-based knowledge and skills, findings suggested projects do not always encourage the same complexity of problems and, consequently, do not generate the same level of learning outcomes. Results also reveal that hidden-curriculum responses were decisive for students to embrace new sustainability perspectives. Finally, the research also provides insight into future curriculum strategies for developing engineering education for sustainability.",
+      "source": {
+        "id": "e74f11b5",
+        "name": "civil engineering curricula and sustainability education an international cross case analysis of alignments and gaps",
+        "raw_path": "C:\\Users\\dlaev\\GitHub\\scaffold_ai\\data\\Systematic selection - Scopus and ASEE library\\civil-engineering-curricula-and-sustainability-education-an-international-cross-case-analysis-of-alignments-and-gaps.pdf"
+      },
+      "search_type": "keyword",
+      "keyword_matches": 5,
+      "semantic_score": 0.0,
+      "keyword_score": 0.7226107226107226,
+      "cross_score": 2.4490151405334473,
+      "contextual_score": 5
+    }
+  ],
+  "search_stats": {
+    "initial_candidates": 49,
+    "reranked_candidates": 49,
+    "filtered_candidates": 49,
+    "final_candidates": 3
+  }
+}
+DEBUG: JSON printed successfully
+DEBUG: Script completed successfully
