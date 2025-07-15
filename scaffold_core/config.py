@@ -155,7 +155,8 @@ TOP_K_FINAL = 10
 # -------------------
 LLM_TASK = "text-generation"
 LLM_DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-LLM_MAX_LENGTH = 2048
+LLM_MAX_LENGTH = 4096  # Increased from 2048
+LLM_MAX_NEW_TOKENS = 2048  # New setting for max new tokens to generate
 LLM_TEMPERATURE = 0.3
 LLM_TOP_P = 0.9
 LLM_BATCH_SIZE = 1
