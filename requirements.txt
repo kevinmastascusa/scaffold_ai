@@ -150,7 +150,7 @@ pandas==2.3.0
 pandocfilters==1.5.1
 parso==0.8.4
 pathlib2==2.3.7.post1
-pillow==11.2.1
+pillow==11.3.0
 platformdirs==4.3.8
 playwright==1.53.0
 preshed==3.0.10
