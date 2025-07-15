@@ -478,19 +478,20 @@
         
         function displaySources(sources) {
             sourcesList.innerHTML = '';
-            
+
             sources.forEach((source, index) => {
                 const sourceDiv = document.createElement('div');
                 sourceDiv.className = 'source-item';
-                
-                const filename = source.source.split('\\').pop().split('/').pop();
-                
+
+                // Use the 'name' field from the source object, fallback to id or raw_path
+                const filename = (source.source && (source.source.name || source.source.raw_path || source.source.id)) || "Unknown Source";
+
                 sourceDiv.innerHTML = `
                     <div class="source-filename">${index + 1}. ${filename}</div>
                     <div class="source-score">Relevance Score: ${source.score.toFixed(3)}</div>
                     <div class="source-preview">${source.text_preview}</div>
                 `;
-                
+
                 sourcesList.appendChild(sourceDiv);
             });
         }
