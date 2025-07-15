@@ -112,12 +112,21 @@ class LLMManager:
             quantization_config = None
             logger.debug("Using full precision (no quantization)")
         
+        # Check if accelerate is available for low_cpu_mem_usage
+        try:
+            import accelerate
+            low_cpu_mem_usage = True
+            logger.debug("Using low_cpu_mem_usage=True (accelerate available)")
+        except ImportError:
+            low_cpu_mem_usage = False
+            logger.warning("accelerate not available, using low_cpu_mem_usage=False")
+        
         self.model = AutoModelForCausalLM.from_pretrained(
             LLM_MODEL,
             token=HF_TOKEN,
             torch_dtype=torch.float16 if LLM_DEVICE == "cuda" else torch.float32,
             device_map="auto" if LLM_DEVICE == "cuda" else None,
-            low_cpu_mem_usage=True,
+            low_cpu_mem_usage=low_cpu_mem_usage,
             trust_remote_code=True,
             quantization_config=quantization_config,
             use_cache=True,

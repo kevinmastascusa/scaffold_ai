@@ -18,7 +18,9 @@ from flask_cors import CORS
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_root)
 
-from scaffold_core.vector.enhanced_query import query_enhanced
+from scaffold_core.vector.enhanced_query import (
+    query_enhanced, enhanced_query_system
+)
 
 # Initialize Flask app
 app = Flask(__name__, template_folder='templates')
@@ -31,6 +33,15 @@ app.config['DEBUG'] = True
 # Create directories for storing feedback and logs
 FEEDBACK_DIR = Path("ui_feedback")
 FEEDBACK_DIR.mkdir(exist_ok=True)
+
+# Pre-initialize the enhanced query system
+print("🔄 Pre-initializing enhanced query system...")
+try:
+    enhanced_query_system.initialize()
+    print("✅ Enhanced query system initialized successfully")
+except Exception as e:
+    print(f"❌ Failed to initialize enhanced query system: {e}")
+    print("⚠️  The system will initialize on first request (may cause delay)")
 
 
 @app.route('/')
