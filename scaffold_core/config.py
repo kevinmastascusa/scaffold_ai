@@ -107,7 +107,7 @@ LLM_MODELS = {
         "desc": "Very fast, low resource, lower quality."
     },
 }
-SELECTED_LLM_MODEL = LLM_MODELS["mistral"]["name"]
+SELECTED_LLM_MODEL = LLM_MODELS["tinyllama"]["name"]
 
 # Model registry for tracking status/compatibility
 MODEL_REGISTRY = {
