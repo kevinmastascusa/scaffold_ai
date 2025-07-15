@@ -227,7 +227,7 @@ threadpoolctl==3.6.0
 tinycss2==1.4.0
 tokenizers==0.15.2
 toml==0.10.2
-torch==2.1.0
+torch==2.7.1
 torchaudio==2.1.0+cpu
 torchinfo==1.8.0
 torchvision==0.16.0
