@@ -479,17 +479,33 @@
         function displaySources(sources) {
             sourcesList.innerHTML = '';
 
+            if (!sources || sources.length === 0) {
+                sourcesList.innerHTML = '<div class="text-muted">No sources found.</div>';
+                return;
+            }
+
             sources.forEach((source, index) => {
                 const sourceDiv = document.createElement('div');
                 sourceDiv.className = 'source-item';
 
-                // Use the 'name' field from the source object, fallback to id or raw_path
-                const filename = (source.source && (source.source.name || source.source.raw_path || source.source.id)) || "Unknown Source";
+                // Handle the citation structure properly
+                let filename = "Unknown Source";
+                if (source.source) {
+                    if (typeof source.source === 'string') {
+                        filename = source.source;
+                    } else if (source.source.name) {
+                        filename = source.source.name;
+                    } else if (source.source.raw_path) {
+                        filename = source.source.raw_path.split('/').pop().split('\\').pop() || source.source.raw_path;
+                    } else if (source.source.id) {
+                        filename = `Source ${source.source.id}`;
+                    }
+                }
 
                 sourceDiv.innerHTML = `
                     <div class="source-filename">${index + 1}. ${filename}</div>
-                    <div class="source-score">Relevance Score: ${source.score.toFixed(3)}</div>
-                    <div class="source-preview">${source.text_preview}</div>
+                    <div class="source-score">Relevance Score: ${(source.score || 0).toFixed(3)}</div>
+                    <div class="source-preview">${source.text_preview || 'No preview available'}</div>
                 `;
 
                 sourcesList.appendChild(sourceDiv);
