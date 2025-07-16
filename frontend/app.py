@@ -62,6 +62,11 @@ def api_query():
 
         # Process the query using the enhanced system
         result = query_enhanced(query)
+        
+        # Debug: Print the first candidate to see its structure
+        if result['candidates']:
+            print(f"DEBUG: First candidate structure: "
+                  f"{result['candidates'][0]}")
 
         # Format the response for the UI
         response = {
@@ -71,7 +76,7 @@ def api_query():
             'search_stats': result['search_stats'],
             'sources': [
                 {
-                    'source': candidate.get('source', 'Unknown'),
+                    'source': candidate.get('source', {}),
                     'score': candidate.get(
                         'cross_score', candidate.get('score', 0)
                     ),
