@@ -405,6 +405,168 @@
             40% { transform: scale(1); }
         }
         
+        /* Model Control Panel Styles */
+        .model-control-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #e2e8f0;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .model-selector {
+            margin-bottom: 15px;
+        }
+        
+        .model-label {
+            display: block;
+            font-size: 12px;
+            color: #a0aec0;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        .model-select {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            color: white;
+            padding: 8px 10px;
+            font-size: 12px;
+            outline: none;
+        }
+        
+        .model-select:focus {
+            border-color: var(--primary-color);
+        }
+        
+        .model-select option {
+            background: #2d3748;
+            color: white;
+        }
+        
+        .model-params {
+            margin-bottom: 12px;
+        }
+        
+        .param-label {
+            display: block;
+            font-size: 12px;
+            color: #a0aec0;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        .param-slider {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            outline: none;
+            margin-bottom: 5px;
+        }
+        
+        .param-slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        
+        .param-slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .param-value {
+            font-size: 11px;
+            color: #e2e8f0;
+            text-align: right;
+        }
+        
+        .model-actions {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .model-btn {
+            flex: 1;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+        
+        .model-btn.primary {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .model-btn.primary:hover {
+            background: var(--secondary-color);
+        }
+        
+        .model-btn.secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #e2e8f0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .model-btn.secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .model-status {
+            text-align: center;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 500;
+        }
+        
+        .status-badge.active {
+            background: rgba(72, 187, 120, 0.2);
+            color: #48bb78;
+        }
+        
+        .status-badge.updating {
+            background: rgba(237, 137, 54, 0.2);
+            color: #ed8936;
+        }
+        
+        .status-badge.error {
+            background: rgba(245, 101, 101, 0.2);
+            color: #f56565;
+        }
+        
         /* Responsive Design */
         @media (max-width: 768px) {
             .sidebar {
@@ -471,6 +633,29 @@
         .chat-container::-webkit-scrollbar-thumb:hover {
             background: #a0aec0;
         }
+        
+        /* Notification Animations */
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
     </style>
 </head>
 <body>
@@ -500,6 +685,67 @@
                         Upload Syllabus
                     </button>
                     <div class="upload-status" id="uploadStatus"></div>
+                </div>
+                
+                <!-- Model Control Panel -->
+                <div class="model-control-section">
+                    <div class="section-title">
+                        <i class="fas fa-cogs"></i> Model Settings
+                    </div>
+                    
+                    <div class="model-selector">
+                        <label class="model-label">Language Model</label>
+                        <select id="llmModelSelect" class="model-select">
+                            <option value="">Loading...</option>
+                        </select>
+                    </div>
+                    
+                    <div class="model-selector">
+                        <label class="model-label">Embedding Model</label>
+                        <select id="embeddingModelSelect" class="model-select">
+                            <option value="">Loading...</option>
+                        </select>
+                    </div>
+                    
+                    <div class="model-params">
+                        <label class="param-label">Temperature</label>
+                        <input type="range" id="temperature" min="0" max="2" step="0.1" value="0.3" class="param-slider">
+                        <div class="param-value" id="temperatureValue">0.3</div>
+                    </div>
+                    
+                    <div class="model-params">
+                        <label class="param-label">Max Tokens</label>
+                        <input type="range" id="maxTokens" min="100" max="2000" step="100" value="800" class="param-slider">
+                        <div class="param-value" id="maxTokensValue">800</div>
+                    </div>
+                    
+                    <div class="model-params">
+                        <label class="param-label">Chunk Size</label>
+                        <input type="range" id="chunkSize" min="500" max="2000" step="100" value="1000" class="param-slider">
+                        <div class="param-value" id="chunkSizeValue">1000</div>
+                    </div>
+                    
+                    <div class="model-params">
+                        <label class="param-label">Chunk Overlap</label>
+                        <input type="range" id="chunkOverlap" min="0" max="500" step="50" value="200" class="param-slider">
+                        <div class="param-value" id="chunkOverlapValue">200</div>
+                    </div>
+                    
+                    <div class="model-actions">
+                        <button class="model-btn primary" onclick="applyModelChanges()">
+                            <i class="fas fa-check"></i> Apply
+                        </button>
+                        <button class="model-btn secondary" onclick="resetToDefaults()">
+                            <i class="fas fa-undo"></i> Reset
+                        </button>
+                        <button class="model-btn secondary" onclick="testNotification()" style="font-size: 10px;">
+                            <i class="fas fa-bell"></i> Test
+                        </button>
+                    </div>
+                    
+                    <div class="model-status">
+                        <span class="status-badge active" id="modelStatus">Active</span>
+                    </div>
                 </div>
                 
                 <button class="clear-btn" onclick="clearConversation()">
@@ -576,6 +822,7 @@
         // Initialize chat
         document.addEventListener('DOMContentLoaded', function() {
             loadConversationHistory();
+            initializeModelControls();
         });
 
         // Auto-resize textarea
@@ -896,6 +1143,297 @@
                 sidebar.classList.remove('open');
             }
         });
+
+        // Model Control Functions
+        function initializeModelControls() {
+            // Load available models
+            loadAvailableModels();
+            
+            // Set up slider event listeners
+            setupSliderListeners();
+            
+            // Load saved settings
+            loadSavedSettings();
+        }
+
+        function loadAvailableModels() {
+            fetch('/api/models')
+                .then(response => response.json())
+                .then(data => {
+                    const llmSelect = document.getElementById('llmModelSelect');
+                    const embeddingSelect = document.getElementById('embeddingModelSelect');
+                    
+                    // Populate LLM models
+                    llmSelect.innerHTML = '<option value="">Select LLM Model</option>';
+                    Object.entries(data.llm).forEach(([key, model]) => {
+                        const option = document.createElement('option');
+                        option.value = key;
+                        option.textContent = model.name;
+                        option.title = model.desc;
+                        if (key === data.current_llm) {
+                            option.selected = true;
+                        }
+                        llmSelect.appendChild(option);
+                    });
+                    
+                    // Populate embedding models
+                    embeddingSelect.innerHTML = '<option value="">Select Embedding Model</option>';
+                    Object.entries(data.embedding).forEach(([key, model]) => {
+                        const option = document.createElement('option');
+                        option.value = key;
+                        option.textContent = model.name;
+                        option.title = model.desc;
+                        if (key === data.current_embedding) {
+                            option.selected = true;
+                        }
+                        embeddingSelect.appendChild(option);
+                    });
+                    
+                    // Load current settings
+                    if (data.settings) {
+                        if (data.settings.llm) {
+                            document.getElementById('temperature').value = data.settings.llm.temperature || 0.7;
+                            document.getElementById('temperatureValue').textContent = data.settings.llm.temperature || 0.7;
+                            document.getElementById('maxTokens').value = data.settings.llm.max_new_tokens || 1000;
+                            document.getElementById('maxTokensValue').textContent = data.settings.llm.max_new_tokens || 1000;
+                        }
+                        if (data.settings.embedding) {
+                            document.getElementById('chunkSize').value = data.settings.embedding.chunk_size || 1000;
+                            document.getElementById('chunkSizeValue').textContent = data.settings.embedding.chunk_size || 1000;
+                            document.getElementById('chunkOverlap').value = data.settings.embedding.chunk_overlap || 200;
+                            document.getElementById('chunkOverlapValue').textContent = data.settings.embedding.chunk_overlap || 200;
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading models:', error);
+                });
+        }
+
+        function setupSliderListeners() {
+            // Temperature slider
+            const tempSlider = document.getElementById('temperature');
+            const tempValue = document.getElementById('temperatureValue');
+            if (tempSlider && tempValue) {
+                tempSlider.addEventListener('input', function() {
+                    tempValue.textContent = this.value;
+                });
+            }
+            
+            // Max tokens slider
+            const tokensSlider = document.getElementById('maxTokens');
+            const tokensValue = document.getElementById('maxTokensValue');
+            if (tokensSlider && tokensValue) {
+                tokensSlider.addEventListener('input', function() {
+                    tokensValue.textContent = this.value;
+                });
+            }
+            
+            // Chunk size slider
+            const chunkSizeSlider = document.getElementById('chunkSize');
+            const chunkSizeValue = document.getElementById('chunkSizeValue');
+            if (chunkSizeSlider && chunkSizeValue) {
+                chunkSizeSlider.addEventListener('input', function() {
+                    chunkSizeValue.textContent = this.value;
+                });
+            }
+            
+            // Chunk overlap slider
+            const chunkOverlapSlider = document.getElementById('chunkOverlap');
+            const chunkOverlapValue = document.getElementById('chunkOverlapValue');
+            if (chunkOverlapSlider && chunkOverlapValue) {
+                chunkOverlapSlider.addEventListener('input', function() {
+                    chunkOverlapValue.textContent = this.value;
+                });
+            }
+        }
+
+        function loadSavedSettings() {
+            // Load from localStorage if available
+            const savedSettings = localStorage.getItem('modelSettings');
+            if (savedSettings) {
+                const settings = JSON.parse(savedSettings);
+                document.getElementById('temperature').value = settings.temperature || 0.3;
+                document.getElementById('temperatureValue').textContent = settings.temperature || 0.3;
+                document.getElementById('maxTokens').value = settings.maxTokens || 800;
+                document.getElementById('maxTokensValue').textContent = settings.maxTokens || 800;
+                document.getElementById('chunkSize').value = settings.chunkSize || 1000;
+                document.getElementById('chunkSizeValue').textContent = settings.chunkSize || 1000;
+                document.getElementById('chunkOverlap').value = settings.chunkOverlap || 200;
+                document.getElementById('chunkOverlapValue').textContent = settings.chunkOverlap || 200;
+            }
+        }
+
+        function applyModelChanges() {
+            const llmModel = document.getElementById('llmModelSelect').value;
+            const embeddingModel = document.getElementById('embeddingModelSelect').value;
+            const temperature = parseFloat(document.getElementById('temperature').value);
+            const maxTokens = parseInt(document.getElementById('maxTokens').value);
+            const chunkSize = parseInt(document.getElementById('chunkSize').value);
+            const chunkOverlap = parseInt(document.getElementById('chunkOverlap').value);
+            
+            // Update status
+            updateModelStatus('updating');
+            
+            // Save settings to localStorage
+            const settings = { temperature, maxTokens, chunkSize, chunkOverlap };
+            localStorage.setItem('modelSettings', JSON.stringify(settings));
+            
+            // Create promises for model switching and settings updates
+            const promises = [];
+            
+            // Switch LLM model if changed
+            if (llmModel) {
+                promises.push(
+                    fetch('/api/models/switch', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            model_type: 'llm',
+                            model_key: llmModel
+                        })
+                    }).then(response => response.json())
+                );
+            }
+            
+            // Switch embedding model if changed
+            if (embeddingModel) {
+                promises.push(
+                    fetch('/api/models/switch', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            model_type: 'embedding',
+                            model_key: embeddingModel
+                        })
+                    }).then(response => response.json())
+                );
+            }
+            
+            // Update LLM settings
+            promises.push(
+                fetch('/api/models/settings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model_type: 'llm',
+                        settings: {
+                            temperature: temperature,
+                            max_new_tokens: maxTokens
+                        }
+                    })
+                }).then(response => response.json())
+            );
+            
+            // Update embedding settings
+            promises.push(
+                fetch('/api/models/settings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model_type: 'embedding',
+                        settings: {
+                            chunk_size: chunkSize,
+                            chunk_overlap: chunkOverlap
+                        }
+                    })
+                }).then(response => response.json())
+            );
+            
+            // Execute all promises
+            Promise.all(promises)
+                .then(results => {
+                    const allSuccess = results.every(result => result.success);
+                    if (allSuccess) {
+                        updateModelStatus('active');
+                        showNotification('Model settings applied successfully!', 'success');
+                    } else {
+                        updateModelStatus('error');
+                        showNotification('Some settings failed to apply', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error applying model settings:', error);
+                    updateModelStatus('error');
+                    showNotification('Error applying model settings', 'error');
+                });
+        }
+
+        function resetToDefaults() {
+            document.getElementById('temperature').value = 0.7;
+            document.getElementById('temperatureValue').textContent = '0.7';
+            document.getElementById('maxTokens').value = 1000;
+            document.getElementById('maxTokensValue').textContent = '1000';
+            document.getElementById('chunkSize').value = 1000;
+            document.getElementById('chunkSizeValue').textContent = '1000';
+            document.getElementById('chunkOverlap').value = 200;
+            document.getElementById('chunkOverlapValue').textContent = '200';
+            
+            // Clear localStorage
+            localStorage.removeItem('modelSettings');
+            
+            showNotification('Settings reset to defaults', 'info');
+        }
+        
+        function updateModelStatus(status) {
+            const statusElement = document.getElementById('modelStatus');
+            if (statusElement) {
+                statusElement.className = `badge ${status === 'active' ? 'bg-success' : status === 'updating' ? 'bg-warning' : 'bg-danger'}`;
+                statusElement.textContent = status === 'active' ? 'Active' : status === 'updating' ? 'Updating' : 'Error';
+            }
+        }
+        
+        function testNotification() {
+            showNotification('This is a test notification!', 'success');
+            setTimeout(() => showNotification('This is an error test!', 'error'), 1000);
+            setTimeout(() => showNotification('This is an info test!', 'info'), 2000);
+        }
+        
+        function showNotification(message, type = 'info') {
+            console.log(`Notification: ${message} (${type})`); // Debug log
+            
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type === 'success' ? 'success' : type === 'error' ? 'danger' : 'info'} alert-dismissible fade show`;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 10000;
+                min-width: 300px;
+                max-width: 400px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                border-radius: 8px;
+                padding: 16px 20px;
+                margin: 0;
+                animation: slideIn 0.3s ease-out;
+            `;
+            
+            notification.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'} me-2"></i>
+                    <span>${message}</span>
+                    <button type="button" class="btn-close ms-auto" onclick="this.parentElement.parentElement.remove()"></button>
+                </div>
+            `;
+            
+            // Add to body
+            document.body.appendChild(notification);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.style.animation = 'slideOut 0.3s ease-in';
+                    setTimeout(() => {
+                        if (notification.parentNode) {
+                            notification.remove();
+                        }
+                    }, 300);
+                }
+            }, 5000);
+        }
+
+
     </script>
 </body>
 </html> 

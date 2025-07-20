@@ -99,6 +99,21 @@ environmental engineering insights from AASHE STARS data" - ASEE Publications]
 
 ## ✨ **Key Features & Recent Improvements**
 
+### 🎛️ **Model Control Panel (NEW!)**
+- **Dynamic Model Selection:** Switch between different LLM and embedding models
+- **Real-time Parameter Tuning:** Adjust temperature, max tokens, chunk size, and overlap
+- **Visual Status Indicators:** See model status (Active/Updating/Error) at a glance
+- **One-click Apply:** Instantly apply model changes with API integration
+- **Settings Persistence:** All settings saved to localStorage for consistency
+- **Reset to Defaults:** Quick reset button for parameter restoration
+
+### 🔔 **Enhanced Notification System**
+- **Animated Notifications:** Smooth slide-in/slide-out animations
+- **Multiple Types:** Success, Error, and Info notifications with appropriate styling
+- **Auto-dismiss:** Notifications disappear after 5 seconds
+- **Manual Control:** Users can manually close notifications
+- **Debug Support:** Console logging for troubleshooting
+
 ### 🎨 **Enhanced User Interface**
 - **Modern Chat Design:** Sleek, intuitive chat interface with Scaffold AI branding
 - **Responsive Layout:** Works seamlessly on desktop, tablet, and mobile devices
