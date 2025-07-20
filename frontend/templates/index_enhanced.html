@@ -656,7 +656,10 @@
             const input = document.getElementById('chatInput');
             const message = input.value.trim();
             
+            console.log('sendMessage called with:', message);
+            
             if (message && !isProcessing) {
+                console.log('Adding user message to chat');
                 addMessage('user', message);
                 input.value = '';
                 input.style.height = 'auto';
@@ -664,6 +667,7 @@
                 // Show typing indicator
                 showTypingIndicator();
                 
+                console.log('Sending request to /api/chat');
                 // Send to API
                 fetch('/api/chat', {
                     method: 'POST',
@@ -672,17 +676,24 @@
                     },
                     body: JSON.stringify({ message: message })
                 })
-                .then(response => response.json())
+                .then(response => {
+                    console.log('Response received:', response.status);
+                    return response.json();
+                })
                 .then(data => {
+                    console.log('Data received:', data);
                     hideTypingIndicator();
                     
                     if (data.success) {
+                        console.log('Adding AI response to chat');
                         addMessage('ai', data.response.content, data.response.sources);
                     } else {
+                        console.error('API error:', data.error);
                         addMessage('system', `Error: ${data.error}`);
                     }
                 })
                 .catch(error => {
+                    console.error('Fetch error:', error);
                     hideTypingIndicator();
                     addMessage('system', `Error: ${error.message}`);
                 });
@@ -690,11 +701,13 @@
         }
 
         function addMessage(type, content, sources = null) {
+            console.log('addMessage called:', type, content);
             const chatContainer = document.getElementById('chatContainer');
             
             // Remove welcome message if it exists
             const welcomeMessage = chatContainer.querySelector('.welcome-message');
             if (welcomeMessage) {
+                console.log('Removing welcome message');
                 welcomeMessage.remove();
             }
             
@@ -742,6 +755,8 @@
             messageDiv.appendChild(contentDiv);
             chatContainer.appendChild(messageDiv);
             
+            console.log('Message added to chat container');
+            
             // Scroll to bottom
             chatContainer.scrollTop = chatContainer.scrollHeight;
             
@@ -754,20 +769,24 @@
         }
 
         function showTypingIndicator() {
+            console.log('Showing typing indicator');
             const indicator = document.getElementById('typingIndicator');
             indicator.style.display = 'block';
             document.getElementById('chatContainer').scrollTop = document.getElementById('chatContainer').scrollHeight;
         }
 
         function hideTypingIndicator() {
+            console.log('Hiding typing indicator');
             const indicator = document.getElementById('typingIndicator');
             indicator.style.display = 'none';
         }
 
         function loadConversationHistory() {
+            console.log('Loading conversation history');
             fetch('/api/conversation')
             .then(response => response.json())
             .then(data => {
+                console.log('Conversation history loaded:', data);
                 if (data.success && data.conversation.length > 0) {
                     conversationHistory = data.conversation;
                     
@@ -787,12 +806,14 @@
         }
 
         function clearConversation() {
+            console.log('Clearing conversation');
             if (confirm('Are you sure you want to clear the conversation history?')) {
                 fetch('/api/clear-conversation', {
                     method: 'POST'
                 })
                 .then(response => response.json())
                 .then(data => {
+                    console.log('Clear conversation response:', data);
                     if (data.success) {
                         conversationHistory = [];
                         const chatContainer = document.getElementById('chatContainer');
@@ -829,6 +850,40 @@
                 });
             }
         }
+
+        // Add a reset function for debugging
+        function resetChat() {
+            console.log('Resetting chat...');
+            // Clear conversation via API
+            fetch('/api/clear-conversation', {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Reset response:', data);
+                // Force reload the page
+                window.location.reload(true);
+            })
+            .catch(error => {
+                console.error('Reset error:', error);
+                // Force reload anyway
+                window.location.reload(true);
+            });
+        }
+
+        // Add reset button to the page
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Page loaded, adding reset button');
+            const chatHeader = document.querySelector('.chat-header');
+            if (chatHeader) {
+                const resetBtn = document.createElement('button');
+                resetBtn.innerHTML = '<i class="fas fa-redo"></i> Reset';
+                resetBtn.className = 'btn btn-sm btn-outline-secondary';
+                resetBtn.style.marginLeft = '10px';
+                resetBtn.onclick = resetChat;
+                chatHeader.appendChild(resetBtn);
+            }
+        });
 
         // Close mobile sidebar when clicking outside
         document.addEventListener('click', function(event) {
