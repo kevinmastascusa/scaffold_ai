@@ -1,8 +1,42 @@
-# 🌱 Scaffold AI: Curriculum Recommendation Tool for Sustainability and Climate Resilience
+<div align="center">
+  <img src="frontend/static/LogoR1.png" alt="Scaffold AI Logo" width="200" height="200">
+  
+  # 🌱 Scaffold AI: Curriculum Recommendation Tool for Sustainability and Climate Resilience
+  
+  [![Python](https://img.shields.io/badge/Python-3.12+-blue.svg)](https://www.python.org/downloads/)
+  [![Flask](https://img.shields.io/badge/Flask-2.3+-green.svg)](https://flask.palletsprojects.com/)
+  [![LLM](https://img.shields.io/badge/LLM-TinyLlama-orange.svg)](https://huggingface.co/TinyLlama/TinyLlama-1.1B-Chat-v1.0)
+  [![Vector Search](https://img.shields.io/badge/Vector%20Search-FAISS-red.svg)](https://github.com/facebookresearch/faiss)
+  [![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen.svg)](https://github.com/kevinmastascusa/scaffold_ai)
+  [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+  
+  [![GitHub stars](https://img.shields.io/github/stars/kevinmastascusa/scaffold_ai?style=social)](https://github.com/kevinmastascusa/scaffold_ai)
+  [![GitHub forks](https://img.shields.io/github/forks/kevinmastascusa/scaffold_ai?style=social)](https://github.com/kevinmastascusa/scaffold_ai)
+  [![GitHub issues](https://img.shields.io/github/issues/kevinmastascusa/scaffold_ai)](https://github.com/kevinmastascusa/scaffold_ai/issues)
+  [![GitHub pull requests](https://img.shields.io/github/issues-pr/kevinmastascusa/scaffold_ai)](https://github.com/kevinmastascusa/scaffold_ai/pulls)
+  
+  **Collaborators:** Kevin Mastascusa, Joseph Di Stefano
+  
+  **Date:** 6/26/2025 | **Last Updated:** 7/20/2025
+</div>
 
-**Collaborators:** Kevin Mastascusa, Joseph Di Stefano
-
-**Date:** 6/26/2025 | **Last Updated:** 7/20/2025
+## 📋 Table of Contents
+- [🌍 Project Overview](#-project-overview)
+- [🎉 Current Status](#-current-status-fully-operational-with-llm-integration)
+- [✨ Key Features & Recent Improvements](#-key-features--recent-improvements)
+- [🚀 Getting Started](#-getting-started)
+- [🎯 Goals and Objectives](#-goals-and-objectives)
+- [🏗️ System Architecture](#️-proposed-system-architecture)
+- [🤖 Large Language Model (LLM)](#-large-language-model-llm)
+- [🔗 Citation Tracking and Transparency](#-citation-tracking-and-transparency)
+- [🔄 Technical Workflow](#-technical-workflow)
+- [📅 Project Timeline](#-project-timeline-overview)
+- [📈 Evaluation Overview](#-evaluation-overview)
+- [✅ Expected Outcomes](#-expected-outcomes)
+- [🧾 TODO Section](#-todo-section)
+- [🔍 Project Validation](#-project-validation)
+- [📝 Model Version/Hash Logging](#-model-versionhash-logging)
+- [⚡ Model Benchmarking](#-model-benchmarking)
 
 ## 🌍 Project Overview
 
@@ -29,6 +63,39 @@ python app_enhanced_simple.py --port 5003
 ```
 
 **Access the UI:** `http://localhost:5003` (or your preferred port)
+
+## 🎬 **Quick Demo**
+
+<div align="center">
+  <img src="frontend/static/LogoR1.png" alt="Scaffold AI Demo" width="300" height="300">
+  
+  **Experience the power of AI-driven sustainability education recommendations!**
+</div>
+
+### 🚀 **Try It Now:**
+1. **Start the server** using the Quick Start commands above
+2. **Open your browser** to `http://localhost:5003`
+3. **Ask questions** like:
+   - "How can I incorporate sustainability in my Fluid Mechanics course?"
+   - "What are some climate education strategies for engineering students?"
+   - "Show me examples of green technology integration in thermodynamics"
+4. **Get research-backed responses** with complete source citations
+
+### 💡 **Example Interaction:**
+```
+User: "How can I teach sustainability in mechanical engineering?"
+
+Scaffold AI: "Based on research from the ASEE database, here are proven strategies:
+
+1. **Core Course Integration**: Incorporate sustainability into thermodynamics, 
+   fluid mechanics, and materials science courses...
+
+2. **Project-Based Learning**: Design assignments around renewable energy, 
+   green manufacturing, and life cycle analysis...
+
+[Source: "Sustainability incorporation in courses in mechanical civil and 
+environmental engineering insights from AASHE STARS data" - ASEE Publications]
+```
 
 ## ✨ **Key Features & Recent Improvements**
 
