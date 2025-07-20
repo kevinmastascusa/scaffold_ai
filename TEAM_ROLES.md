@@ -98,8 +98,8 @@ flowchart LR
 - **Documentation:** All decisions logged in GitHub issues
 
 ### Weekly Reviews
-- **Schedule:** Mondays at 9:00 AM
-- **Duration:** 30 minutes
+- **Schedule:** TBD
+- **Duration:** 60 minutes
 - **Agenda:** Progress review, blocker identification, week planning
 - **Documentation:** Updated in PROGRESS.md
 
