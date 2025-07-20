@@ -3,298 +3,384 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scaffold AI - Enhanced UI</title>
+    <title>Scaffold AI - Sustainability Education Assistant</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #3498db;
-            --accent-color: #27ae60;
-            --warning-color: #f39c12;
-            --danger-color: #e74c3c;
-            --light-bg: #f8f9fa;
-            --dark-text: #2c3e50;
-            --chat-bg: #f1f3f4;
-            --user-msg-bg: #e3f2fd;
-            --ai-msg-bg: #f5f5f5;
+            --primary-color: #10a37f;
+            --secondary-color: #1a7f64;
+            --accent-color: #059669;
+            --background-color: #ffffff;
+            --chat-bg: #f7f7f8;
+            --sidebar-bg: #202123;
+            --text-primary: #2d3748;
+            --text-secondary: #718096;
+            --border-color: #e2e8f0;
+            --user-msg-bg: #10a37f;
+            --ai-msg-bg: #f7f7f8;
+            --hover-bg: #f1f5f9;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: var(--background-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow: hidden;
         }
         
-        .main-container {
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            padding: 30px;
-            margin: 20px auto;
-            max-width: 1400px;
+        .app-container {
+            display: flex;
+            height: 100vh;
         }
         
-        .header {
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: var(--sidebar-bg);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #4a5568;
+        }
+        
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid #4a5568;
             text-align: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid var(--light-bg);
         }
         
-        .header h1 {
-            color: var(--primary-color);
-            font-weight: 700;
-            margin-bottom: 10px;
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
         }
         
-        .header p {
-            color: #6c757d;
-            font-size: 1.1em;
+        .logo {
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+        }
+        
+        .brand-name {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: white;
+        }
+        
+        .sidebar-actions {
+            padding: 20px;
+            flex-grow: 1;
         }
         
         .upload-section {
-            background: var(--light-bg);
-            border-radius: 10px;
-            padding: 25px;
-            margin-bottom: 30px;
-            border: 2px dashed #dee2e6;
-            transition: all 0.3s ease;
-        }
-        
-        .upload-section:hover {
-            border-color: var(--secondary-color);
-            background: #e3f2fd;
-        }
-        
-        .upload-section.dragover {
-            border-color: var(--accent-color);
-            background: #e8f5e8;
-        }
-        
-        .file-input-wrapper {
-            position: relative;
-            display: inline-block;
-            cursor: pointer;
-        }
-        
-        .file-input {
-            position: absolute;
-            opacity: 0;
-            width: 100%;
-            height: 100%;
-            cursor: pointer;
+            margin-bottom: 20px;
         }
         
         .upload-btn {
-            background: var(--accent-color);
+            width: 100%;
+            background: var(--primary-color);
             border: none;
-            padding: 12px 30px;
-            font-size: 1.1em;
-            font-weight: 600;
-            border-radius: 8px;
             color: white;
-            transition: all 0.3s ease;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
         
         .upload-btn:hover {
-            background: #229954;
-            transform: translateY(-2px);
+            background: var(--secondary-color);
+        }
+        
+        .upload-btn:disabled {
+            background: #6b7280;
+            cursor: not-allowed;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .clear-btn {
+            width: 100%;
+            background: transparent;
+            border: 1px solid #4a5568;
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 10px;
+        }
+        
+        .clear-btn:hover {
+            background: #4a5568;
+        }
+        
+        .upload-status {
+            margin-top: 10px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            display: none;
+        }
+        
+        .upload-status.success {
+            background: #065f46;
+            color: #d1fae5;
+        }
+        
+        .upload-status.error {
+            background: #991b1b;
+            color: #fecaca;
+        }
+        
+        /* Main Chat Area */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--background-color);
+        }
+        
+        .chat-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--background-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .chat-title {
+            font-size: 1.5em;
+            font-weight: 600;
+            color: var(--text-primary);
         }
         
         .chat-container {
-            background: var(--chat-bg);
-            border-radius: 10px;
-            height: 500px;
+            flex: 1;
             overflow-y: auto;
             padding: 20px;
-            margin-bottom: 20px;
-            border: 1px solid #dee2e6;
+            background: var(--chat-bg);
         }
         
         .message {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             display: flex;
             align-items: flex-start;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
         }
         
         .message.user {
-            justify-content: flex-end;
+            flex-direction: row-reverse;
         }
         
-        .message.ai {
-            justify-content: flex-start;
+        .message-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 12px;
+            flex-shrink: 0;
+        }
+        
+        .message.user .message-avatar {
+            background: var(--user-msg-bg);
+            color: white;
+        }
+        
+        .message.ai .message-avatar {
+            background: var(--primary-color);
+            color: white;
         }
         
         .message-content {
-            max-width: 70%;
+            flex: 1;
             padding: 12px 16px;
-            border-radius: 18px;
+            border-radius: 8px;
+            max-width: calc(100% - 60px);
             word-wrap: break-word;
         }
         
         .message.user .message-content {
             background: var(--user-msg-bg);
-            color: var(--dark-text);
-            border-bottom-right-radius: 4px;
+            color: white;
         }
         
         .message.ai .message-content {
             background: var(--ai-msg-bg);
-            color: var(--dark-text);
-            border-bottom-left-radius: 4px;
-        }
-        
-        .message-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 8px;
-            font-size: 14px;
-            color: white;
-        }
-        
-        .message.user .message-avatar {
-            background: var(--secondary-color);
-        }
-        
-        .message.ai .message-avatar {
-            background: var(--accent-color);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
         }
         
         .sources-section {
-            margin-top: 10px;
-            padding: 10px;
-            background: rgba(255, 255, 255, 0.8);
-            border-radius: 8px;
-            font-size: 0.9em;
+            margin-top: 12px;
+            padding: 12px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            font-size: 13px;
+        }
+        
+        .sources-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
         }
         
         .source-item {
             margin-bottom: 8px;
             padding: 8px;
-            background: white;
-            border-radius: 6px;
-            border-left: 3px solid var(--secondary-color);
+            background: var(--hover-bg);
+            border-radius: 4px;
+            border-left: 3px solid var(--primary-color);
         }
         
         .source-title {
-            font-weight: 600;
-            color: var(--primary-color);
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 4px;
         }
         
         .source-preview {
-            color: #6c757d;
-            font-size: 0.85em;
-            margin-top: 4px;
+            color: var(--text-secondary);
+            font-size: 12px;
+            line-height: 1.4;
         }
         
-        .chat-input-section {
-            display: flex;
-            gap: 10px;
-            align-items: center;
+        .welcome-message {
+            text-align: center;
+            color: var(--text-secondary);
+            padding: 60px 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .welcome-icon {
+            font-size: 4em;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+        
+        .welcome-title {
+            font-size: 1.8em;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 15px;
+        }
+        
+        .welcome-text {
+            font-size: 1.1em;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        
+        .welcome-suggestion {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 20px;
+            text-align: left;
+        }
+        
+        .suggestion-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+        
+        .suggestion-text {
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+        
+        /* Input Area */
+        .input-container {
+            padding: 20px;
+            background: var(--background-color);
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .input-wrapper {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
         }
         
         .chat-input {
-            flex: 1;
-            border: 2px solid #e9ecef;
-            border-radius: 25px;
-            padding: 12px 20px;
-            font-size: 1em;
-            transition: all 0.3s ease;
+            width: 100%;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px 50px 12px 16px;
+            font-size: 16px;
+            line-height: 1.5;
+            resize: none;
+            outline: none;
+            transition: border-color 0.2s;
+            background: var(--background-color);
+            color: var(--text-primary);
         }
         
         .chat-input:focus {
-            border-color: var(--secondary-color);
-            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
-            outline: none;
+            border-color: var(--primary-color);
         }
         
         .send-btn {
-            background: var(--secondary-color);
+            position: absolute;
+            right: 8px;
+            bottom: 8px;
+            background: var(--primary-color);
             border: none;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
             color: white;
-            font-size: 1.2em;
-            transition: all 0.3s ease;
+            cursor: pointer;
+            transition: background 0.2s;
             display: flex;
             align-items: center;
             justify-content: center;
         }
         
         .send-btn:hover {
-            background: #2980b9;
-            transform: scale(1.1);
+            background: var(--secondary-color);
         }
         
         .send-btn:disabled {
-            background: #6c757d;
+            background: #6b7280;
             cursor: not-allowed;
-            transform: none;
-        }
-        
-        .loading-spinner {
-            display: none;
-            text-align: center;
-            padding: 20px;
-        }
-        
-        .spinner-border {
-            width: 2rem;
-            height: 2rem;
-        }
-        
-        .alert {
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-        
-        .btn-clear {
-            background: var(--warning-color);
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            color: white;
-            font-size: 0.9em;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-clear:hover {
-            background: #e67e22;
-        }
-        
-        .upload-status {
-            margin-top: 15px;
-            padding: 10px;
-            border-radius: 8px;
-            display: none;
-        }
-        
-        .upload-status.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        
-        .upload-status.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
         }
         
         .typing-indicator {
             display: none;
             padding: 12px 16px;
             background: var(--ai-msg-bg);
-            border-radius: 18px;
-            border-bottom-left-radius: 4px;
-            margin-bottom: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 20px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
         }
         
         .typing-dots {
@@ -303,10 +389,10 @@
         
         .typing-dots span {
             display: inline-block;
-            width: 8px;
-            height: 8px;
+            width: 6px;
+            height: 6px;
             border-radius: 50%;
-            background: #6c757d;
+            background: var(--text-secondary);
             margin: 0 2px;
             animation: typing 1.4s infinite ease-in-out;
         }
@@ -319,59 +405,140 @@
             40% { transform: scale(1); }
         }
         
-        .welcome-message {
-            text-align: center;
-            color: #6c757d;
-            padding: 40px 20px;
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                left: -260px;
+                top: 0;
+                height: 100vh;
+                z-index: 1000;
+                transition: left 0.3s;
+            }
+            
+            .sidebar.open {
+                left: 0;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .mobile-menu-btn {
+                display: block;
+                position: fixed;
+                top: 20px;
+                left: 20px;
+                z-index: 1001;
+                background: var(--primary-color);
+                border: none;
+                color: white;
+                padding: 10px;
+                border-radius: 6px;
+                cursor: pointer;
+            }
+            
+            .message {
+                margin-left: 10px;
+                margin-right: 10px;
+            }
         }
         
-        .welcome-message i {
-            font-size: 3em;
-            margin-bottom: 20px;
-            color: var(--secondary-color);
+        .mobile-menu-btn {
+            display: none;
+        }
+        
+        /* Loading States */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        
+        /* Scrollbar Styling */
+        .chat-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .chat-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .chat-container::-webkit-scrollbar-thumb {
+            background: #cbd5e0;
+            border-radius: 3px;
+        }
+        
+        .chat-container::-webkit-scrollbar-thumb:hover {
+            background: #a0aec0;
         }
     </style>
 </head>
 <body>
-    <div class="main-container">
-        <!-- Header -->
-        <div class="header">
-            <h1><i class="fas fa-graduation-cap"></i> Scaffold AI Enhanced UI</h1>
-            <p>Upload your syllabus and start a conversation about sustainability integration</p>
-        </div>
-
-        <!-- Syllabus Upload Section -->
-        <div class="upload-section" id="uploadSection">
-            <div class="text-center">
-                <h4><i class="fas fa-file-upload"></i> Upload Your Syllabus</h4>
-                <p class="text-muted">Upload a PDF syllabus to get personalized sustainability integration suggestions</p>
-                
-                <div class="file-input-wrapper">
+    <div class="app-container">
+        <!-- Mobile Menu Button -->
+        <button class="mobile-menu-btn" onclick="toggleSidebar()">
+            <i class="fas fa-bars"></i>
+        </button>
+        
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-container">
+                    <img src="/static/LogoR1.png" alt="Scaffold AI" class="logo">
+                    <span class="brand-name">Scaffold AI</span>
+                </div>
+                <div style="font-size: 12px; color: #a0aec0; margin-top: 5px;">
+                    Sustainability Education Assistant
+                </div>
+            </div>
+            
+            <div class="sidebar-actions">
+                <div class="upload-section">
                     <input type="file" class="file-input" id="syllabusFile" accept=".pdf" onchange="handleFileSelect(event)">
-                    <button class="upload-btn" onclick="document.getElementById('syllabusFile').click()">
-                        <i class="fas fa-cloud-upload-alt"></i> Choose PDF File
+                    <button class="upload-btn" onclick="document.getElementById('syllabusFile').click()" id="uploadBtn">
+                        <i class="fas fa-file-upload"></i>
+                        Upload Syllabus
                     </button>
+                    <div class="upload-status" id="uploadStatus"></div>
                 </div>
                 
-                <div class="upload-status" id="uploadStatus"></div>
+                <button class="clear-btn" onclick="clearConversation()">
+                    <i class="fas fa-trash"></i>
+                    Clear Chat
+                </button>
             </div>
         </div>
-
-        <!-- Chat Interface -->
-        <div class="chat-section">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h4><i class="fas fa-comments"></i> Chat Interface</h4>
-                <button class="btn-clear" onclick="clearConversation()">
-                    <i class="fas fa-trash"></i> Clear Chat
-                </button>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="chat-header">
+                <h1 class="chat-title">Chat with Scaffold AI</h1>
             </div>
             
             <div class="chat-container" id="chatContainer">
                 <div class="welcome-message">
-                    <i class="fas fa-robot"></i>
-                    <h5>Welcome to Scaffold AI!</h5>
-                    <p>Upload your syllabus above, then ask me about integrating sustainability into your course.</p>
-                    <p>Try asking: "How can I incorporate sustainability into my Fluid Mechanics course?"</p>
+                    <div class="welcome-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <h2 class="welcome-title">Welcome to Scaffold AI</h2>
+                    <p class="welcome-text">
+                        I'm here to help you integrate sustainability into your engineering courses. 
+                        Upload your syllabus to get personalized suggestions, or start a conversation about sustainability education.
+                    </p>
+                    
+                    <div class="welcome-suggestion">
+                        <div class="suggestion-title">💡 Try asking:</div>
+                        <div class="suggestion-text">
+                            "How can I incorporate sustainability into my Fluid Mechanics course?"
+                        </div>
+                    </div>
+                    
+                    <div class="welcome-suggestion">
+                        <div class="suggestion-title">📚 Upload your syllabus</div>
+                        <div class="suggestion-text">
+                            Get personalized sustainability integration suggestions based on your specific course content.
+                        </div>
+                    </div>
                 </div>
             </div>
             
@@ -381,24 +548,24 @@
                     <span></span>
                     <span></span>
                 </div>
-                AI is thinking...
+                Scaffold AI is thinking...
             </div>
             
-            <div class="chat-input-section">
-                <input type="text" class="chat-input" id="chatInput" placeholder="Type your message here..." 
-                       onkeypress="handleKeyPress(event)">
-                <button class="send-btn" id="sendBtn" onclick="sendMessage()">
-                    <i class="fas fa-paper-plane"></i>
-                </button>
+            <div class="input-container">
+                <div class="input-wrapper">
+                    <textarea 
+                        class="chat-input" 
+                        id="chatInput" 
+                        placeholder="Message Scaffold AI..." 
+                        rows="1"
+                        onkeypress="handleKeyPress(event)"
+                        oninput="autoResize(this)"
+                    ></textarea>
+                    <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
             </div>
-        </div>
-
-        <!-- Loading Spinner -->
-        <div class="loading-spinner" id="loadingSpinner">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
-            <p class="mt-2">Processing your request...</p>
         </div>
     </div>
 
@@ -410,6 +577,18 @@
         document.addEventListener('DOMContentLoaded', function() {
             loadConversationHistory();
         });
+
+        // Auto-resize textarea
+        function autoResize(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+        }
+
+        // Mobile sidebar toggle
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('open');
+        }
 
         // File upload handling
         function handleFileSelect(event) {
@@ -424,9 +603,13 @@
             formData.append('file', file);
             
             const statusDiv = document.getElementById('uploadStatus');
+            const uploadBtn = document.getElementById('uploadBtn');
+            
             statusDiv.style.display = 'block';
             statusDiv.className = 'upload-status';
-            statusDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+            statusDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading and analyzing...';
+            uploadBtn.disabled = true;
+            uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
             
             fetch('/api/upload-syllabus', {
                 method: 'POST',
@@ -436,10 +619,16 @@
             .then(data => {
                 if (data.success) {
                     statusDiv.className = 'upload-status success';
-                    statusDiv.innerHTML = `<i class="fas fa-check"></i> ${data.message}: ${data.filename}`;
+                    statusDiv.innerHTML = `<i class="fas fa-check"></i> ${data.filename} uploaded successfully`;
                     
                     // Add a system message to the chat
-                    addMessage('system', `Syllabus "${data.filename}" uploaded successfully. You can now ask questions about integrating sustainability into this course.`);
+                    addMessage('system', `📄 Syllabus "${data.filename}" uploaded and analyzed. You can now ask me about integrating sustainability into this course.`);
+                    
+                    // Add suggestions if available
+                    if (data.suggestions && data.suggestions.length > 0) {
+                        const suggestionsText = data.suggestions.slice(0, 3).join('\n• ');
+                        addMessage('ai', `Here are some initial suggestions for your course:\n\n• ${suggestionsText}`);
+                    }
                 } else {
                     statusDiv.className = 'upload-status error';
                     statusDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Error: ${data.error}`;
@@ -448,6 +637,10 @@
             .catch(error => {
                 statusDiv.className = 'upload-status error';
                 statusDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Upload failed: ${error.message}`;
+            })
+            .finally(() => {
+                uploadBtn.disabled = false;
+                uploadBtn.innerHTML = '<i class="fas fa-file-upload"></i> Upload Syllabus';
             });
         }
 
@@ -466,6 +659,7 @@
             if (message && !isProcessing) {
                 addMessage('user', message);
                 input.value = '';
+                input.style.height = 'auto';
                 
                 // Show typing indicator
                 showTypingIndicator();
@@ -519,13 +713,13 @@
                 contentDiv.textContent = content;
             } else if (type === 'ai') {
                 avatar.innerHTML = '<i class="fas fa-robot"></i>';
-                contentDiv.innerHTML = content;
+                contentDiv.innerHTML = content.replace(/\n/g, '<br>');
                 
                 // Add sources if available
                 if (sources && sources.length > 0) {
                     const sourcesDiv = document.createElement('div');
                     sourcesDiv.className = 'sources-section';
-                    sourcesDiv.innerHTML = '<strong>Sources:</strong>';
+                    sourcesDiv.innerHTML = '<div class="sources-title">📚 Sources:</div>';
                     
                     sources.forEach(source => {
                         const sourceDiv = document.createElement('div');
@@ -604,10 +798,28 @@
                         const chatContainer = document.getElementById('chatContainer');
                         chatContainer.innerHTML = `
                             <div class="welcome-message">
-                                <i class="fas fa-robot"></i>
-                                <h5>Welcome to Scaffold AI!</h5>
-                                <p>Upload your syllabus above, then ask me about integrating sustainability into your course.</p>
-                                <p>Try asking: "How can I incorporate sustainability into my Fluid Mechanics course?"</p>
+                                <div class="welcome-icon">
+                                    <i class="fas fa-graduation-cap"></i>
+                                </div>
+                                <h2 class="welcome-title">Welcome to Scaffold AI</h2>
+                                <p class="welcome-text">
+                                    I'm here to help you integrate sustainability into your engineering courses. 
+                                    Upload your syllabus to get personalized suggestions, or start a conversation about sustainability education.
+                                </p>
+                                
+                                <div class="welcome-suggestion">
+                                    <div class="suggestion-title">💡 Try asking:</div>
+                                    <div class="suggestion-text">
+                                        "How can I incorporate sustainability into my Fluid Mechanics course?"
+                                    </div>
+                                </div>
+                                
+                                <div class="welcome-suggestion">
+                                    <div class="suggestion-title">📚 Upload your syllabus</div>
+                                    <div class="suggestion-text">
+                                        Get personalized sustainability integration suggestions based on your specific course content.
+                                    </div>
+                                </div>
                             </div>
                         `;
                     }
@@ -618,31 +830,15 @@
             }
         }
 
-        // Drag and drop functionality
-        const uploadSection = document.getElementById('uploadSection');
-        
-        uploadSection.addEventListener('dragover', function(e) {
-            e.preventDefault();
-            uploadSection.classList.add('dragover');
-        });
-        
-        uploadSection.addEventListener('dragleave', function(e) {
-            e.preventDefault();
-            uploadSection.classList.remove('dragover');
-        });
-        
-        uploadSection.addEventListener('drop', function(e) {
-            e.preventDefault();
-            uploadSection.classList.remove('dragover');
+        // Close mobile sidebar when clicking outside
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('sidebar');
+            const mobileBtn = document.querySelector('.mobile-menu-btn');
             
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                const file = files[0];
-                if (file.type === 'application/pdf') {
-                    uploadSyllabus(file);
-                } else {
-                    alert('Please upload a PDF file.');
-                }
+            if (window.innerWidth <= 768 && 
+                !sidebar.contains(event.target) && 
+                !mobileBtn.contains(event.target)) {
+                sidebar.classList.remove('open');
             }
         });
     </script>

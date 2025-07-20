@@ -25,7 +25,7 @@ from scaffold_core.vector.enhanced_query import (
 from scaffold_core.pdf_processor import process_syllabus_upload
 
 # Initialize Flask app
-app = Flask(__name__, template_folder='templates')
+app = Flask(__name__, template_folder='templates', static_folder='static')
 CORS(app)
 
 # Configuration
