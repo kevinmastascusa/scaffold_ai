@@ -228,12 +228,14 @@ The system will include three key components:
 
 The project follows a structured timeline with week-by-week development phases. Key phases include:
 
-* 🏗️ Setting up the preprocessing pipeline and repository structure
-* 🤖 Embedding the curated document corpus and validating retrieval quality
-* 🧪 Integrating the LLM and developing the initial prototype
-* 🎨 Building and refining the user interface
-* 🧾 Implementing citation tracking and performing usability testing
-* 🧑‍🏫 Engaging stakeholders for feedback and refining the final product
+* 🏗️ Setting up the preprocessing pipeline and repository structure ✅
+* 🤖 Embedding the curated document corpus and validating retrieval quality ✅
+* 🧪 Integrating the LLM and developing the initial prototype ✅
+* 🎨 Building and refining the user interface 🔄
+* 🧾 Implementing citation tracking and performing usability testing 🔄
+* 🧑‍🏫 Engaging stakeholders for feedback and refining the final product 📋
+
+**📊 For detailed project timeline and critical path analysis, see [CRITICAL_PATH.md](CRITICAL_PATH.md)**
 
 Optional enhancements may include a real-time feedback loop in the UI and tag-based filtering of recommendations.
 
@@ -358,6 +360,16 @@ Evaluation will include both qualitative feedback from faculty and technical per
 5. **README.md Documentation** ✅ **COMPLETED**
    * ✅ Created and incrementally updated comprehensive README.md with full setup instructions, usage examples, and project context
    * ✅ Added project structure overview and configuration explanation
+
+## 🔍 Project Validation
+
+To validate that all critical path components are present, run:
+
+```bash
+python validate_critical_path.py
+```
+
+This will check all essential components and provide a status report.
 
 ## 📝 Model Version/Hash Logging
 - Log all model names, descriptions, and hashes for reproducibility:
