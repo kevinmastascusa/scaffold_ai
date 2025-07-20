@@ -627,6 +627,116 @@ def api_health():
         'mode': 'llm_powered' if system_initialized else 'fallback'
     })
 
+@app.route('/api/models')
+def get_models():
+    """Get available models and current selections."""
+    try:
+        from scaffold_core.config import MODEL_REGISTRY, LLM_MODELS, EMBEDDING_MODELS
+        from scaffold_core.config_manager import config_manager
+        
+        # Get current selections from config manager
+        current_llm_key = config_manager.get_selected_model('llm')
+        current_embedding_key = config_manager.get_selected_model('embedding')
+        
+        # Get model settings
+        llm_settings = config_manager.get_model_settings('llm')
+        embedding_settings = config_manager.get_model_settings('embedding')
+        
+        return jsonify({
+            'llm': MODEL_REGISTRY['llm'],
+            'embedding': MODEL_REGISTRY['embedding'],
+            'current_llm': current_llm_key,
+            'current_embedding': current_embedding_key,
+            'settings': {
+                'llm': llm_settings,
+                'embedding': embedding_settings
+            }
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/models/switch', methods=['POST'])
+def switch_model():
+    """Switch to a different model."""
+    try:
+        data = request.get_json()
+        model_type = data.get('model_type')
+        model_key = data.get('model_key')
+        
+        if not model_type or not model_key:
+            return jsonify({'error': 'Missing model_type or model_key'}), 400
+        
+        from scaffold_core.config import MODEL_REGISTRY, LLM_MODELS, EMBEDDING_MODELS
+        from scaffold_core.config_manager import config_manager
+        
+        if model_type == 'llm':
+            if model_key not in LLM_MODELS:
+                return jsonify({'error': f'Invalid LLM model key: {model_key}'}), 400
+            
+            # Update the configuration
+            new_model_name = LLM_MODELS[model_key]['name']
+            config_manager.set_selected_model('llm', model_key)
+            
+            return jsonify({
+                'success': True,
+                'message': f'LLM model switched to {model_key} ({new_model_name})',
+                'note': 'Model configuration updated. The system will reload with the new model.'
+            })
+            
+        elif model_type == 'embedding':
+            if model_key not in EMBEDDING_MODELS:
+                return jsonify({'error': f'Invalid embedding model key: {model_key}'}), 400
+            
+            # Update the configuration
+            new_model_name = EMBEDDING_MODELS[model_key]['name']
+            config_manager.set_selected_model('embedding', model_key)
+            
+            return jsonify({
+                'success': True,
+                'message': f'Embedding model switched to {model_key} ({new_model_name})',
+                'note': 'Model configuration updated. The system will reload with the new model.'
+            })
+        
+        else:
+            return jsonify({'error': f'Invalid model type: {model_type}'}), 400
+            
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/models/settings', methods=['POST'])
+def update_model_settings():
+    """Update model settings."""
+    try:
+        data = request.get_json()
+        model_type = data.get('model_type')
+        settings = data.get('settings', {})
+        
+        if not model_type:
+            return jsonify({'error': 'Missing model_type'}), 400
+        
+        from scaffold_core.config_manager import config_manager
+        
+        # Validate settings based on model type
+        if model_type == 'llm':
+            valid_settings = ['temperature', 'max_new_tokens', 'top_p']
+            filtered_settings = {k: v for k, v in settings.items() if k in valid_settings}
+        elif model_type == 'embedding':
+            valid_settings = ['chunk_size', 'chunk_overlap']
+            filtered_settings = {k: v for k, v in settings.items() if k in valid_settings}
+        else:
+            return jsonify({'error': f'Invalid model type: {model_type}'}), 400
+        
+        config_manager.update_model_settings(model_type, filtered_settings)
+        
+        return jsonify({
+            'success': True,
+            'message': f'{model_type.upper()} settings updated successfully',
+            'settings': filtered_settings
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/feedback')
 def feedback_page():
     """Feedback dashboard page."""

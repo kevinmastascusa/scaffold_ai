@@ -222,6 +222,33 @@
             margin: 20px 0;
         }
         
+        .model-switcher-section {
+            margin-top: 20px;
+        }
+        
+        .model-switcher-section .card {
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .model-switcher-section .card-title {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
+        .model-switcher-section .form-select {
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 0.9em;
+        }
+        
+        .model-switcher-section .form-select:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+        }
+        
         @media (max-width: 768px) {
             .main-container {
                 margin: 10px;
@@ -242,6 +269,69 @@
             <div class="header">
                 <h1><i class="fas fa-graduation-cap"></i> Scaffold AI</h1>
                 <p>Pilot UI for Sustainability & Life Cycle Assessment Knowledge System</p>
+                
+                <!-- Model Switcher -->
+                <div class="model-switcher-section mt-3">
+                    <div class="row justify-content-center">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6 class="card-title"><i class="fas fa-cogs"></i> Model Configuration</h6>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <label for="llmModelSelect" class="form-label">LLM Model:</label>
+                                            <select id="llmModelSelect" class="form-select form-select-sm">
+                                                <option value="">Loading models...</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="embeddingModelSelect" class="form-label">Embedding Model:</label>
+                                            <select id="embeddingModelSelect" class="form-select form-select-sm">
+                                                <option value="">Loading models...</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2">
+                                        <small class="text-muted" id="modelDescription">Select a model to see its description</small>
+                                    </div>
+                                    
+                                    <!-- Model Settings -->
+                                    <div class="mt-3">
+                                        <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#modelSettings">
+                                            <i class="fas fa-cog"></i> Advanced Settings
+                                        </button>
+                                    </div>
+                                    
+                                    <div class="collapse mt-3" id="modelSettings">
+                                        <div class="card card-body">
+                                            <h6>LLM Settings</h6>
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <label for="temperature" class="form-label">Temperature:</label>
+                                                    <input type="range" class="form-range" id="temperature" min="0" max="2" step="0.1" value="0.3">
+                                                    <small class="text-muted" id="temperatureValue">0.3</small>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label for="maxTokens" class="form-label">Max Tokens:</label>
+                                                    <input type="range" class="form-range" id="maxTokens" min="100" max="2000" step="100" value="800">
+                                                    <small class="text-muted" id="maxTokensValue">800</small>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label for="topP" class="form-label">Top P:</label>
+                                                    <input type="range" class="form-range" id="topP" min="0" max="1" step="0.1" value="0.9">
+                                                    <small class="text-muted" id="topPValue">0.9</small>
+                                                </div>
+                                            </div>
+                                            <button class="btn btn-sm btn-success mt-2" onclick="saveLLMSettings()">
+                                                <i class="fas fa-save"></i> Save LLM Settings
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             
             <!-- Query Section -->
@@ -392,9 +482,23 @@
         const ratingStars = document.getElementById('ratingStars');
         const messageContainer = document.getElementById('messageContainer');
         
+        // Model switcher elements
+        const llmModelSelect = document.getElementById('llmModelSelect');
+        const embeddingModelSelect = document.getElementById('embeddingModelSelect');
+        const modelDescription = document.getElementById('modelDescription');
+        
         // Event listeners
         queryForm.addEventListener('submit', handleQuery);
         feedbackForm.addEventListener('submit', handleFeedback);
+        
+        // Model switcher event listeners
+        llmModelSelect.addEventListener('change', handleLLMModelChange);
+        embeddingModelSelect.addEventListener('change', handleEmbeddingModelChange);
+        
+        // Settings event listeners
+        document.getElementById('temperature').addEventListener('input', updateTemperatureValue);
+        document.getElementById('maxTokens').addEventListener('input', updateMaxTokensValue);
+        document.getElementById('topP').addEventListener('input', updateTopPValue);
         
         // Example query buttons
         document.querySelectorAll('.example-query').forEach(btn => {
@@ -630,7 +734,206 @@
             messageContainer.innerHTML = '';
         }
         
+        // Model Switcher Functions
+        async function loadAvailableModels() {
+            try {
+                const response = await fetch('/api/models');
+                const data = await response.json();
+                
+                if (response.ok) {
+                    populateModelSelects(data);
+                } else {
+                    console.error('Failed to load models:', data.error);
+                }
+            } catch (error) {
+                console.error('Error loading models:', error);
+            }
+        }
+        
+        function populateModelSelects(models) {
+            // Populate LLM models
+            llmModelSelect.innerHTML = '<option value="">Select LLM Model</option>';
+            Object.entries(models.llm).forEach(([key, model]) => {
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = `${key.charAt(0).toUpperCase() + key.slice(1)} - ${model.name.split('/').pop()}`;
+                option.dataset.description = model.desc;
+                llmModelSelect.appendChild(option);
+            });
+            
+            // Populate embedding models
+            embeddingModelSelect.innerHTML = '<option value="">Select Embedding Model</option>';
+            Object.entries(models.embedding).forEach(([key, model]) => {
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = `${key.charAt(0).toUpperCase() + key.slice(1)} - ${model.name.split('/').pop()}`;
+                option.dataset.description = model.desc;
+                embeddingModelSelect.appendChild(option);
+            });
+            
+            // Set current selections
+            if (models.current_llm) {
+                llmModelSelect.value = models.current_llm;
+                updateModelDescription();
+            }
+            if (models.current_embedding) {
+                embeddingModelSelect.value = models.current_embedding;
+                updateModelDescription();
+            }
+            
+            // Load settings
+            if (models.settings) {
+                loadSettings(models.settings);
+            }
+        }
+        
+        function updateModelDescription() {
+            const llmOption = llmModelSelect.options[llmModelSelect.selectedIndex];
+            const embeddingOption = embeddingModelSelect.options[embeddingModelSelect.selectedIndex];
+            
+            let description = '';
+            if (llmOption && llmOption.dataset.description) {
+                description += `<strong>LLM:</strong> ${llmOption.dataset.description}`;
+            }
+            if (embeddingOption && embeddingOption.dataset.description) {
+                if (description) description += '<br>';
+                description += `<strong>Embedding:</strong> ${embeddingOption.dataset.description}`;
+            }
+            
+            modelDescription.innerHTML = description || 'Select a model to see its description';
+        }
+        
+        async function handleLLMModelChange() {
+            const selectedModel = llmModelSelect.value;
+            if (!selectedModel) return;
+            
+            try {
+                const response = await fetch('/api/models/switch', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        model_type: 'llm',
+                        model_key: selectedModel
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showSuccess(`LLM model switched to ${selectedModel}. The system will reload with the new model.`);
+                    updateModelDescription();
+                    
+                    // Reload the system after a short delay
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
+                } else {
+                    showError(data.error || 'Failed to switch LLM model.');
+                }
+            } catch (error) {
+                showError('Network error while switching model: ' + error.message);
+            }
+        }
+        
+        async function handleEmbeddingModelChange() {
+            const selectedModel = embeddingModelSelect.value;
+            if (!selectedModel) return;
+            
+            try {
+                const response = await fetch('/api/models/switch', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        model_type: 'embedding',
+                        model_key: selectedModel
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showSuccess(`Embedding model switched to ${selectedModel}. The system will reload with the new model.`);
+                    updateModelDescription();
+                    
+                    // Reload the system after a short delay
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
+                } else {
+                    showError(data.error || 'Failed to switch embedding model.');
+                }
+            } catch (error) {
+                showError('Network error while switching model: ' + error.message);
+            }
+        }
+        
+        // Settings Functions
+        function updateTemperatureValue() {
+            const value = document.getElementById('temperature').value;
+            document.getElementById('temperatureValue').textContent = value;
+        }
+        
+        function updateMaxTokensValue() {
+            const value = document.getElementById('maxTokens').value;
+            document.getElementById('maxTokensValue').textContent = value;
+        }
+        
+        function updateTopPValue() {
+            const value = document.getElementById('topP').value;
+            document.getElementById('topPValue').textContent = value;
+        }
+        
+        async function saveLLMSettings() {
+            const temperature = parseFloat(document.getElementById('temperature').value);
+            const maxTokens = parseInt(document.getElementById('maxTokens').value);
+            const topP = parseFloat(document.getElementById('topP').value);
+            
+            try {
+                const response = await fetch('/api/models/settings', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        model_type: 'llm',
+                        settings: {
+                            temperature: temperature,
+                            max_new_tokens: maxTokens,
+                            top_p: topP
+                        }
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showSuccess('LLM settings saved successfully!');
+                } else {
+                    showError(data.error || 'Failed to save settings.');
+                }
+            } catch (error) {
+                showError('Network error while saving settings: ' + error.message);
+            }
+        }
+        
+        function loadSettings(settings) {
+            if (settings.llm) {
+                document.getElementById('temperature').value = settings.llm.temperature || 0.3;
+                document.getElementById('maxTokens').value = settings.llm.max_new_tokens || 800;
+                document.getElementById('topP').value = settings.llm.top_p || 0.9;
+                
+                updateTemperatureValue();
+                updateMaxTokensValue();
+                updateTopPValue();
+            }
+        }
+        
         // Initialize
+        loadAvailableModels();
         queryInput.focus();
     </script>
 </body>
