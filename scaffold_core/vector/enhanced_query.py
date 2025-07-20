@@ -236,7 +236,7 @@ class EnhancedQuerySystem:
         return results[:k]
 
     def cross_encoder_rerank(self, query: str, candidates: List[Dict]) -> List[Dict]:
-        """Rerank candidates using cross-encoder."""
+        """Rerank candidates using cross-encoder with improved error handling."""
         logger.debug(f"Reranking {len(candidates)} candidates with cross-encoder")
 
         # Handle empty candidates list
@@ -244,40 +244,53 @@ class EnhancedQuerySystem:
             logger.warning("No candidates to rerank")
             return []
 
-        # Prepare pairs for cross-encoder
-        pairs = [[query, candidate["text"]] for candidate in candidates]
+        try:
+            # Prepare pairs for cross-encoder
+            pairs = [[query, candidate.get("text", "")] for candidate in candidates]
 
-        # Get cross-encoder scores
-        cross_scores = self.cross_encoder.predict(pairs)
+            # Get cross-encoder scores
+            cross_scores = self.cross_encoder.predict(pairs)
 
-        # Add cross-encoder scores to candidates
-        for candidate, score in zip(candidates, cross_scores):
-            candidate["cross_score"] = float(score)
+            # Add cross-encoder scores to candidates with error handling
+            for candidate, score in zip(candidates, cross_scores):
+                try:
+                    candidate["cross_score"] = float(score)
+                except (ValueError, TypeError):
+                    candidate["cross_score"] = 0.0
 
-        # Sort by cross-encoder score
-        candidates.sort(key=lambda x: x["cross_score"], reverse=True)
+            # Sort by cross-encoder score
+            candidates.sort(key=lambda x: x["cross_score"], reverse=True)
 
-        return candidates
+            return candidates
+
+        except Exception as e:
+            logger.error(f"Error in cross-encoder reranking: {e}")
+            return candidates
 
     def contextual_filtering(self, query: str, candidates: List[Dict]) -> List[Dict]:
-        """Apply contextual filtering to improve relevance."""
+        """Apply improved contextual filtering to improve relevance."""
         logger.debug(f"Performing contextual filtering on {len(candidates)} candidates")
         if not candidates:
             return []
 
-        # Simple contextual filtering based on shared keywords
-        query_keywords = set(self.extract_keywords(query))
-        if not query_keywords:
+        try:
+            # Extract keywords from query
+            query_keywords = set(self.extract_keywords(query))
+            if not query_keywords:
+                return candidates
+
+            for candidate in candidates:
+                text_keywords = set(self.extract_keywords(candidate.get('text', '')))
+                shared_keywords = query_keywords.intersection(text_keywords)
+                candidate['contextual_score'] = len(shared_keywords)
+
+            # Sort by contextual score
+            candidates.sort(key=lambda x: x['contextual_score'], reverse=True)
             return candidates
 
-        for candidate in candidates:
-            text_keywords = set(self.extract_keywords(candidate['text']))
-            shared_keywords = query_keywords.intersection(text_keywords)
-            candidate['contextual_score'] = len(shared_keywords)
-
-        # Sort by contextual score
-        candidates.sort(key=lambda x: x['contextual_score'], reverse=True)
-        return candidates
+        except Exception as e:
+            logger.error(f"Error in contextual filtering: {e}")
+            return candidates
 
     def generate_enhanced_prompt(
         self, query: str, chunks: List[Dict]
@@ -323,21 +336,29 @@ class EnhancedQuerySystem:
             [f"{c['ref']}: {c['name']}" for c in citation_refs]
         )
 
-        prompt = (
-            "Please answer the following query based on the provided sources."
-            "\nUse the sources to provide a comprehensive and accurate answer."
-            "\n**IMPORTANT**: You MUST cite the sources you use in your "
-            "response using the format [1], [2], etc. at the end of each "
-            "sentence."
-            "\n\n---"
-            f"\n**QUERY**: {query}"
-            f"\n\n---"
-            f"\n**SOURCES**:\n{context}"
-            f"\n\n---"
-            f"\n**CITATION LIST**:\n{citations_str}"
-            f"\n\n---"
-            "\n**ANSWER** (with citations):"
-        )
+        # Improved prompt template with better engineering
+        prompt = f"""You are a helpful AI assistant that provides accurate, relevant, and well-cited responses based on the provided sources.
+
+TASK: Answer the following query using ONLY the information from the provided sources.
+
+QUERY: {query}
+
+SOURCES:
+{context}
+
+CITATION LIST:
+{citations_str}
+
+INSTRUCTIONS:
+1. Answer the query comprehensively using information from the sources
+2. Use specific details and examples from the sources
+3. Cite sources using [1], [2], etc. format at the end of relevant sentences
+4. Avoid repetition and stay focused on the query
+5. If the sources don't contain enough information, say so clearly
+6. Write in a clear, professional tone
+7. Keep the response concise but complete
+
+ANSWER:"""
         
         # Log estimated token count
         total_estimated_tokens = len(prompt) // 4
@@ -374,7 +395,8 @@ class EnhancedQuerySystem:
         enhanced_prompt = self.generate_enhanced_prompt(query, final_candidates)
 
         try:
-            llm_response = llm.generate_response(enhanced_prompt, temperature=0.3)
+            # Use lower temperature for more stable and consistent responses
+            llm_response = llm.generate_response(enhanced_prompt, temperature=0.1)
         except Exception as e:
             logger.error(f"LLM response generation failed: {str(e)}")
             llm_response = f"Error generating response: {str(e)}"

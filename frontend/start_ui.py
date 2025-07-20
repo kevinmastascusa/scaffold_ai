@@ -119,11 +119,11 @@ def main():
     # Start the Flask application
     try:
         from app import app
-        print("📍 Access the UI at: http://localhost:5000")
-        print("📊 Feedback dashboard at: http://localhost:5000/feedback")
+        print("📍 Access the UI at: http://localhost:5002")
+        print("📊 Feedback dashboard at: http://localhost:5002/feedback")
         print("💡 Press Ctrl+C to stop the server\n")
 
-        app.run(host='0.0.0.0', port=5000, debug=True)
+        app.run(host='0.0.0.0', port=5002, debug=True)
 
     except KeyboardInterrupt:
         print("\n👋 Shutting down gracefully...")
