@@ -41,6 +41,7 @@ FEEDBACK_DIR.mkdir(exist_ok=True)
 embedding_model = None
 index = None
 metadata = None
+llm_manager = None
 system_initialized = False
 
 def allowed_file(filename):
@@ -68,14 +69,14 @@ def save_conversation_history(session_id, conversation):
         print(f"Error saving conversation file: {e}")
 
 def initialize_search_system():
-    """Initialize the search system with embeddings and vector index."""
-    global embedding_model, index, metadata, system_initialized
+    """Initialize the search system with embeddings, vector index, and LLM."""
+    global embedding_model, index, metadata, system_initialized, llm_manager
     
     if system_initialized:
         return True
         
     try:
-        print("🔄 Initializing direct search system...")
+        print("🔄 Initializing LLM-powered search system...")
         
         # Import configuration
         from scaffold_core.config import EMBEDDING_MODEL, get_faiss_index_path, get_metadata_json_path
@@ -100,8 +101,13 @@ def initialize_search_system():
             metadata = json.load(f)
         print(f"✅ Metadata loaded: {len(metadata)} entries")
         
+        # Initialize LLM manager
+        from scaffold_core.llm import LLMManager
+        llm_manager = LLMManager()
+        print("✅ LLM manager initialized")
+        
         system_initialized = True
-        print("✅ Direct search system initialized successfully")
+        print("✅ LLM-powered search system initialized successfully")
         return True
         
     except Exception as e:
@@ -109,6 +115,7 @@ def initialize_search_system():
         embedding_model = None
         index = None
         metadata = None
+        llm_manager = None
         system_initialized = False
         return False
 
@@ -188,77 +195,93 @@ def search_sustainability_data(query, k=10):
         return []
 
 def generate_response_from_sources(query, search_results):
-    """Generate a coherent response based on the search results."""
+    """Generate a coherent response using LLM based on the search results."""
     if not search_results:
         return "I couldn't find specific information about that in my sustainability research database. Please try rephrasing your question or ask about a different sustainability topic.", []
     
     # Extract key information from the top candidates
     sources_used = []
     
-    # Get the most relevant chunks
-    top_results = search_results[:5]  # Use top 5 sources for better coverage
+    # Get the most relevant chunks (limit to avoid token limits)
+    top_results = search_results[:3]  # Use top 3 sources for LLM processing
     
-    # Analyze the query to understand what the user is asking
+    # Prepare context for LLM
+    context_parts = []
+    for result in top_results:
+        text = result.get('text', '')
+        if len(text) > 100:  # Only use substantial text chunks
+            # Truncate to reasonable length for LLM
+            truncated_text = text[:800] if len(text) > 800 else text
+            context_parts.append(truncated_text)
+            
+            # Create source display
+            source = result.get('source', {})
+            source_display = {
+                'source': {
+                    'id': source.get('id', f'chunk_{result.get("chunk_id", "unknown")}'),
+                    'name': source.get('name', 'Sustainability Research Document'),
+                    'title': source.get('title', source.get('name', 'Sustainability Research')),
+                    'authors': source.get('authors', ''),
+                    'year': source.get('year', ''),
+                    'journal': source.get('journal', ''),
+                    'doi': source.get('doi', ''),
+                    'folder': source.get('folder', ''),
+                    'document_id': source.get('document_id', '')
+                },
+                'score': result.get('score', 0),
+                'text_preview': text[:200] + "..." if len(text) > 200 else text
+            }
+            sources_used.append(source_display)
+    
+    # Combine context
+    context = "\n\n".join(context_parts)
+    
+    # Create LLM prompt
+    prompt = f"""You are an expert in sustainability education and engineering curriculum development. Based on the following research excerpts, provide a comprehensive and practical response to the user's question about incorporating sustainability into their engineering course.
+
+User Question: {query}
+
+Research Context:
+{context}
+
+Please provide a well-structured response that:
+1. Directly addresses the user's question
+2. Incorporates insights from the provided research
+3. Offers practical, actionable suggestions
+4. Maintains academic rigor while being accessible
+5. Includes specific examples and approaches
+
+Response:"""
+    
+    try:
+        # Generate response using LLM
+        if llm_manager is not None:
+            print("🤖 Generating LLM response...")
+            response = llm_manager.generate_response(prompt, max_new_tokens=800)
+            print("✅ LLM response generated successfully")
+        else:
+            # Fallback to template-based response
+            print("⚠️ LLM not available, using fallback response")
+            response = generate_fallback_response(query, top_results)
+            
+    except Exception as e:
+        print(f"❌ LLM generation failed: {e}, using fallback")
+        response = generate_fallback_response(query, top_results)
+    
+    return response, sources_used
+
+def generate_fallback_response(query, search_results):
+    """Generate a fallback response when LLM is not available."""
     query_lower = query.lower()
     
-    # Create a more intelligent response based on the query type
     if 'fluid mechanics' in query_lower or 'fluid' in query_lower:
         response = "Based on sustainability research in engineering education, here are specific ways to incorporate sustainability into your Fluid Mechanics course:\n\n"
-        
-        # Extract relevant information from search results
-        fluid_mechanics_info = []
-        for result in top_results:
-            text = result.get('text', '').lower()
-            if any(keyword in text for keyword in ['fluid', 'mechanics', 'thermodynamics', 'energy', 'efficiency', 'sustainability']):
-                # Extract a more meaningful excerpt
-                full_text = result.get('text', '')
-                # Find a better starting point
-                start_idx = max(0, full_text.find('sustainability') - 100)
-                end_idx = min(len(full_text), start_idx + 400)
-                excerpt = full_text[start_idx:end_idx]
-                
-                if len(excerpt) > 50:  # Only use substantial excerpts
-                    fluid_mechanics_info.append(excerpt)
-                    
-                    # Create better source display
-                    source = result.get('source', {})
-                    source_display = {
-                        'source': {
-                            'id': source.get('id', f'chunk_{result.get("chunk_id", "unknown")}'),
-                            'name': source.get('name', 'Sustainability Research Document'),
-                            'title': source.get('title', source.get('name', 'Sustainability Research')),
-                            'authors': source.get('authors', ''),
-                            'year': source.get('year', ''),
-                            'journal': source.get('journal', ''),
-                            'doi': source.get('doi', ''),
-                            'folder': source.get('folder', ''),
-                            'document_id': source.get('document_id', '')
-                        },
-                        'score': result.get('score', 0),
-                        'text_preview': excerpt[:200] + "..." if len(excerpt) > 200 else excerpt
-                    }
-                    sources_used.append(source_display)
-        
         response += "**Key Integration Areas:**\n\n"
         response += "• **Energy Efficiency**: Focus on pump and turbine efficiency, renewable energy applications, and sustainable fluid systems\n"
         response += "• **Environmental Impact**: Cover water treatment, pollution control, and sustainable water management practices\n"
         response += "• **Real-world Applications**: Include case studies of sustainable fluid systems in buildings, infrastructure, and renewable energy\n"
         response += "• **Green Technologies**: Explore wind turbines, hydroelectric power, and sustainable HVAC systems\n\n"
         
-        if fluid_mechanics_info:
-            response += "**Research-Based Insights:**\n\n"
-            # Add the most relevant research findings with better formatting
-            for i, info in enumerate(fluid_mechanics_info[:2], 1):
-                # Clean up the excerpt to make it more readable
-                clean_info = info.replace('\n', ' ').strip()
-                # Find a complete sentence
-                sentences = clean_info.split('.')
-                if len(sentences) > 1:
-                    clean_info = '. '.join(sentences[:2]) + '.'
-                response += f"**Finding {i}**: {clean_info}\n\n"
-        else:
-            response += "**General Approach**: While specific fluid mechanics research data is limited, focus on energy conservation principles, environmental applications, and sustainable design practices.\n\n"
-    
     elif 'thermodynamics' in query_lower:
         response = "Here are research-backed approaches for integrating sustainability into Thermodynamics courses:\n\n"
         response += "**Core Integration Areas:**\n\n"
@@ -267,147 +290,39 @@ def generate_response_from_sources(query, search_results):
         response += "• **Efficiency Analysis**: Analyze heat engines, refrigeration cycles, and combined heat and power systems\n"
         response += "• **Environmental Thermodynamics**: Explore climate change, atmospheric processes, and carbon cycles\n\n"
         
-        # Add relevant research findings
-        thermo_info = []
-        for result in top_results:
-            text = result.get('text', '').lower()
-            if any(keyword in text for keyword in ['thermodynamics', 'energy', 'efficiency', 'sustainability']):
-                full_text = result.get('text', '')
-                start_idx = max(0, full_text.find('sustainability') - 100)
-                end_idx = min(len(full_text), start_idx + 300)
-                excerpt = full_text[start_idx:end_idx]
-                if len(excerpt) > 50:
-                    thermo_info.append(excerpt)
-                    
-                    # Create better source display
-                    source = result.get('source', {})
-                    source_display = {
-                        'source': {
-                            'id': source.get('id', f'chunk_{result.get("chunk_id", "unknown")}'),
-                            'name': source.get('name', 'Sustainability Research Document'),
-                            'title': source.get('title', source.get('name', 'Sustainability Research')),
-                            'authors': source.get('authors', ''),
-                            'year': source.get('year', ''),
-                            'journal': source.get('journal', ''),
-                            'doi': source.get('doi', ''),
-                            'folder': source.get('folder', ''),
-                            'document_id': source.get('document_id', '')
-                        },
-                        'score': result.get('score', 0),
-                        'text_preview': excerpt[:200] + "..." if len(excerpt) > 200 else excerpt
-                    }
-                    sources_used.append(source_display)
-        
-        if thermo_info:
-            response += "**Research Insights:**\n\n"
-            for i, info in enumerate(thermo_info[:2], 1):
-                clean_info = info.replace('\n', ' ').strip()
-                sentences = clean_info.split('.')
-                if len(sentences) > 1:
-                    clean_info = '. '.join(sentences[:2]) + '.'
-                response += f"**Finding {i}**: {clean_info}\n\n"
-    
     elif 'materials' in query_lower:
-        response = "Research shows these effective approaches for sustainability integration in Materials courses:\n\n"
-        response += "**Key Areas for Integration:**\n\n"
-        response += "• **Green Materials**: Study biodegradable polymers, sustainable composites, and recycled materials\n"
-        response += "• **Life Cycle Assessment**: Analyze environmental impact of material choices and manufacturing processes\n"
-        response += "• **Energy Materials**: Explore solar cells, batteries, and energy storage materials\n"
-        response += "• **Circular Economy**: Design for disassembly, recycling, and material recovery systems\n\n"
+        response = "Here are effective strategies for integrating sustainability into Materials Science courses:\n\n"
+        response += "**Key Integration Areas:**\n\n"
+        response += "• **Sustainable Materials**: Study biodegradable, recyclable, and renewable materials\n"
+        response += "• **Life Cycle Assessment**: Analyze environmental impact from extraction to disposal\n"
+        response += "• **Green Manufacturing**: Explore energy-efficient production processes\n"
+        response += "• **Circular Economy**: Focus on material reuse, recycling, and waste reduction\n\n"
         
-        # Add relevant research findings
-        materials_info = []
-        for result in top_results:
-            text = result.get('text', '').lower()
-            if any(keyword in text for keyword in ['materials', 'sustainability', 'engineering']):
-                full_text = result.get('text', '')
-                start_idx = max(0, full_text.find('sustainability') - 100)
-                end_idx = min(len(full_text), start_idx + 300)
-                excerpt = full_text[start_idx:end_idx]
-                if len(excerpt) > 50:
-                    materials_info.append(excerpt)
-                    
-                    # Create better source display
-                    source = result.get('source', {})
-                    source_display = {
-                        'source': {
-                            'id': source.get('id', f'chunk_{result.get("chunk_id", "unknown")}'),
-                            'name': source.get('name', 'Sustainability Research Document'),
-                            'title': source.get('title', source.get('name', 'Sustainability Research')),
-                            'authors': source.get('authors', ''),
-                            'year': source.get('year', ''),
-                            'journal': source.get('journal', ''),
-                            'doi': source.get('doi', ''),
-                            'folder': source.get('folder', ''),
-                            'document_id': source.get('document_id', '')
-                        },
-                        'score': result.get('score', 0),
-                        'text_preview': excerpt[:200] + "..." if len(excerpt) > 200 else excerpt
-                    }
-                    sources_used.append(source_display)
-        
-        if materials_info:
-            response += "**Research Findings:**\n\n"
-            for i, info in enumerate(materials_info[:2], 1):
-                clean_info = info.replace('\n', ' ').strip()
-                sentences = clean_info.split('.')
-                if len(sentences) > 1:
-                    clean_info = '. '.join(sentences[:2]) + '.'
-                response += f"**Finding {i}**: {clean_info}\n\n"
-    
     else:
-        # General sustainability integration response
-        response = f"Based on sustainability research in engineering education, here are approaches for integrating sustainability into your course about '{query}':\n\n"
-        
-        response += "**General Integration Strategies:**\n\n"
-        response += "• **Core Course Integration**: Embed sustainability concepts throughout the curriculum rather than as separate modules\n"
-        response += "• **Real-world Applications**: Use case studies and examples from sustainable engineering projects\n"
-        response += "• **Systems Thinking**: Teach students to consider environmental, social, and economic impacts\n"
-        response += "• **Innovation Focus**: Encourage sustainable technology development and green innovation\n\n"
-        
-        # Add relevant research findings
-        general_info = []
-        for result in top_results:
-            text = result.get('text', '').lower()
-            if 'sustainability' in text:
-                full_text = result.get('text', '')
-                start_idx = max(0, full_text.find('sustainability') - 100)
-                end_idx = min(len(full_text), start_idx + 300)
-                excerpt = full_text[start_idx:end_idx]
-                if len(excerpt) > 50:
-                    general_info.append(excerpt)
-                    
-                    # Create better source display
-                    source = result.get('source', {})
-                    source_display = {
-                        'source': {
-                            'id': source.get('id', f'chunk_{result.get("chunk_id", "unknown")}'),
-                            'name': source.get('name', 'Sustainability Research Document'),
-                            'title': source.get('title', source.get('name', 'Sustainability Research')),
-                            'authors': source.get('authors', ''),
-                            'year': source.get('year', ''),
-                            'journal': source.get('journal', ''),
-                            'doi': source.get('doi', ''),
-                            'folder': source.get('folder', ''),
-                            'document_id': source.get('document_id', '')
-                        },
-                        'score': result.get('score', 0),
-                        'text_preview': excerpt[:200] + "..." if len(excerpt) > 200 else excerpt
-                    }
-                    sources_used.append(source_display)
-        
-        if general_info:
-            response += "**Research Insights:**\n\n"
-            for i, info in enumerate(general_info[:2], 1):
-                clean_info = info.replace('\n', ' ').strip()
-                sentences = clean_info.split('.')
+        response = "Based on sustainability research in engineering education, here are general approaches for incorporating sustainability into your course:\n\n"
+        response += "**Core Principles:**\n\n"
+        response += "• **Systems Thinking**: Help students understand interconnected environmental, social, and economic impacts\n"
+        response += "• **Life Cycle Analysis**: Consider environmental impacts from design to disposal\n"
+        response += "• **Stakeholder Engagement**: Include diverse perspectives in problem-solving\n"
+        response += "• **Innovation for Sustainability**: Encourage creative solutions to environmental challenges\n\n"
+    
+    # Add research-based insights if available
+    if search_results:
+        response += "**Research-Based Insights:**\n\n"
+        for i, result in enumerate(search_results[:2], 1):
+            text = result.get('text', '')
+            if len(text) > 100:
+                # Extract a meaningful excerpt
+                start_idx = max(0, text.find('sustainability') - 50)
+                end_idx = min(len(text), start_idx + 300)
+                excerpt = text[start_idx:end_idx]
+                clean_excerpt = excerpt.replace('\n', ' ').strip()
+                sentences = clean_excerpt.split('.')
                 if len(sentences) > 1:
-                    clean_info = '. '.join(sentences[:2]) + '.'
-                response += f"**Finding {i}**: {clean_info}\n\n"
+                    clean_excerpt = '. '.join(sentences[:2]) + '.'
+                response += f"**Finding {i}**: {clean_excerpt}\n\n"
     
-    response += "These recommendations are based on academic research in sustainability engineering education. For more specific guidance, consider uploading your syllabus for personalized suggestions."
-    
-    return response, sources_used
+    return response
 
 def get_fallback_response(message):
     """Generate a fallback response when the search system is unavailable."""
@@ -543,17 +458,17 @@ def chat():
         }
         conversation.append(user_message)
 
-        # Try to use search system
+        # Try to use LLM-powered search system
         ai_message = None
         try:
             # Initialize search system if needed
             if initialize_search_system():
-                print(f"🔍 Processing query with direct search: {message[:50]}...")
+                print(f"🤖 Processing query with LLM-powered search: {message[:50]}...")
                 
                 # Search the sustainability database
                 search_results = search_sustainability_data(message, k=10)
                 
-                # Generate response from search results
+                # Generate response using LLM
                 response_content, sources = generate_response_from_sources(message, search_results)
                 
                 # Create AI response with sources
@@ -564,7 +479,7 @@ def chat():
                     'sources': sources,
                     'timestamp': datetime.datetime.now().isoformat()
                 }
-                print(f"✅ Direct search response generated successfully")
+                print(f"✅ LLM-powered response generated successfully")
             else:
                 raise Exception("Search system not available")
                 
@@ -709,7 +624,7 @@ def api_health():
         'status': 'healthy',
         'timestamp': datetime.datetime.now().isoformat(),
         'search_system': 'initialized' if system_initialized else 'not_initialized',
-        'mode': 'direct_search' if system_initialized else 'fallback'
+        'mode': 'llm_powered' if system_initialized else 'fallback'
     })
 
 @app.route('/feedback')
@@ -741,16 +656,16 @@ def internal_error(error):
 if __name__ == '__main__':
     import argparse
     
-    parser = argparse.ArgumentParser(description='Scaffold AI Enhanced UI - Direct Search')
+    parser = argparse.ArgumentParser(description='Scaffold AI Enhanced UI - LLM-Powered')
     parser.add_argument('--port', type=int, default=5003, help='Port to run the server on')
     parser.add_argument('--host', type=str, default='0.0.0.0', help='Host to run the server on')
     
     args = parser.parse_args()
     
-    print(f"🚀 Starting Scaffold AI Enhanced UI (Direct Search) on {args.host}:{args.port}")
+    print(f"🚀 Starting Scaffold AI Enhanced UI (LLM-Powered) on {args.host}:{args.port}")
     print(f"📍 Access the UI at: http://localhost:{args.port}")
     print(f"📊 Feedback dashboard at: http://localhost:{args.port}/feedback")
     print(f"💡 Press Ctrl+C to stop the server")
-    print(f"🔍 Direct search system will initialize on first request")
+    print(f"🤖 LLM-powered search system will initialize on first request")
     
     app.run(host=args.host, port=args.port, debug=True) 
