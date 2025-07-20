@@ -129,11 +129,55 @@ def search_sustainability_data(query, k=10):
         for i, (score, idx) in enumerate(zip(scores[0], indices[0])):
             if idx < len(metadata):
                 chunk_data = metadata[idx]
+                
+                # Extract and format source information
+                source_info = chunk_data.get('source', {})
+                metadata_info = chunk_data.get('metadata', {})
+                
+                if isinstance(metadata_info, dict):
+                    # Create a more detailed source object from the actual metadata structure
+                    formatted_source = {
+                        'id': chunk_data.get('chunk_id', f'chunk_{idx}'),
+                        'name': metadata_info.get('filename', 'Sustainability Research Document'),
+                        'raw_path': chunk_data.get('source_path', ''),
+                        'title': metadata_info.get('title', metadata_info.get('filename', 'Sustainability Research')),
+                        'authors': metadata_info.get('authors', ''),
+                        'year': metadata_info.get('year', ''),
+                        'journal': metadata_info.get('journal', ''),
+                        'doi': metadata_info.get('doi', ''),
+                        'folder': metadata_info.get('folder', ''),
+                        'document_id': chunk_data.get('document_id', '')
+                    }
+                elif isinstance(source_info, dict):
+                    # Fallback to source field if metadata doesn't exist
+                    formatted_source = {
+                        'id': source_info.get('id', f'chunk_{idx}'),
+                        'name': source_info.get('name', 'Sustainability Research Document'),
+                        'raw_path': source_info.get('raw_path', ''),
+                        'title': source_info.get('title', source_info.get('name', 'Sustainability Research')),
+                        'authors': source_info.get('authors', ''),
+                        'year': source_info.get('year', ''),
+                        'journal': source_info.get('journal', ''),
+                        'doi': source_info.get('doi', '')
+                    }
+                else:
+                    # Fallback if neither exists
+                    formatted_source = {
+                        'id': f'chunk_{idx}',
+                        'name': 'Sustainability Research Document',
+                        'raw_path': '',
+                        'title': 'Sustainability Research',
+                        'authors': '',
+                        'year': '',
+                        'journal': '',
+                        'doi': ''
+                    }
+                
                 results.append({
                     'chunk_id': idx,
                     'score': float(score),
                     'text': chunk_data.get('text', ''),
-                    'source': chunk_data.get('source', {}),
+                    'source': formatted_source,
                     'search_type': 'semantic'
                 })
         
@@ -175,11 +219,25 @@ def generate_response_from_sources(query, search_results):
                 
                 if len(excerpt) > 50:  # Only use substantial excerpts
                     fluid_mechanics_info.append(excerpt)
-                    sources_used.append({
-                        'source': result.get('source', {}),
+                    
+                    # Create better source display
+                    source = result.get('source', {})
+                    source_display = {
+                        'source': {
+                            'id': source.get('id', f'chunk_{result.get("chunk_id", "unknown")}'),
+                            'name': source.get('name', 'Sustainability Research Document'),
+                            'title': source.get('title', source.get('name', 'Sustainability Research')),
+                            'authors': source.get('authors', ''),
+                            'year': source.get('year', ''),
+                            'journal': source.get('journal', ''),
+                            'doi': source.get('doi', ''),
+                            'folder': source.get('folder', ''),
+                            'document_id': source.get('document_id', '')
+                        },
                         'score': result.get('score', 0),
                         'text_preview': excerpt[:200] + "..." if len(excerpt) > 200 else excerpt
-                    })
+                    }
+                    sources_used.append(source_display)
         
         response += "**Key Integration Areas:**\n\n"
         response += "• **Energy Efficiency**: Focus on pump and turbine efficiency, renewable energy applications, and sustainable fluid systems\n"
@@ -220,11 +278,25 @@ def generate_response_from_sources(query, search_results):
                 excerpt = full_text[start_idx:end_idx]
                 if len(excerpt) > 50:
                     thermo_info.append(excerpt)
-                    sources_used.append({
-                        'source': result.get('source', {}),
+                    
+                    # Create better source display
+                    source = result.get('source', {})
+                    source_display = {
+                        'source': {
+                            'id': source.get('id', f'chunk_{result.get("chunk_id", "unknown")}'),
+                            'name': source.get('name', 'Sustainability Research Document'),
+                            'title': source.get('title', source.get('name', 'Sustainability Research')),
+                            'authors': source.get('authors', ''),
+                            'year': source.get('year', ''),
+                            'journal': source.get('journal', ''),
+                            'doi': source.get('doi', ''),
+                            'folder': source.get('folder', ''),
+                            'document_id': source.get('document_id', '')
+                        },
                         'score': result.get('score', 0),
                         'text_preview': excerpt[:200] + "..." if len(excerpt) > 200 else excerpt
-                    })
+                    }
+                    sources_used.append(source_display)
         
         if thermo_info:
             response += "**Research Insights:**\n\n"
@@ -254,11 +326,25 @@ def generate_response_from_sources(query, search_results):
                 excerpt = full_text[start_idx:end_idx]
                 if len(excerpt) > 50:
                     materials_info.append(excerpt)
-                    sources_used.append({
-                        'source': result.get('source', {}),
+                    
+                    # Create better source display
+                    source = result.get('source', {})
+                    source_display = {
+                        'source': {
+                            'id': source.get('id', f'chunk_{result.get("chunk_id", "unknown")}'),
+                            'name': source.get('name', 'Sustainability Research Document'),
+                            'title': source.get('title', source.get('name', 'Sustainability Research')),
+                            'authors': source.get('authors', ''),
+                            'year': source.get('year', ''),
+                            'journal': source.get('journal', ''),
+                            'doi': source.get('doi', ''),
+                            'folder': source.get('folder', ''),
+                            'document_id': source.get('document_id', '')
+                        },
                         'score': result.get('score', 0),
                         'text_preview': excerpt[:200] + "..." if len(excerpt) > 200 else excerpt
-                    })
+                    }
+                    sources_used.append(source_display)
         
         if materials_info:
             response += "**Research Findings:**\n\n"
@@ -290,11 +376,25 @@ def generate_response_from_sources(query, search_results):
                 excerpt = full_text[start_idx:end_idx]
                 if len(excerpt) > 50:
                     general_info.append(excerpt)
-                    sources_used.append({
-                        'source': result.get('source', {}),
+                    
+                    # Create better source display
+                    source = result.get('source', {})
+                    source_display = {
+                        'source': {
+                            'id': source.get('id', f'chunk_{result.get("chunk_id", "unknown")}'),
+                            'name': source.get('name', 'Sustainability Research Document'),
+                            'title': source.get('title', source.get('name', 'Sustainability Research')),
+                            'authors': source.get('authors', ''),
+                            'year': source.get('year', ''),
+                            'journal': source.get('journal', ''),
+                            'doi': source.get('doi', ''),
+                            'folder': source.get('folder', ''),
+                            'document_id': source.get('document_id', '')
+                        },
                         'score': result.get('score', 0),
                         'text_preview': excerpt[:200] + "..." if len(excerpt) > 200 else excerpt
-                    })
+                    }
+                    sources_used.append(source_display)
         
         if general_info:
             response += "**Research Insights:**\n\n"
