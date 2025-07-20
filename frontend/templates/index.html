@@ -222,31 +222,60 @@
             margin: 20px 0;
         }
         
-        .model-switcher-section {
+        .model-control-section {
             margin-top: 20px;
         }
         
-        .model-switcher-section .card {
+        .model-control-section .card {
             border: 2px solid #e9ecef;
             border-radius: 10px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
         
-        .model-switcher-section .card-title {
+        .model-control-section .card-title {
             color: var(--primary-color);
             font-weight: 600;
-            margin-bottom: 15px;
         }
         
-        .model-switcher-section .form-select {
-            border: 1px solid #ced4da;
-            border-radius: 6px;
-            font-size: 0.9em;
+        .model-status .badge {
+            font-size: 0.8em;
+            padding: 0.4em 0.8em;
         }
         
-        .model-switcher-section .form-select:focus {
-            border-color: var(--secondary-color);
-            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+        .metric {
+            padding: 10px;
+        }
+        
+        .metric-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .metric-label {
+            font-size: 0.8em;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+        
+        .model-info {
+            min-height: 20px;
+        }
+        
+        .btn-group .btn {
+            font-size: 0.8em;
+        }
+        
+        .form-range {
+            height: 6px;
+        }
+        
+        .form-range::-webkit-slider-thumb {
+            background: var(--secondary-color);
+        }
+        
+        .form-range::-moz-range-thumb {
+            background: var(--secondary-color);
         }
         
         @media (max-width: 768px) {
@@ -270,61 +299,159 @@
                 <h1><i class="fas fa-graduation-cap"></i> Scaffold AI</h1>
                 <p>Pilot UI for Sustainability & Life Cycle Assessment Knowledge System</p>
                 
-                <!-- Model Switcher -->
-                <div class="model-switcher-section mt-3">
+                <!-- Enhanced Model Control Panel -->
+                <div class="model-control-section mt-3">
                     <div class="row justify-content-center">
-                        <div class="col-md-6">
+                        <div class="col-md-10">
                             <div class="card">
                                 <div class="card-body">
-                                    <h6 class="card-title"><i class="fas fa-cogs"></i> Model Configuration</h6>
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <label for="llmModelSelect" class="form-label">LLM Model:</label>
-                                            <select id="llmModelSelect" class="form-select form-select-sm">
-                                                <option value="">Loading models...</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label for="embeddingModelSelect" class="form-label">Embedding Model:</label>
-                                            <select id="embeddingModelSelect" class="form-select form-select-sm">
-                                                <option value="">Loading models...</option>
-                                            </select>
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h6 class="card-title mb-0"><i class="fas fa-robot"></i> AI Model Control Center</h6>
+                                        <div class="model-status">
+                                            <span class="badge bg-success" id="modelStatus">Active</span>
                                         </div>
                                     </div>
-                                    <div class="mt-2">
-                                        <small class="text-muted" id="modelDescription">Select a model to see its description</small>
+                                    
+                                    <!-- Model Selection Row -->
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label for="llmModelSelect" class="form-label">
+                                                <i class="fas fa-brain"></i> Language Model (LLM)
+                                            </label>
+                                            <select id="llmModelSelect" class="form-select">
+                                                <option value="">Loading models...</option>
+                                            </select>
+                                            <div class="model-info mt-1">
+                                                <small class="text-muted" id="llmModelInfo">Select a model to see details</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="embeddingModelSelect" class="form-label">
+                                                <i class="fas fa-search"></i> Embedding Model
+                                            </label>
+                                            <select id="embeddingModelSelect" class="form-select">
+                                                <option value="">Loading models...</option>
+                                            </select>
+                                            <div class="model-info mt-1">
+                                                <small class="text-muted" id="embeddingModelInfo">Select a model to see details</small>
+                                            </div>
+                                        </div>
                                     </div>
                                     
-                                    <!-- Model Settings -->
-                                    <div class="mt-3">
-                                        <button class="btn btn-sm btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#modelSettings">
-                                            <i class="fas fa-cog"></i> Advanced Settings
-                                        </button>
-                                    </div>
-                                    
-                                    <div class="collapse mt-3" id="modelSettings">
-                                        <div class="card card-body">
-                                            <h6>LLM Settings</h6>
-                                            <div class="row">
-                                                <div class="col-md-4">
-                                                    <label for="temperature" class="form-label">Temperature:</label>
-                                                    <input type="range" class="form-range" id="temperature" min="0" max="2" step="0.1" value="0.3">
-                                                    <small class="text-muted" id="temperatureValue">0.3</small>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <label for="maxTokens" class="form-label">Max Tokens:</label>
-                                                    <input type="range" class="form-range" id="maxTokens" min="100" max="2000" step="100" value="800">
-                                                    <small class="text-muted" id="maxTokensValue">800</small>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <label for="topP" class="form-label">Top P:</label>
-                                                    <input type="range" class="form-range" id="topP" min="0" max="1" step="0.1" value="0.9">
-                                                    <small class="text-muted" id="topPValue">0.9</small>
+                                    <!-- Model Performance Metrics -->
+                                    <div class="row mb-3">
+                                        <div class="col-12">
+                                            <div class="card bg-light">
+                                                <div class="card-body py-2">
+                                                    <div class="row text-center">
+                                                        <div class="col-md-3">
+                                                            <div class="metric">
+                                                                <div class="metric-value" id="responseTime">--</div>
+                                                                <div class="metric-label">Response Time</div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <div class="metric">
+                                                                <div class="metric-value" id="tokenUsage">--</div>
+                                                                <div class="metric-label">Tokens Used</div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <div class="metric">
+                                                                <div class="metric-value" id="modelAccuracy">--</div>
+                                                                <div class="metric-label">Accuracy</div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <div class="metric">
+                                                                <div class="metric-value" id="memoryUsage">--</div>
+                                                                <div class="metric-label">Memory</div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <button class="btn btn-sm btn-success mt-2" onclick="saveLLMSettings()">
-                                                <i class="fas fa-save"></i> Save LLM Settings
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Advanced Controls -->
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <div class="btn-group" role="group">
+                                                <button class="btn btn-outline-primary btn-sm" onclick="toggleAdvancedSettings()">
+                                                    <i class="fas fa-sliders-h"></i> Advanced Settings
+                                                </button>
+                                                <button class="btn btn-outline-info btn-sm" onclick="showModelComparison()">
+                                                    <i class="fas fa-balance-scale"></i> Compare Models
+                                                </button>
+                                                <button class="btn btn-outline-warning btn-sm" onclick="resetToDefaults()">
+                                                    <i class="fas fa-undo"></i> Reset Defaults
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 text-end">
+                                            <button class="btn btn-success btn-sm" onclick="applyModelChanges()">
+                                                <i class="fas fa-check"></i> Apply Changes
                                             </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Advanced Settings Panel -->
+                                    <div class="collapse mt-3" id="advancedSettingsPanel">
+                                        <div class="card card-body">
+                                            <h6><i class="fas fa-cog"></i> Advanced Model Configuration</h6>
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <label for="temperature" class="form-label">Temperature (Creativity)</label>
+                                                    <input type="range" class="form-range" id="temperature" min="0" max="2" step="0.1" value="0.3">
+                                                    <div class="d-flex justify-content-between">
+                                                        <small class="text-muted">Conservative</small>
+                                                        <small class="text-muted" id="temperatureValue">0.3</small>
+                                                        <small class="text-muted">Creative</small>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label for="maxTokens" class="form-label">Max Response Length</label>
+                                                    <input type="range" class="form-range" id="maxTokens" min="100" max="2000" step="100" value="800">
+                                                    <div class="d-flex justify-content-between">
+                                                        <small class="text-muted">Short</small>
+                                                        <small class="text-muted" id="maxTokensValue">800</small>
+                                                        <small class="text-muted">Long</small>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label for="topP" class="form-label">Top P (Focus)</label>
+                                                    <input type="range" class="form-range" id="topP" min="0" max="1" step="0.1" value="0.9">
+                                                    <div class="d-flex justify-content-between">
+                                                        <small class="text-muted">Focused</small>
+                                                        <small class="text-muted" id="topPValue">0.9</small>
+                                                        <small class="text-muted">Diverse</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Additional Settings -->
+                                            <div class="row mt-3">
+                                                <div class="col-md-6">
+                                                    <label for="chunkSize" class="form-label">Chunk Size</label>
+                                                    <input type="range" class="form-range" id="chunkSize" min="500" max="2000" step="100" value="1000">
+                                                    <small class="text-muted" id="chunkSizeValue">1000 tokens</small>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label for="chunkOverlap" class="form-label">Chunk Overlap</label>
+                                                    <input type="range" class="form-range" id="chunkOverlap" min="0" max="500" step="50" value="200">
+                                                    <small class="text-muted" id="chunkOverlapValue">200 tokens</small>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="mt-3">
+                                                <button class="btn btn-primary btn-sm" onclick="saveAllSettings()">
+                                                    <i class="fas fa-save"></i> Save All Settings
+                                                </button>
+                                                <button class="btn btn-secondary btn-sm ms-2" onclick="testModelSettings()">
+                                                    <i class="fas fa-play"></i> Test Settings
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -482,16 +609,24 @@
         const ratingStars = document.getElementById('ratingStars');
         const messageContainer = document.getElementById('messageContainer');
         
-        // Model switcher elements
+        // Model control elements
         const llmModelSelect = document.getElementById('llmModelSelect');
         const embeddingModelSelect = document.getElementById('embeddingModelSelect');
-        const modelDescription = document.getElementById('modelDescription');
+        const llmModelInfo = document.getElementById('llmModelInfo');
+        const embeddingModelInfo = document.getElementById('embeddingModelInfo');
+        const modelStatus = document.getElementById('modelStatus');
+        
+        // Performance metrics
+        const responseTime = document.getElementById('responseTime');
+        const tokenUsage = document.getElementById('tokenUsage');
+        const modelAccuracy = document.getElementById('modelAccuracy');
+        const memoryUsage = document.getElementById('memoryUsage');
         
         // Event listeners
         queryForm.addEventListener('submit', handleQuery);
         feedbackForm.addEventListener('submit', handleFeedback);
         
-        // Model switcher event listeners
+        // Model control event listeners
         llmModelSelect.addEventListener('change', handleLLMModelChange);
         embeddingModelSelect.addEventListener('change', handleEmbeddingModelChange);
         
@@ -499,6 +634,8 @@
         document.getElementById('temperature').addEventListener('input', updateTemperatureValue);
         document.getElementById('maxTokens').addEventListener('input', updateMaxTokensValue);
         document.getElementById('topP').addEventListener('input', updateTopPValue);
+        document.getElementById('chunkSize').addEventListener('input', updateChunkSizeValue);
+        document.getElementById('chunkOverlap').addEventListener('input', updateChunkOverlapValue);
         
         // Example query buttons
         document.querySelectorAll('.example-query').forEach(btn => {
@@ -734,7 +871,7 @@
             messageContainer.innerHTML = '';
         }
         
-        // Model Switcher Functions
+        // Enhanced Model Control Functions
         async function loadAvailableModels() {
             try {
                 const response = await fetch('/api/models');
@@ -742,6 +879,7 @@
                 
                 if (response.ok) {
                     populateModelSelects(data);
+                    updatePerformanceMetrics();
                 } else {
                     console.error('Failed to load models:', data.error);
                 }
@@ -771,14 +909,14 @@
                 embeddingModelSelect.appendChild(option);
             });
             
-            // Set current selections
+            // Set current selections and update info
             if (models.current_llm) {
                 llmModelSelect.value = models.current_llm;
-                updateModelDescription();
+                updateLLMModelInfo();
             }
             if (models.current_embedding) {
                 embeddingModelSelect.value = models.current_embedding;
-                updateModelDescription();
+                updateEmbeddingModelInfo();
             }
             
             // Load settings
@@ -787,25 +925,30 @@
             }
         }
         
-        function updateModelDescription() {
-            const llmOption = llmModelSelect.options[llmModelSelect.selectedIndex];
-            const embeddingOption = embeddingModelSelect.options[embeddingModelSelect.selectedIndex];
-            
-            let description = '';
-            if (llmOption && llmOption.dataset.description) {
-                description += `<strong>LLM:</strong> ${llmOption.dataset.description}`;
+        function updateLLMModelInfo() {
+            const option = llmModelSelect.options[llmModelSelect.selectedIndex];
+            if (option && option.dataset.description) {
+                llmModelInfo.textContent = option.dataset.description;
+            } else {
+                llmModelInfo.textContent = 'Select a model to see details';
             }
-            if (embeddingOption && embeddingOption.dataset.description) {
-                if (description) description += '<br>';
-                description += `<strong>Embedding:</strong> ${embeddingOption.dataset.description}`;
+        }
+        
+        function updateEmbeddingModelInfo() {
+            const option = embeddingModelSelect.options[embeddingModelSelect.selectedIndex];
+            if (option && option.dataset.description) {
+                embeddingModelInfo.textContent = option.dataset.description;
+            } else {
+                embeddingModelInfo.textContent = 'Select a model to see details';
             }
-            
-            modelDescription.innerHTML = description || 'Select a model to see its description';
         }
         
         async function handleLLMModelChange() {
             const selectedModel = llmModelSelect.value;
             if (!selectedModel) return;
+            
+            updateLLMModelInfo();
+            updateModelStatus('Updating...');
             
             try {
                 const response = await fetch('/api/models/switch', {
@@ -823,7 +966,7 @@
                 
                 if (response.ok) {
                     showSuccess(`LLM model switched to ${selectedModel}. The system will reload with the new model.`);
-                    updateModelDescription();
+                    updateModelStatus('Active');
                     
                     // Reload the system after a short delay
                     setTimeout(() => {
@@ -831,15 +974,20 @@
                     }, 2000);
                 } else {
                     showError(data.error || 'Failed to switch LLM model.');
+                    updateModelStatus('Error');
                 }
             } catch (error) {
                 showError('Network error while switching model: ' + error.message);
+                updateModelStatus('Error');
             }
         }
         
         async function handleEmbeddingModelChange() {
             const selectedModel = embeddingModelSelect.value;
             if (!selectedModel) return;
+            
+            updateEmbeddingModelInfo();
+            updateModelStatus('Updating...');
             
             try {
                 const response = await fetch('/api/models/switch', {
@@ -857,7 +1005,7 @@
                 
                 if (response.ok) {
                     showSuccess(`Embedding model switched to ${selectedModel}. The system will reload with the new model.`);
-                    updateModelDescription();
+                    updateModelStatus('Active');
                     
                     // Reload the system after a short delay
                     setTimeout(() => {
@@ -865,9 +1013,11 @@
                     }, 2000);
                 } else {
                     showError(data.error || 'Failed to switch embedding model.');
+                    updateModelStatus('Error');
                 }
             } catch (error) {
                 showError('Network error while switching model: ' + error.message);
+                updateModelStatus('Error');
             }
         }
         
@@ -930,6 +1080,206 @@
                 updateMaxTokensValue();
                 updateTopPValue();
             }
+            
+            if (settings.embedding) {
+                document.getElementById('chunkSize').value = settings.embedding.chunk_size || 1000;
+                document.getElementById('chunkOverlap').value = settings.embedding.chunk_overlap || 200;
+                
+                updateChunkSizeValue();
+                updateChunkOverlapValue();
+            }
+        }
+        
+        // Enhanced Model Control Functions
+        function updateModelStatus(status) {
+            const statusElement = document.getElementById('modelStatus');
+            statusElement.textContent = status;
+            
+            // Update badge color based on status
+            statusElement.className = 'badge';
+            switch (status) {
+                case 'Active':
+                    statusElement.classList.add('bg-success');
+                    break;
+                case 'Updating...':
+                    statusElement.classList.add('bg-warning');
+                    break;
+                case 'Error':
+                    statusElement.classList.add('bg-danger');
+                    break;
+                default:
+                    statusElement.classList.add('bg-secondary');
+            }
+        }
+        
+        async function updatePerformanceMetrics() {
+            try {
+                const response = await fetch('/api/models/performance');
+                const data = await response.json();
+                
+                if (response.ok) {
+                    responseTime.textContent = data.response_time;
+                    tokenUsage.textContent = data.token_usage;
+                    modelAccuracy.textContent = data.model_accuracy;
+                    memoryUsage.textContent = data.memory_usage;
+                } else {
+                    // Fallback to default values
+                    responseTime.textContent = '--';
+                    tokenUsage.textContent = '--';
+                    modelAccuracy.textContent = '--';
+                    memoryUsage.textContent = '--';
+                }
+            } catch (error) {
+                console.error('Error fetching performance metrics:', error);
+                // Fallback to default values
+                responseTime.textContent = '--';
+                tokenUsage.textContent = '--';
+                modelAccuracy.textContent = '--';
+                memoryUsage.textContent = '--';
+            }
+        }
+        
+        function toggleAdvancedSettings() {
+            const panel = document.getElementById('advancedSettingsPanel');
+            const bsCollapse = new bootstrap.Collapse(panel, {
+                toggle: true
+            });
+        }
+        
+        function showModelComparison() {
+            // This would open a modal with model comparison
+            showInfo('Model comparison feature coming soon!');
+        }
+        
+        function resetToDefaults() {
+            if (confirm('Are you sure you want to reset all settings to defaults?')) {
+                document.getElementById('temperature').value = 0.3;
+                document.getElementById('maxTokens').value = 800;
+                document.getElementById('topP').value = 0.9;
+                document.getElementById('chunkSize').value = 1000;
+                document.getElementById('chunkOverlap').value = 200;
+                
+                updateTemperatureValue();
+                updateMaxTokensValue();
+                updateTopPValue();
+                updateChunkSizeValue();
+                updateChunkOverlapValue();
+                
+                showSuccess('Settings reset to defaults');
+            }
+        }
+        
+        async function applyModelChanges() {
+            updateModelStatus('Applying...');
+            
+            try {
+                // Apply all pending changes
+                await saveAllSettings();
+                showSuccess('All model changes applied successfully!');
+                updateModelStatus('Active');
+            } catch (error) {
+                showError('Failed to apply model changes: ' + error.message);
+                updateModelStatus('Error');
+            }
+        }
+        
+        async function saveAllSettings() {
+            const temperature = parseFloat(document.getElementById('temperature').value);
+            const maxTokens = parseInt(document.getElementById('maxTokens').value);
+            const topP = parseFloat(document.getElementById('topP').value);
+            const chunkSize = parseInt(document.getElementById('chunkSize').value);
+            const chunkOverlap = parseInt(document.getElementById('chunkOverlap').value);
+            
+            try {
+                // Save LLM settings
+                const llmResponse = await fetch('/api/models/settings', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        model_type: 'llm',
+                        settings: {
+                            temperature: temperature,
+                            max_new_tokens: maxTokens,
+                            top_p: topP
+                        }
+                    })
+                });
+                
+                // Save embedding settings
+                const embeddingResponse = await fetch('/api/models/settings', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        model_type: 'embedding',
+                        settings: {
+                            chunk_size: chunkSize,
+                            chunk_overlap: chunkOverlap
+                        }
+                    })
+                });
+                
+                if (llmResponse.ok && embeddingResponse.ok) {
+                    showSuccess('All settings saved successfully!');
+                } else {
+                    throw new Error('Failed to save some settings');
+                }
+            } catch (error) {
+                showError('Error saving settings: ' + error.message);
+                throw error;
+            }
+        }
+        
+        async function testModelSettings() {
+            const testQuery = "Test query for model settings";
+            showInfo('Testing model settings with sample query...');
+            
+            try {
+                const startTime = Date.now();
+                const response = await fetch('/api/query', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        query: testQuery
+                    })
+                });
+                
+                const endTime = Date.now();
+                const responseTimeMs = endTime - startTime;
+                
+                if (response.ok) {
+                    showSuccess(`Test completed! Response time: ${responseTimeMs}ms`);
+                    updatePerformanceMetrics();
+                } else {
+                    showError('Test failed - check model configuration');
+                }
+            } catch (error) {
+                showError('Test failed: ' + error.message);
+            }
+        }
+        
+        function updateChunkSizeValue() {
+            const value = document.getElementById('chunkSize').value;
+            document.getElementById('chunkSizeValue').textContent = `${value} tokens`;
+        }
+        
+        function updateChunkOverlapValue() {
+            const value = document.getElementById('chunkOverlap').value;
+            document.getElementById('chunkOverlapValue').textContent = `${value} tokens`;
+        }
+        
+        function showInfo(message) {
+            messageContainer.innerHTML = `
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> ${message}
+                </div>
+            `;
+            messageContainer.scrollIntoView({ behavior: 'smooth' });
         }
         
         // Initialize
