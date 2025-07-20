@@ -2,11 +2,64 @@
 
 **Collaborators:** Kevin Mastascusa, Joseph Di Stefano
 
-**Date:** 6/26/2025 | **Last Updated:** 6/29/2025
+**Date:** 6/26/2025 | **Last Updated:** 7/20/2025
 
 ## 🌍 Project Overview
 
 This project involves developing a specialized large language model (LLM)-based tool to assist educators in integrating sustainability and climate resilience topics into academic programs. The tool leverages state-of-the-art AI techniques to recommend high-quality, literature-backed educational materials, case studies, and project ideas.
+
+## 🎉 **Current Status: FULLY OPERATIONAL**
+
+### ✅ **What's Working Now:**
+- **🎨 Modern ChatGPT-Style UI:** Beautiful, responsive web interface with Scaffold AI branding
+- **🔍 Intelligent Search System:** Vector-based search through sustainability research database
+- **📚 Rich Source Attribution:** Complete source information with authors, titles, and citations
+- **💬 Real-time Chat:** Smooth conversation flow with proper error handling
+- **📊 Research-Based Responses:** All responses backed by academic sustainability research
+- **🔄 Reset & Debug Features:** Easy troubleshooting and conversation management
+
+### 🚀 **Quick Start (Production Ready):**
+```bash
+# Start the enhanced UI
+cd frontend
+export HUGGINGFACE_TOKEN=your_token_here
+python app_enhanced_simple.py --port 5003
+```
+
+**Access the UI:** `http://localhost:5003` (or your preferred port)
+
+## ✨ **Key Features & Recent Improvements**
+
+### 🎨 **Enhanced User Interface**
+- **Modern Chat Design:** Sleek, intuitive chat interface with Scaffold AI branding
+- **Responsive Layout:** Works seamlessly on desktop, tablet, and mobile devices
+- **Real-time Chat:** Smooth message flow with typing indicators and proper error handling
+- **Reset Functionality:** One-click conversation reset for easy testing and troubleshooting
+- **Debug Console:** Comprehensive logging for developers and troubleshooting
+
+### 📚 **Intelligent Source Attribution**
+- **Complete Source Information:** Every response includes detailed source metadata:
+  - Document titles and authors
+  - Source folders and file paths
+  - Document IDs and chunk references
+  - DOIs when available
+- **Research-Based Responses:** All recommendations backed by academic sustainability research
+- **Professional Formatting:** Clean, structured responses with proper citations
+
+### 🔍 **Advanced Search Capabilities**
+- **Vector-Based Search:** Semantic search through sustainability research database
+- **Course-Specific Responses:** Intelligent analysis for different engineering disciplines:
+  - Fluid Mechanics integration strategies
+  - Thermodynamics sustainability approaches
+  - Materials science green technologies
+  - General sustainability principles
+- **Fallback Mechanisms:** Robust error handling with graceful degradation
+
+### 🚀 **System Performance**
+- **Stable Architecture:** Direct search system bypassing unstable LLM dependencies
+- **Memory Optimization:** Efficient resource usage and cleanup
+- **Production Ready:** System tested and validated for extended use
+- **Scalable Design:** Modular architecture for future enhancements
 
 ## 🚀 Getting Started
 
