@@ -1,0 +1,31 @@
+[
+  {
+    "id": "37821660-1754-4b87-9817-56d06d8ed22b",
+    "type": "user",
+    "content": "Hello, can you help me with sustainability in engineering?",
+    "timestamp": "2025-07-20T16:47:32.232304"
+  },
+  {
+    "id": "c298ab85-e520-4837-89d1-e612ba5c1267",
+    "type": "assistant",
+    "content": "Based on my search through sustainability research, here's what I found about your query: **Hello, can you help me with sustainability in engineering?**\n\n**Source 1**: Paper ID #37716Implementation of Sustainability Concept in Capstone Projects Dr. Asif Ahmed, State University of New York, Polytechnic Institute American Society for Engineering Education, 2023\n\n**Source 2**: members of the Mechanical Engineering (ME) program are attempting to introduce sustainability as a visible thread in certain courses. Some of the ideas presented below are suggestions for future incorporation in the curricula, while some are already being introduced during the ongoing semester. In l...\n\n**Source 3**: need for sustainable course offerings and combined informationfrom many different industries to provide relevance for civilengineers.Challenges to Being Sustainable Sustainability is a fluid, ever-changing process. Consequently, yes-terday\u2019s sustainable design will not be tomorrow\u2019s. The lack of aco...\n\nThese findings are drawn from academic research on sustainability in engineering education.",
+    "sources": [
+      {
+        "source": {},
+        "score": 0.530348002910614,
+        "text_preview": "Paper ID #37716Implementation of Sustainability Concept in Capstone Projects Dr. Asif Ahmed, State University of New York, Polytechnic Institute American Society for Engineering Education, 2023"
+      },
+      {
+        "source": {},
+        "score": 0.535947859287262,
+        "text_preview": "members of the Mechanical Engineering (ME) program are attempting to introduce sustainability as a visible thread in certain courses. Some of the ideas presented below are suggestions for future incorporation in the curricula, while some are already being introduced during the ongoing semester. In l..."
+      },
+      {
+        "source": {},
+        "score": 0.5665369629859924,
+        "text_preview": "need for sustainable course offerings and combined informationfrom many different industries to provide relevance for civilengineers.Challenges to Being Sustainable Sustainability is a fluid, ever-changing process. Consequently, yes-terday\u2019s sustainable design will not be tomorrow\u2019s. The lack of aco..."
+      }
+    ],
+    "timestamp": "2025-07-20T16:47:32.256379"
+  }
+]

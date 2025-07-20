@@ -1,0 +1,17 @@
+{
+  "selected_models": {
+    "llm": "mistral",
+    "embedding": "miniLM"
+  },
+  "model_settings": {
+    "llm": {
+      "temperature": 0.7,
+      "max_new_tokens": 1000,
+      "top_p": 0.8
+    },
+    "embedding": {
+      "chunk_size": 1000,
+      "chunk_overlap": 200
+    }
+  }
+}
