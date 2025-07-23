@@ -209,29 +209,27 @@ def generate_response_from_sources(query, search_results):
     context_parts = []
     for result in top_results:
         text = result.get('text', '')
-        if len(text) > 100:  # Only use substantial text chunks
-            # Truncate to reasonable length for LLM
-            truncated_text = text[:800] if len(text) > 800 else text
-            context_parts.append(truncated_text)
-            
-            # Create source display
-            source = result.get('source', {})
-            source_display = {
-                'source': {
-                    'id': source.get('id', f'chunk_{result.get("chunk_id", "unknown")}'),
-                    'name': source.get('name', 'Sustainability Research Document'),
-                    'title': source.get('title', source.get('name', 'Sustainability Research')),
-                    'authors': source.get('authors', ''),
-                    'year': source.get('year', ''),
-                    'journal': source.get('journal', ''),
-                    'doi': source.get('doi', ''),
-                    'folder': source.get('folder', ''),
-                    'document_id': source.get('document_id', '')
-                },
-                'score': result.get('score', 0),
-                'text_preview': text[:200] + "..." if len(text) > 200 else text
-            }
-            sources_used.append(source_display)
+        # Always use the chunk, even if short
+        truncated_text = text[:800] if len(text) > 800 else text
+        context_parts.append(truncated_text)
+        # Create source display
+        source = result.get('source', {})
+        source_display = {
+            'source': {
+                'id': source.get('id', f'chunk_{result.get("chunk_id", "unknown")}'),
+                'name': source.get('name', 'Sustainability Research Document'),
+                'title': source.get('title', source.get('name', 'Sustainability Research')),
+                'authors': source.get('authors', ''),
+                'year': source.get('year', ''),
+                'journal': source.get('journal', ''),
+                'doi': source.get('doi', ''),
+                'folder': source.get('folder', ''),
+                'document_id': source.get('document_id', '')
+            },
+            'score': result.get('score', 0),
+            'text_preview': text[:200] + "..." if len(text) > 200 else text
+        }
+        sources_used.append(source_display)
     
     # Combine context
     context = "\n\n".join(context_parts)
