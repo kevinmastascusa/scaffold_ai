@@ -388,10 +388,11 @@ class ImprovedEnhancedQuerySystem:
         context_parts = []
         citation_refs = []
         estimated_tokens = 0
-        max_context_tokens = 1500  # Reduced context window to prevent overflow
-        max_chunk_tokens = 300     # Limit per chunk to ensure diversity
+        max_context_tokens = 1000  # Further reduced context window
+        max_chunk_tokens = 200     # Reduced chunk size
+        max_chunks = 3             # Limit number of chunks
         
-        for i, chunk in enumerate(chunks):
+        for i, chunk in enumerate(chunks[:max_chunks]):  # Only process max_chunks
             chunk_text = chunk.get('text', '').strip()
             if not chunk_text:
                 continue
@@ -414,8 +415,8 @@ class ImprovedEnhancedQuerySystem:
             citation_name = source.get('name', 'Unknown Source')
             ref = f"[{i+1}]"
             
-            # Add chunk with better formatting and clear separation
-            context_parts.append(f"\n=== Source {ref} ===\n{chunk_text}\n")
+            # Add chunk with minimal formatting
+            context_parts.append(f"Source {ref}:\n{chunk_text}\n")
             estimated_tokens += chunk_tokens
             
             # Store citation details
@@ -424,50 +425,38 @@ class ImprovedEnhancedQuerySystem:
                     'ref': ref, 'id': citation_id, 'name': citation_name
                 })
         
-        # Create context string with clear section markers
+        # Create context string with minimal formatting
         context = "\n".join(context_parts)
         
-        # Create citation list with clear formatting
+        # Create citation list with minimal formatting
         citations = [f"{c['ref']}: {c['name']}" for c in citation_refs]
         citations_str = "\n".join(citations)
         
-        # Build conversation context section with clear markers
+        # Build conversation context section (limited)
         conversation_section = ""
         if conversation_context:
-            # Limit conversation context tokens
-            conv_lines = conversation_context.split('\n')[:5]  # Only keep last 5 exchanges
-            conversation_section = f"""
-=== Previous Conversation ===
-{'\n'.join(conv_lines)}
-=== End Previous Conversation ===
-
-"""
+            # Only keep last 3 exchanges and truncate each
+            conv_lines = [line[:200] for line in conversation_context.split('\n')[:3]]
+            conversation_section = f"Previous Context:\n{'\n'.join(conv_lines)}\n\n"
         
-        # Improved prompt template with clear section markers and explicit instructions
-        prompt = f"""You are a helpful AI assistant specializing in sustainability education. Your task is to provide accurate, relevant, and well-cited responses based ONLY on the provided sources.
+        # Streamlined prompt template
+        prompt = f"""You are an AI assistant for sustainability education. Answer based ONLY on these sources.
 
-=== Current Query ===
-{query}
+Query: {query}
 
-=== Available Sources ===
+Sources:
 {context}
 
-=== Citations ===
+Citations:
 {citations_str}
 
-=== Instructions ===
-1. Base your response ONLY on the information from the provided sources
-2. Use specific details and examples from the sources
-3. Cite sources using [1], [2], etc. at the end of relevant statements
-4. Keep responses focused and relevant to the query
-5. If the sources don't contain enough information, say so clearly
-6. Write in a clear, professional tone
-7. Avoid speculation or information not found in the sources
-8. Format your response with clear paragraphs and structure
-9. Keep your response concise but complete
+Instructions:
+1. Use ONLY information from sources
+2. Cite using [1], [2], etc.
+3. Be concise and focused
+4. Say if sources lack information
 
-=== Your Response ===
-"""
+Response:"""
         
         total_tokens = len(prompt.split())
         logger.info(f"Generated improved prompt with ~{total_tokens} tokens")
