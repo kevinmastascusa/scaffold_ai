@@ -197,17 +197,11 @@ def chat():
             'content': result['response'],
             'sources': [
                 {
-                    'source': candidate.get('source', {}),
-                    'score': candidate.get(
-                        'cross_score', candidate.get('score', 0)
-                    ),
-                    'text_preview': (
-                        candidate.get('text', '')[:200] + '...'
-                        if len(candidate.get('text', '')) > 200
-                        else candidate.get('text', '')
-                    )
+                    'source': source.get('source', {}),
+                    'score': source.get('score', 0),
+                    'text_preview': source.get('text_preview', '')
                 }
-                for candidate in result['candidates'][:5]
+                for source in result['sources'][:5]
             ],
             'timestamp': datetime.datetime.now().isoformat()
         }
@@ -275,30 +269,24 @@ def api_query():
         # Process the query using the enhanced system
         result = query_enhanced_improved(query)
         
-        # Debug: Print the first candidate to see its structure
-        if result['candidates']:
-            print(f"DEBUG: First candidate structure: "
-                  f"{result['candidates'][0]}")
+        # Debug: Print the first source to see its structure
+        if result['sources']:
+            print(f"DEBUG: First source structure: "
+                  f"{result['sources'][0]}")
 
         # Format the response for the UI
         response = {
             'query': query,
             'response': result['response'],
-            'candidates_found': result['search_stats']['final_candidates'],
-            'search_stats': result['search_stats'],
+            'candidates_found': result.get('candidates_found', len(result['sources'])),
+            'search_stats': result.get('search_stats', {}),
             'sources': [
                 {
-                    'source': candidate.get('source', {}),
-                    'score': candidate.get(
-                        'cross_score', candidate.get('score', 0)
-                    ),
-                    'text_preview': (
-                        candidate.get('text', '')[:200] + '...'
-                        if len(candidate.get('text', '')) > 200
-                        else candidate.get('text', '')
-                    )
+                    'source': source.get('source', {}),
+                    'score': source.get('score', 0),
+                    'text_preview': source.get('text_preview', '')
                 }
-                for candidate in result['candidates'][:5]
+                for source in result['sources'][:5]
             ],
             'timestamp': datetime.datetime.now().isoformat()
         }
