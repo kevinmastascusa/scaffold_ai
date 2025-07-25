@@ -44,13 +44,13 @@ config_manager = ConfigManager()
 
 # Constants
 TOP_K_INITIAL = 50
-TOP_K_FINAL = 5
+TOP_K_FINAL = 3  # Reduced from 5 to 3 to limit context
 MIN_CROSS_SCORE = -2.0  # Minimum cross-encoder score threshold
 MIN_CONTEXTUAL_SCORE = 1  # Minimum contextual score threshold
-MAX_MEMORY_MESSAGES = 4  # Further reduced to prevent token overflow
-MAX_MEMORY_TOKENS = 800  # Further reduced to stay well under 2048 limit
-MAX_CONTEXT_TOKENS = 600  # Reduced maximum tokens for source context
-MAX_TOTAL_TOKENS = 1500  # Conservative total token limit
+MAX_MEMORY_MESSAGES = 2  # Further reduced to prevent token overflow
+MAX_MEMORY_TOKENS = 400  # Further reduced to stay well under 2048 limit
+MAX_CONTEXT_TOKENS = 300  # Reduced maximum tokens for source context
+MAX_TOTAL_TOKENS = 1000  # More conservative total token limit
 
 class ImprovedEnhancedQuerySystem:
     """Improved enhanced query system with better prompt engineering and chat memory."""
@@ -430,7 +430,7 @@ class ImprovedEnhancedQuerySystem:
         
         # Calculate available tokens for context (reserve space for prompt template)
         max_total_tokens = MAX_TOTAL_TOKENS  # Use conservative limit
-        prompt_template_tokens = 150  # Reduced estimate for prompt template
+        prompt_template_tokens = 100  # Further reduced estimate for prompt template
         available_tokens = max_total_tokens - prompt_template_tokens
         
         # Format conversation context with token limit
@@ -497,7 +497,7 @@ Answer:"""
                 
         return "\n\n".join(context_parts)
     
-    def format_chunks_for_prompt(self, chunks: List[Dict], max_chunks: int = 3, max_tokens: Optional[int] = None) -> str:
+    def format_chunks_for_prompt(self, chunks: List[Dict], max_chunks: int = 2, max_tokens: Optional[int] = None) -> str:
         """Format chunks for the prompt, limiting length and number with token management."""
         formatted_chunks = []
         total_tokens = 0
@@ -518,11 +518,11 @@ Answer:"""
                 chunk_text = ' '.join(words) + "..."
                 chunk_tokens = len(words)
             
-            # Truncate chunk if too long (200 words max per chunk)
-            if chunk_tokens > 200:
-                words = chunk_text.split()[:200]
+            # Truncate chunk if too long (100 words max per chunk)
+            if chunk_tokens > 100:
+                words = chunk_text.split()[:100]
                 chunk_text = ' '.join(words) + "..."
-                chunk_tokens = 200
+                chunk_tokens = 100
             
             formatted_chunks.append(chunk_text)
             total_tokens += chunk_tokens
