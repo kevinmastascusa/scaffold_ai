@@ -19,8 +19,8 @@ from flask_cors import CORS
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(project_root)
 
-from scaffold_core.vector.enhanced_query import (
-    query_enhanced, enhanced_query_system
+from scaffold_core.vector.enhanced_query_improved import (
+    query_enhanced_improved, improved_enhanced_query_system
 )
 from scaffold_core.pdf_processor import process_syllabus_upload
 
@@ -48,7 +48,7 @@ CONVERSATIONS_DIR.mkdir(exist_ok=True)
 # Pre-initialize the enhanced query system
 print("🔄 Pre-initializing enhanced query system...")
 try:
-    enhanced_query_system.initialize()
+    improved_enhanced_query_system.initialize()
     print("✅ Enhanced query system initialized successfully")
 except Exception as e:
     print(f"❌ Failed to initialize enhanced query system: {e}")
@@ -117,6 +117,25 @@ def upload_syllabus():
             processing_result = process_syllabus_upload(str(file_path), session_id)
             
             if processing_result['processing_status'] == 'success':
+                # Add syllabus content to conversation memory for context
+                syllabus_context = f"""UPLOADED SYLLABUS CONTEXT:
+Course: {processing_result['analysis'].get('course_info', {}).get('title', 'Unknown Course')}
+Course Code: {processing_result['analysis'].get('course_info', {}).get('code', 'N/A')}
+Topics: {', '.join(processing_result['analysis'].get('topics', [])[:5])}
+Content Summary: {processing_result.get('text_content', '')[:500]}..."""
+                
+                # Store syllabus context for this session
+                conversation = get_conversation_history(session_id)
+                syllabus_message = {
+                    'id': str(uuid.uuid4()),
+                    'type': 'syllabus_context',
+                    'content': syllabus_context,
+                    'timestamp': datetime.datetime.now().isoformat(),
+                    'filename': filename
+                }
+                conversation.append(syllabus_message)
+                save_conversation_history(session_id, conversation)
+                
                 return jsonify({
                     'success': True,
                     'filename': filename,
@@ -168,8 +187,8 @@ def chat():
         }
         conversation.append(user_message)
 
-        # Process the query using the enhanced system
-        result = query_enhanced(message)
+        # Process the query using the enhanced system with session context
+        result = query_enhanced_improved(message, session_id)
         
         # Create AI response
         ai_message = {
@@ -254,7 +273,7 @@ def api_query():
             return jsonify({'error': 'Query is required'}), 400
 
         # Process the query using the enhanced system
-        result = query_enhanced(query)
+        result = query_enhanced_improved(query)
         
         # Debug: Print the first candidate to see its structure
         if result['candidates']:
@@ -324,7 +343,7 @@ def api_health():
     return jsonify({
         'status': 'healthy',
         'timestamp': datetime.datetime.now().isoformat(),
-        'enhanced_query_system': 'initialized' if enhanced_query_system.initialized else 'not_initialized'
+        'enhanced_query_system': 'initialized' if improved_enhanced_query_system.initialized else 'not_initialized'
     })
 
 

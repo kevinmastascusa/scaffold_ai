@@ -119,8 +119,46 @@ class ImprovedEnhancedQuerySystem:
         logger.debug(f"Added message to memory for session {session_id}. Total messages: {len(self.conversation_memory[session_id])}")
     
     def get_conversation_context(self, session_id: str) -> str:
-        """Get conversation context for the given session."""
+        """Get conversation context for the given session, including syllabus context."""
         if session_id not in self.conversation_memory:
+            # Try to load from external conversation files (for app_enhanced.py compatibility)
+            try:
+                import json
+                from pathlib import Path
+                conversations_dir = Path("conversations")
+                conversation_file = conversations_dir / f"{session_id}.json"
+                
+                if conversation_file.exists():
+                    with open(conversation_file, 'r') as f:
+                        external_messages = json.load(f)
+                    
+                    # Look for syllabus context in external messages
+                    syllabus_context = ""
+                    recent_messages = []
+                    
+                    for msg in external_messages:
+                        if msg.get('type') == 'syllabus_context':
+                            syllabus_context = msg.get('content', '')
+                        elif msg.get('type') in ['user', 'assistant'] and len(recent_messages) < MAX_MEMORY_MESSAGES:
+                            recent_messages.append(msg)
+                    
+                    # Build context with syllabus info
+                    context_parts = []
+                    if syllabus_context:
+                        context_parts.append(syllabus_context)
+                    
+                    for msg in recent_messages[-MAX_MEMORY_MESSAGES:]:
+                        role = msg.get('type', 'user')
+                        content = msg.get('content', '')
+                        if role == 'user':
+                            context_parts.append(f"User: {content}")
+                        elif role == 'assistant':
+                            context_parts.append(f"Assistant: {content}")
+                    
+                    return "\n".join(context_parts)
+            except Exception as e:
+                logger.debug(f"Could not load external conversation file: {e}")
+            
             return ""
         
         messages = self.conversation_memory[session_id]
@@ -139,6 +177,9 @@ class ImprovedEnhancedQuerySystem:
                 context_parts.append(f"User: {content}")
             elif role == 'assistant':
                 context_parts.append(f"Assistant: {content}")
+            elif role == 'syllabus_context':
+                # Include syllabus context at the beginning
+                context_parts.insert(0, content)
             
             # Estimate tokens (rough approximation)
             message_tokens = len(content) // 4
