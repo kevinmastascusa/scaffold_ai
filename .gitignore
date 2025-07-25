@@ -98,6 +98,10 @@ celerybeat.pid
 # User-specific configuration
 model_config.json
 
+# Conversation files and uploads
+conversations/
+uploads/
+
 # SageMath parsed files
 *.sage.py
 
