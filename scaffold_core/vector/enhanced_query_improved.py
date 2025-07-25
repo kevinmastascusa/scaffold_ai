@@ -47,9 +47,10 @@ TOP_K_INITIAL = 50
 TOP_K_FINAL = 5
 MIN_CROSS_SCORE = -2.0  # Minimum cross-encoder score threshold
 MIN_CONTEXTUAL_SCORE = 1  # Minimum contextual score threshold
-MAX_MEMORY_MESSAGES = 6  # Reduced from 10 to prevent token overflow
-MAX_MEMORY_TOKENS = 1200  # Reduced from 1800 to stay well under 2048 limit
-MAX_CONTEXT_TOKENS = 800  # Maximum tokens for source context
+MAX_MEMORY_MESSAGES = 4  # Further reduced to prevent token overflow
+MAX_MEMORY_TOKENS = 800  # Further reduced to stay well under 2048 limit
+MAX_CONTEXT_TOKENS = 600  # Reduced maximum tokens for source context
+MAX_TOTAL_TOKENS = 1500  # Conservative total token limit
 
 class ImprovedEnhancedQuerySystem:
     """Improved enhanced query system with better prompt engineering and chat memory."""
@@ -408,8 +409,8 @@ class ImprovedEnhancedQuerySystem:
             return f"Query: {query}\n\nI don't have enough relevant information to answer this query accurately."
         
         # Calculate available tokens for context (reserve space for prompt template)
-        max_total_tokens = 1800  # Conservative limit
-        prompt_template_tokens = 200  # Estimate for prompt template
+        max_total_tokens = MAX_TOTAL_TOKENS  # Use conservative limit
+        prompt_template_tokens = 150  # Reduced estimate for prompt template
         available_tokens = max_total_tokens - prompt_template_tokens
         
         # Format conversation context with token limit
@@ -439,6 +440,14 @@ Provide specific, actionable steps:"""
         # Log token usage for debugging
         total_tokens = len(prompt.split())
         logger.debug(f"Generated prompt with ~{total_tokens} tokens")
+        
+        # Final validation to prevent token overflow
+        if total_tokens > MAX_TOTAL_TOKENS:
+            logger.warning(f"Prompt too long ({total_tokens} tokens), truncating")
+            # Truncate prompt to fit within limits
+            words = prompt.split()[:MAX_TOTAL_TOKENS]
+            prompt = ' '.join(words) + "..."
+            logger.debug(f"Truncated prompt to ~{len(words)} tokens")
         
         return prompt
 
