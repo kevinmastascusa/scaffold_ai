@@ -384,37 +384,22 @@ class ImprovedEnhancedQuerySystem:
         if not chunks:
             return f"Query: {query}\n\nI don't have enough relevant information to answer this query accurately."
         
-        # Build educational instruction set for Scaffold AI
-        instructions = [
-            "1. Provide comprehensive, educational responses that help students understand the topic",
-            "2. Use the provided sources as a foundation, but supplement with your knowledge when helpful",
-            "3. Include relevant examples, explanations, and context to enhance learning",
-            "4. Structure responses clearly with logical flow and appropriate sections",
-            "5. Use clear, accessible language suitable for students and educators",
-            "6. When sources provide specific information, reference them appropriately",
-            "7. If the topic requires additional context or background, provide it",
-            "8. Focus on practical applications and real-world relevance when possible"
-        ]
-        
         # Format conversation context if available
         context_section = ""
         if conversation_context:
             context_section = f"\nPrevious Conversation Context:\n{conversation_context}\n"
             
         # Build the prompt
-        prompt = f"""You are Scaffold AI, a helpful course curriculum assistant designed to support students and educators.
+        prompt = f"""You are Scaffold AI, a course curriculum assistant helping students and educators.
 
-TASK: Provide a comprehensive, educational response to the following query, using the provided sources as a foundation while drawing on your knowledge to enhance the learning experience.
+Answer the following question comprehensively, using the provided sources and your knowledge to provide educational value:
 
 QUERY: {query}
-
-INSTRUCTIONS:
-{chr(10).join(instructions)}
 {context_section}
 RELEVANT SOURCES:
 {self.format_chunks_for_prompt(chunks)}
 
-ANSWER:"""
+Provide a clear, educational response that helps students understand the topic:"""
         
         return prompt
 
