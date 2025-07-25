@@ -723,6 +723,22 @@ def clear_conversation_memory(session_id: str):
             logger.info("Initializing enhanced query system for memory clearing")
             improved_enhanced_query_system.initialize()
         
+        # Check if there's actually memory to clear
+        internal_memory_exists = session_id in improved_enhanced_query_system.conversation_memory
+        external_file_exists = False
+        
+        try:
+            from pathlib import Path
+            conversations_dir = Path("conversations")
+            conversation_file = conversations_dir / f"{session_id}.json"
+            external_file_exists = conversation_file.exists()
+        except Exception:
+            pass
+        
+        if not internal_memory_exists and not external_file_exists:
+            logger.info(f"No memory found to clear for session: {session_id}")
+            return
+        
         improved_enhanced_query_system.clear_memory(session_id)
         logger.info(f"Successfully cleared memory for session: {session_id}")
         
@@ -757,18 +773,36 @@ def clear_all_conversation_memory():
             logger.info("Initializing enhanced query system for memory clearing")
             improved_enhanced_query_system.initialize()
         
+        # Check if there's actually memory to clear
+        internal_memory_count = len(improved_enhanced_query_system.conversation_memory)
+        external_file_count = 0
+        
+        try:
+            from pathlib import Path
+            conversations_dir = Path("conversations")
+            if conversations_dir.exists():
+                external_file_count = len(list(conversations_dir.glob("*.json")))
+        except Exception:
+            pass
+        
+        if internal_memory_count == 0 and external_file_count == 0:
+            logger.info("No conversation memory found to clear")
+            return
+        
         # Clear internal memory
         improved_enhanced_query_system.conversation_memory.clear()
-        logger.info("Successfully cleared all internal conversation memory")
+        logger.info(f"Successfully cleared {internal_memory_count} internal conversation memory entries")
         
         # Also clear external conversation files
         try:
             from pathlib import Path
             conversations_dir = Path("conversations")
             if conversations_dir.exists():
+                cleared_files = 0
                 for conversation_file in conversations_dir.glob("*.json"):
                     conversation_file.unlink()
-                logger.info("Successfully cleared all external conversation files")
+                    cleared_files += 1
+                logger.info(f"Successfully cleared {cleared_files} external conversation files")
         except Exception as e:
             logger.debug(f"Could not clear external conversation files: {e}")
         
