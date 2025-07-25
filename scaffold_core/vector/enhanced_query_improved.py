@@ -37,6 +37,10 @@ from scaffold_core.config import (
     get_faiss_index_path, get_metadata_json_path
 )
 from scaffold_core.llm import llm
+from scaffold_core.config_manager import ConfigManager
+
+# Initialize config manager
+config_manager = ConfigManager()
 
 # Constants
 TOP_K_INITIAL = 50
@@ -460,57 +464,61 @@ ANSWER:"""
         return prompt
     
     def query(self, query: str, session_id: Optional[str] = None) -> Dict[str, Any]:
-        """Main query function with improved processing and chat memory."""
+        """Process a query and return relevant results with improved prompt engineering."""
         if not self.initialized:
             self.initialize()
-        
-        logger.info(f"Processing query: {query} (session: {session_id})")
         
         try:
             # Get conversation context if session_id provided
             conversation_context = ""
             if session_id:
                 conversation_context = self.get_conversation_context(session_id)
-                logger.debug(f"Retrieved conversation context for session {session_id}")
+                logger.debug(f"Generated conversation context with ~{len(conversation_context.split())} tokens")
             
-            # Step 1: Hybrid search
-            initial_candidates = self.hybrid_search(query, TOP_K_INITIAL)
-            logger.debug(f"Found {len(initial_candidates)} initial candidates")
+            # Log query processing
+            logger.info(f"Processing query: {query}" + (f" (session: {session_id})" if session_id else ""))
             
-            # Step 2: Cross-encoder reranking
-            reranked_candidates = self.cross_encoder_rerank(query, initial_candidates)
+            # Get initial candidates using hybrid search
+            candidates = self.hybrid_search(query)
+            logger.debug(f"Found {len(candidates)} initial candidates")
+            
+            if not candidates:
+                return {
+                    "response": "I couldn't find any relevant information to answer your question.",
+                    "sources": []
+                }
+            
+            # Rerank candidates using cross-encoder
+            reranked_candidates = self.cross_encoder_rerank(query, candidates)
             logger.debug(f"Reranked to {len(reranked_candidates)} candidates")
             
-            # Step 3: Contextual filtering
+            # Apply contextual filtering
             filtered_candidates = self.contextual_filtering(query, reranked_candidates)
             logger.debug(f"Filtered to {len(filtered_candidates)} candidates")
             
-            # Step 4: Select top candidates
+            # Select top candidates
             final_candidates = filtered_candidates[:TOP_K_FINAL]
             logger.debug(f"Selected {len(final_candidates)} final candidates")
             
-            # Step 5: Generate improved prompt with conversation context and get LLM response
-            improved_prompt = self.generate_improved_prompt(query, final_candidates, conversation_context)
+            # Generate improved prompt
+            improved_prompt = self.generate_improved_prompt(
+                query, final_candidates, conversation_context
+            )
+            logger.info(f"Generated improved prompt with ~{len(improved_prompt.split())} tokens (including conversation context)")
             
-            # Generate response using config manager temperature setting
-            from scaffold_core.config_manager import config_manager
-            llm_settings = config_manager.get_model_settings('llm')
-            temperature = llm_settings.get('temperature', 0.3)
+            # Get temperature from config manager
+            temperature = config_manager.get_model_settings('llm').get('temperature', 0.3)
+            
+            # Generate response using LLM
             llm_response = llm.generate_response(improved_prompt, temperature=temperature)
             
-            # Add user message to memory
+            # Store query and response in memory if session_id provided
             if session_id:
-                user_message = {
-                    'type': 'user',
-                    'content': query
-                }
-                self.add_to_memory(session_id, user_message)
+                self.add_to_memory(session_id, {"role": "user", "content": query})
+                self.add_to_memory(session_id, {"role": "assistant", "content": llm_response})
             
-            # Prepare results with improved structure
-            results = {
-                "query": query,
+            return {
                 "response": llm_response,
-                "candidates_found": len(final_candidates),
                 "sources": [
                     {
                         "score": candidate.get("cross_score", 0),
@@ -524,36 +532,15 @@ ANSWER:"""
                     }
                     for candidate in final_candidates
                 ],
-                "search_stats": {
-                    "initial_candidates": len(initial_candidates),
-                    "reranked_candidates": len(reranked_candidates),
-                    "filtered_candidates": len(filtered_candidates),
-                    "final_candidates": len(final_candidates)
-                },
-                "conversation_context": bool(conversation_context),
-                "timestamp": str(datetime.datetime.now())
+                "conversation_context": conversation_context if session_id else None
             }
             
-            # Add assistant response to memory
-            if session_id:
-                assistant_message = {
-                    'type': 'assistant',
-                    'content': llm_response
-                }
-                self.add_to_memory(session_id, assistant_message)
-            
-            return results
-            
         except Exception as e:
-            logger.error(f"Error in query processing: {e}")
+            logger.error(f"Error processing query: {e}")
             return {
-                "query": query,
-                "response": f"Error processing query: {str(e)}",
-                "candidates_found": 0,
+                "response": "Sorry, I encountered an error while processing your query.",
                 "sources": [],
-                "search_stats": {},
-                "conversation_context": False,
-                "timestamp": str(datetime.datetime.now())
+                "error": str(e)
             }
 
 # Global instance
