@@ -42,7 +42,7 @@ from scaffold_core.llm import llm
 TOP_K_INITIAL = 50
 TOP_K_FINAL = 5
 MIN_CROSS_SCORE = -2.0  # Minimum cross-encoder score threshold
-MIN_CONTEXTUAL_SCORE = 2  # Minimum contextual score threshold
+MIN_CONTEXTUAL_SCORE = 1  # Minimum contextual score threshold
 MAX_MEMORY_MESSAGES = 10  # Maximum number of previous messages to include
 MAX_MEMORY_TOKENS = 1500  # Maximum tokens for conversation history
 
@@ -511,7 +511,12 @@ ANSWER:"""
                 "sources": [
                     {
                         "score": candidate.get("cross_score", 0),
-                        "source": candidate.get("source", {}),
+                        "source": {
+                            "id": candidate.get("document_id", "Unknown"),
+                            "name": candidate.get("metadata", {}).get("filename", "Unknown Source"),
+                            "path": candidate.get("source_path", ""),
+                            "page": candidate.get("metadata", {}).get("page_number", "")
+                        },
                         "text_preview": candidate.get("text", "")[:200] + "..."
                     }
                     for candidate in final_candidates
