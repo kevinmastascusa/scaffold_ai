@@ -47,8 +47,9 @@ TOP_K_INITIAL = 50
 TOP_K_FINAL = 5
 MIN_CROSS_SCORE = -2.0  # Minimum cross-encoder score threshold
 MIN_CONTEXTUAL_SCORE = 1  # Minimum contextual score threshold
-MAX_MEMORY_MESSAGES = 10  # Maximum number of previous messages to include
-MAX_MEMORY_TOKENS = 1800  # Increased from 1500
+MAX_MEMORY_MESSAGES = 6  # Reduced from 10 to prevent token overflow
+MAX_MEMORY_TOKENS = 1200  # Reduced from 1800 to stay well under 2048 limit
+MAX_CONTEXT_TOKENS = 800  # Maximum tokens for source context
 
 class ImprovedEnhancedQuerySystem:
     """Improved enhanced query system with better prompt engineering and chat memory."""
@@ -123,7 +124,7 @@ class ImprovedEnhancedQuerySystem:
         logger.debug(f"Added message to memory for session {session_id}. Total messages: {len(self.conversation_memory[session_id])}")
     
     def get_conversation_context(self, session_id: str) -> str:
-        """Get conversation context for the given session, including syllabus context."""
+        """Get conversation context for the given session, with strict token management."""
         if session_id not in self.conversation_memory:
             # Try to load from external conversation files (for app_enhanced.py compatibility)
             try:
@@ -146,20 +147,8 @@ class ImprovedEnhancedQuerySystem:
                         elif msg.get('type') in ['user', 'assistant'] and len(recent_messages) < MAX_MEMORY_MESSAGES:
                             recent_messages.append(msg)
                     
-                    # Build context with syllabus info
-                    context_parts = []
-                    if syllabus_context:
-                        context_parts.append(syllabus_context)
-                    
-                    for msg in recent_messages[-MAX_MEMORY_MESSAGES:]:
-                        role = msg.get('type', 'user')
-                        content = msg.get('content', '')
-                        if role == 'user':
-                            context_parts.append(f"User: {content}")
-                        elif role == 'assistant':
-                            context_parts.append(f"Assistant: {content}")
-                    
-                    return "\n".join(context_parts)
+                    # Build context with strict token management
+                    return self._build_context_with_tokens(syllabus_context, recent_messages)
             except Exception as e:
                 logger.debug(f"Could not load external conversation file: {e}")
             
@@ -169,30 +158,64 @@ class ImprovedEnhancedQuerySystem:
         if not messages:
             return ""
         
-        # Build conversation context
-        context_parts = []
-        total_tokens = 0
+        # Extract syllabus context and recent messages
+        syllabus_context = ""
+        recent_messages = []
         
-        for msg in messages[-MAX_MEMORY_MESSAGES:]:  # Get last N messages
+        for msg in messages[-MAX_MEMORY_MESSAGES:]:
             role = msg.get('type', 'user')
             content = msg.get('content', '')
             
+            if role == 'syllabus_context':
+                syllabus_context = content
+            elif role in ['user', 'assistant']:
+                recent_messages.append(msg)
+        
+        return self._build_context_with_tokens(syllabus_context, recent_messages)
+    
+    def _build_context_with_tokens(self, syllabus_context: str, messages: List[Dict]) -> str:
+        """Build conversation context with strict token management to prevent overflow."""
+        context_parts = []
+        total_tokens = 0
+        max_tokens = MAX_MEMORY_TOKENS
+        
+        # Add syllabus context first (if available and not too long)
+        if syllabus_context:
+            syllabus_tokens = len(syllabus_context) // 4
+            if syllabus_tokens <= max_tokens // 3:  # Use max 1/3 of tokens for syllabus
+                context_parts.append(syllabus_context)
+                total_tokens += syllabus_tokens
+                max_tokens -= syllabus_tokens
+            else:
+                # Truncate syllabus if too long
+                max_syllabus_chars = (max_tokens // 3) * 4
+                truncated_syllabus = syllabus_context[:max_syllabus_chars] + "..."
+                context_parts.append(truncated_syllabus)
+                total_tokens += max_tokens // 3
+        
+        # Add recent messages with strict token control
+        for msg in reversed(messages):  # Start with most recent
+            role = msg.get('type', 'user')
+            content = msg.get('content', '')
+            
+            # Estimate tokens for this message
+            message_tokens = len(content) // 4
+            
+            # Check if adding this message would exceed limit
+            if total_tokens + message_tokens > max_tokens:
+                logger.warning(f"Conversation context truncated: {total_tokens} tokens used")
+                break
+            
+            # Add message to context
             if role == 'user':
                 context_parts.append(f"User: {content}")
             elif role == 'assistant':
                 context_parts.append(f"Assistant: {content}")
-            elif role == 'syllabus_context':
-                # Include syllabus context at the beginning
-                context_parts.insert(0, content)
             
-            # Estimate tokens (rough approximation)
-            message_tokens = len(content) // 4
             total_tokens += message_tokens
-            
-            # Stop if we exceed token limit
-            if total_tokens > MAX_MEMORY_TOKENS:
-                logger.warning(f"Conversation context truncated due to token limit")
-                break
+        
+        # Reverse to get chronological order
+        context_parts.reverse()
         
         conversation_context = "\n".join(context_parts)
         logger.debug(f"Generated conversation context with ~{total_tokens} tokens")
@@ -380,14 +403,28 @@ class ImprovedEnhancedQuerySystem:
             return candidates
     
     def generate_improved_prompt(self, query: str, chunks: List[Dict], conversation_context: str = "") -> str:
-        """Generate an improved prompt with better engineering and conversation context."""
+        """Generate an improved prompt with strict token management to prevent overflow."""
         if not chunks:
             return f"Query: {query}\n\nI don't have enough relevant information to answer this query accurately."
         
-        # Format conversation context if available
+        # Calculate available tokens for context (reserve space for prompt template)
+        max_total_tokens = 1800  # Conservative limit
+        prompt_template_tokens = 200  # Estimate for prompt template
+        available_tokens = max_total_tokens - prompt_template_tokens
+        
+        # Format conversation context with token limit
         context_section = ""
         if conversation_context:
+            context_tokens = len(conversation_context.split())
+            if context_tokens > available_tokens // 2:  # Use max 1/2 for conversation
+                # Truncate conversation context
+                words = conversation_context.split()[:available_tokens // 2]
+                conversation_context = ' '.join(words) + "..."
             context_section = f"\nPrevious Conversation Context:\n{conversation_context}\n"
+            available_tokens -= len(conversation_context.split())
+        
+        # Format chunks with remaining token budget
+        formatted_chunks = self.format_chunks_for_prompt(chunks, max_tokens=available_tokens)
             
         # Build the prompt
         prompt = f"""You are Scaffold AI, a course curriculum assistant helping students and educators.
@@ -397,9 +434,13 @@ Answer the following question comprehensively, using the provided sources and yo
 QUERY: {query}
 {context_section}
 RELEVANT SOURCES:
-{self.format_chunks_for_prompt(chunks)}
+{formatted_chunks}
 
 Provide a clear, educational response that helps students understand the topic:"""
+        
+        # Log token usage for debugging
+        total_tokens = len(prompt.split())
+        logger.debug(f"Generated prompt with ~{total_tokens} tokens")
         
         return prompt
 
@@ -429,16 +470,39 @@ Provide a clear, educational response that helps students understand the topic:"
                 
         return "\n\n".join(context_parts)
     
-    def format_chunks_for_prompt(self, chunks: List[Dict], max_chunks: int = 3) -> str:
-        """Format chunks for the prompt, limiting length and number."""
+    def format_chunks_for_prompt(self, chunks: List[Dict], max_chunks: int = 3, max_tokens: Optional[int] = None) -> str:
+        """Format chunks for the prompt, limiting length and number with token management."""
         formatted_chunks = []
+        total_tokens = 0
+        
         for i, chunk in enumerate(chunks[:max_chunks]):
             chunk_text = chunk.get('text', '').strip()
             if not chunk_text:
                 continue
-            # Truncate chunk if too long (200 words)
-            words = chunk_text.split()[:200]
-            formatted_chunks.append(' '.join(words))
+            
+            # Estimate tokens for this chunk
+            chunk_tokens = len(chunk_text.split())
+            
+            # Check token limit if specified
+            if max_tokens and total_tokens + chunk_tokens > max_tokens:
+                # Truncate chunk to fit remaining token budget
+                remaining_tokens = max_tokens - total_tokens
+                words = chunk_text.split()[:remaining_tokens]
+                chunk_text = ' '.join(words) + "..."
+                chunk_tokens = len(words)
+            
+            # Truncate chunk if too long (200 words max per chunk)
+            if chunk_tokens > 200:
+                words = chunk_text.split()[:200]
+                chunk_text = ' '.join(words) + "..."
+                chunk_tokens = 200
+            
+            formatted_chunks.append(chunk_text)
+            total_tokens += chunk_tokens
+            
+            # Stop if we've reached token limit
+            if max_tokens and total_tokens >= max_tokens:
+                break
         
         return "\n\n".join(formatted_chunks)
     
@@ -446,6 +510,19 @@ Provide a clear, educational response that helps students understand the topic:"
         """Process a query and return relevant results with improved prompt engineering."""
         if not self.initialized:
             self.initialize()
+        
+        # Input validation to prevent garbled text
+        if not query or not isinstance(query, str):
+            return {
+                "error": "Invalid query provided",
+                "sources": [],
+                "response": "Please provide a valid question or query."
+            }
+        
+        # Sanitize query to prevent encoding issues
+        query = query.strip()
+        if len(query) > 1000:  # Limit query length
+            query = query[:1000] + "..."
         
         try:
             # Get conversation context if session_id provided
