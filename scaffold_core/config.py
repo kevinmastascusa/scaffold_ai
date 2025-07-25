@@ -92,22 +92,24 @@ CROSS_ENCODER_MODELS = {
 }
 SELECTED_CROSS_ENCODER_MODEL = CROSS_ENCODER_MODELS["miniLM"]["name"]
 
+
 # LLM Models Registry
 LLM_MODELS = {
     "mistral": {
         "name": "mistralai/Mistral-7B-Instruct-v0.2",
         "desc": "Recommended: Good balance of quality and speed."
     },
-    # "mixtral": {
-    #     "name": "microsoft/phi-2",
-    #     "desc": "Smaller, CPU-friendly model (substituted for Mixtral)."
-    # },
+    "mixtral": {
+        "name": "mistralai/Mixtral-8x7B-Instruct-v0.1",
+        "desc": "Large Mixture-of-Experts model, high quality, requires more resources."
+    },
     "tinyllama": {
         "name": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
         "desc": "Very fast, low resource, lower quality."
     },
 }
-SELECTED_LLM_MODEL = LLM_MODELS["tinyllama"]["name"]
+# Change the default model here if desired:
+SELECTED_LLM_MODEL = LLM_MODELS["tinyllama"]["name"]  # or "mixtral"/"mistral"
 
 # Model registry for tracking status/compatibility
 MODEL_REGISTRY = {
@@ -131,6 +133,7 @@ MIXTRAL_API_KEY = os.getenv(
     "MIXTRAL_API_KEY",
     os.getenv("HUGGINGFACE_TOKEN", "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")
 )
+
 
 # Use Mixtral key if Mixtral model is selected
 if LLM_MODEL == LLM_MODELS.get("mixtral", {}).get("name"):
