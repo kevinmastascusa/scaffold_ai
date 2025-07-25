@@ -388,16 +388,23 @@ class ImprovedEnhancedQuerySystem:
         context_parts = []
         citation_refs = []
         estimated_tokens = 0
-        max_context_tokens = 2000  # Increased context window
+        max_context_tokens = 1500  # Reduced context window to prevent overflow
+        max_chunk_tokens = 300     # Limit per chunk to ensure diversity
         
         for i, chunk in enumerate(chunks):
             chunk_text = chunk.get('text', '').strip()
             if not chunk_text:
                 continue
                 
-            chunk_tokens = len(chunk_text) // 4
+            # Estimate tokens (rough approximation)
+            chunk_tokens = len(chunk_text.split())
             
-            # Check token limit
+            # Truncate long chunks
+            if chunk_tokens > max_chunk_tokens:
+                chunk_text = ' '.join(chunk_text.split()[:max_chunk_tokens]) + "..."
+                chunk_tokens = max_chunk_tokens
+            
+            # Check total token limit
             if estimated_tokens + chunk_tokens > max_context_tokens:
                 logger.warning(f"Truncating context at chunk {i}")
                 break
@@ -427,9 +434,11 @@ class ImprovedEnhancedQuerySystem:
         # Build conversation context section with clear markers
         conversation_section = ""
         if conversation_context:
+            # Limit conversation context tokens
+            conv_lines = conversation_context.split('\n')[:5]  # Only keep last 5 exchanges
             conversation_section = f"""
 === Previous Conversation ===
-{conversation_context}
+{'\n'.join(conv_lines)}
 === End Previous Conversation ===
 
 """
@@ -455,11 +464,12 @@ class ImprovedEnhancedQuerySystem:
 6. Write in a clear, professional tone
 7. Avoid speculation or information not found in the sources
 8. Format your response with clear paragraphs and structure
+9. Keep your response concise but complete
 
 === Your Response ===
 """
         
-        total_tokens = len(prompt) // 4
+        total_tokens = len(prompt.split())
         logger.info(f"Generated improved prompt with ~{total_tokens} tokens")
         
         return prompt
@@ -505,13 +515,24 @@ class ImprovedEnhancedQuerySystem:
             improved_prompt = self.generate_improved_prompt(
                 query, final_candidates, conversation_context
             )
-            logger.info(f"Generated improved prompt with ~{len(improved_prompt.split())} tokens (including conversation context)")
             
             # Get temperature from config manager
             temperature = config_manager.get_model_settings('llm').get('temperature', 0.3)
             
-            # Generate response using LLM
-            llm_response = llm.generate_response(improved_prompt, temperature=temperature)
+            # Generate response using LLM with better error handling
+            try:
+                llm_response = llm.generate_response(improved_prompt, temperature=temperature)
+            except Exception as e:
+                logger.error(f"Error in LLM response generation: {e}")
+                # Fall back to a shorter prompt if token limit exceeded
+                if "maximum length" in str(e).lower():
+                    logger.warning("Token limit exceeded, trying with reduced context")
+                    improved_prompt = self.generate_improved_prompt(
+                        query, final_candidates[:2], ""  # Use fewer sources, no conversation context
+                    )
+                    llm_response = llm.generate_response(improved_prompt, temperature=temperature)
+                else:
+                    raise
             
             # Store query and response in memory if session_id provided
             if session_id:
