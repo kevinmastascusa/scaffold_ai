@@ -384,55 +384,80 @@ class ImprovedEnhancedQuerySystem:
         if not chunks:
             return f"Query: {query}\n\nI don't have enough relevant information to answer this query accurately."
         
-        # Prepare context
-        context_parts = []
-        estimated_tokens = 0
-        max_context_tokens = 800  # Reduced context window
-        max_chunk_tokens = 200    # Per chunk limit
-        max_chunks = 3            # Max chunks to include
+        # Build comprehensive instruction set
+        instructions = [
+            "1. Answer ONLY using information from the provided sources",
+            "2. If the sources don't contain enough information, clearly state what's missing",
+            "3. Provide specific details and examples from the sources when available",
+            "4. Keep responses concise, well-structured, and focused on the query",
+            "5. Avoid speculation, assumptions, or information not in the sources",
+            "6. Use clear, professional language appropriate for academic/technical content",
+            "7. If multiple sources provide conflicting information, acknowledge this",
+            "8. Structure your response logically with clear sections if needed"
+        ]
         
-        for i, chunk in enumerate(chunks[:max_chunks]):
+        # Format conversation context if available
+        context_section = ""
+        if conversation_context:
+            context_section = f"\nPrevious Conversation Context:\n{conversation_context}\n"
+            
+        # Build the prompt
+        prompt = f"""You are a helpful AI assistant that provides accurate, relevant, and well-cited responses based on the provided sources.
+
+TASK: Answer the following query using ONLY the information from the provided sources.
+
+QUERY: {query}
+
+INSTRUCTIONS:
+{chr(10).join(instructions)}
+{context_section}
+RELEVANT SOURCES:
+{self.format_chunks_for_prompt(chunks)}
+
+IMPORTANT: Base your response solely on the information provided above. Do not include any external knowledge, assumptions, or information not present in the sources.
+
+ANSWER:"""
+        
+        return prompt
+
+    def _prepare_context(self, chunks: List[Dict], max_tokens: int = 800) -> str:
+        """Prepare context from chunks with token limit."""
+        context_parts = []
+        total_tokens = 0
+        
+        for chunk in chunks:
             chunk_text = chunk.get('text', '').strip()
             if not chunk_text:
                 continue
                 
-            # Estimate tokens
+            # Estimate tokens (rough word count)
             chunk_tokens = len(chunk_text.split())
-            if chunk_tokens > max_chunk_tokens:
-                chunk_text = ' '.join(chunk_text.split()[:max_chunk_tokens]) + "..."
-                chunk_tokens = max_chunk_tokens
+            if total_tokens + chunk_tokens > max_tokens:
+                # Truncate chunk to fit
+                words = chunk_text.split()
+                allowed_words = max_tokens - total_tokens
+                chunk_text = ' '.join(words[:allowed_words])
             
-            if estimated_tokens + chunk_tokens > max_context_tokens:
+            context_parts.append(chunk_text)
+            total_tokens += chunk_tokens
+            
+            if total_tokens >= max_tokens:
                 break
                 
-            context_parts.append(f"Context {i+1}:\n{chunk_text}\n")
-            estimated_tokens += chunk_tokens
+        return "\n\n".join(context_parts)
+    
+    def format_chunks_for_prompt(self, chunks: List[Dict], max_chunks: int = 3) -> str:
+        """Format chunks for the prompt, limiting length and number."""
+        formatted_chunks = []
+        for i, chunk in enumerate(chunks[:max_chunks]):
+            chunk_text = chunk.get('text', '').strip()
+            if not chunk_text:
+                continue
+            # Truncate chunk if too long (200 words)
+            words = chunk_text.split()[:200]
+            formatted_chunks.append(' '.join(words))
         
-        # Build conversation context section (limited)
-        conversation_section = ""
-        if conversation_context:
-            conv_lines = [line[:200] for line in conversation_context.split('\n')[-3:]]
-            conversation_section = f"Previous Context:\n{'\n'.join(conv_lines)}\n\n"
-        
-        # Streamlined prompt template
-        prompt = f"""You are an AI assistant for sustainability education. Answer the query using ONLY the provided context.
-
-Query: {query}
-
-{'\n'.join(context_parts)}
-
-Instructions:
-1. Use ONLY information from the provided context
-2. Be clear, concise, and specific
-3. If context lacks needed information, say so
-4. Focus on practical, actionable insights
-
-Response:"""
-        
-        total_tokens = len(prompt.split())
-        logger.info(f"Generated improved prompt with ~{total_tokens} tokens")
-        
-        return prompt
+        return "\n\n".join(formatted_chunks)
     
     def query(self, query: str, session_id: Optional[str] = None) -> Dict[str, Any]:
         """Process a query and return relevant results with improved prompt engineering."""
