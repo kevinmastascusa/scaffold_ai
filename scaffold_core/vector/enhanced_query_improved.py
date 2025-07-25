@@ -492,8 +492,11 @@ ANSWER:"""
             # Step 5: Generate improved prompt with conversation context and get LLM response
             improved_prompt = self.generate_improved_prompt(query, final_candidates, conversation_context)
             
-            # Generate response with lower temperature for more stable output
-            llm_response = llm.generate_response(improved_prompt, temperature=0.1)
+            # Generate response using config manager temperature setting
+            from scaffold_core.config_manager import config_manager
+            llm_settings = config_manager.get_model_settings('llm')
+            temperature = llm_settings.get('temperature', 0.3)
+            llm_response = llm.generate_response(improved_prompt, temperature=temperature)
             
             # Add user message to memory
             if session_id:
