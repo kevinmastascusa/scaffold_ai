@@ -362,6 +362,19 @@ Provide a clear, educational response that helps students understand the topic:"
         if not self.initialized:
             self.initialize()
 
+        # Input validation to prevent garbled text
+        if not query or not isinstance(query, str):
+            return {
+                "error": "Invalid query provided",
+                "sources": [],
+                "response": "Please provide a valid question or query."
+            }
+        
+        # Sanitize query to prevent encoding issues
+        query = query.strip()
+        if len(query) > 1000:  # Limit query length
+            query = query[:1000] + "..."
+
         logger.info(f"Processing query: {query}")
 
         # Step 1: Hybrid search
