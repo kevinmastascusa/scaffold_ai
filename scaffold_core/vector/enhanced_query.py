@@ -336,10 +336,10 @@ class EnhancedQuerySystem:
             [f"{c['ref']}: {c['name']}" for c in citation_refs]
         )
 
-        # Improved prompt template for educational AI assistant
-        prompt = f"""You are Scaffold AI, a helpful course curriculum assistant designed to support students and educators.
+        # Simplified prompt template for educational AI assistant
+        prompt = f"""You are Scaffold AI, a course curriculum assistant helping students and educators.
 
-TASK: Provide a comprehensive, educational response to the following query, using the provided sources as a foundation while drawing on your knowledge to enhance the learning experience.
+Answer the following question comprehensively, using the provided sources and your knowledge to provide educational value:
 
 QUERY: {query}
 
@@ -349,17 +349,7 @@ SOURCES:
 CITATION LIST:
 {citations_str}
 
-INSTRUCTIONS:
-1. Provide comprehensive, educational responses that help students understand the topic
-2. Use the provided sources as a foundation, but supplement with your knowledge when helpful
-3. Include relevant examples, explanations, and context to enhance learning
-4. Structure responses clearly with logical flow and appropriate sections
-5. Use clear, accessible language suitable for students and educators
-6. When sources provide specific information, reference them appropriately using [1], [2], etc.
-7. If the topic requires additional context or background, provide it
-8. Focus on practical applications and real-world relevance when possible
-
-ANSWER:"""
+Provide a clear, educational response that helps students understand the topic:"""
         
         # Log estimated token count
         total_estimated_tokens = len(prompt) // 4
