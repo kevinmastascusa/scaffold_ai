@@ -694,11 +694,18 @@ def query_enhanced_improved(query: str, session_id: Optional[str] = None) -> Dic
 def clear_conversation_memory(session_id: str):
     """Clear conversation memory for a session."""
     try:
-        if session_id:
-            improved_enhanced_query_system.clear_memory(session_id)
-            logger.info(f"Successfully cleared memory for session: {session_id}")
-        else:
+        if not session_id:
             logger.warning("No session_id provided for memory clearing")
+            return
+        
+        # Ensure the system is initialized
+        if not improved_enhanced_query_system.initialized:
+            logger.info("Initializing enhanced query system for memory clearing")
+            improved_enhanced_query_system.initialize()
+        
+        improved_enhanced_query_system.clear_memory(session_id)
+        logger.info(f"Successfully cleared memory for session: {session_id}")
+        
     except Exception as e:
         logger.error(f"Error clearing conversation memory for session {session_id}: {e}")
         # Don't raise the exception to prevent system crashes
@@ -706,9 +713,18 @@ def clear_conversation_memory(session_id: str):
 def get_conversation_memory(session_id: str) -> List[Dict]:
     """Get conversation memory for a session."""
     try:
-        if session_id and session_id in improved_enhanced_query_system.conversation_memory:
+        if not session_id:
+            return []
+        
+        # Ensure the system is initialized
+        if not improved_enhanced_query_system.initialized:
+            logger.info("Initializing enhanced query system for memory retrieval")
+            improved_enhanced_query_system.initialize()
+        
+        if session_id in improved_enhanced_query_system.conversation_memory:
             return improved_enhanced_query_system.conversation_memory[session_id]
         return []
+        
     except Exception as e:
         logger.error(f"Error getting conversation memory for session {session_id}: {e}")
         return []
@@ -716,7 +732,13 @@ def get_conversation_memory(session_id: str) -> List[Dict]:
 def clear_all_conversation_memory():
     """Clear all conversation memory for debugging."""
     try:
+        # Ensure the system is initialized
+        if not improved_enhanced_query_system.initialized:
+            logger.info("Initializing enhanced query system for memory clearing")
+            improved_enhanced_query_system.initialize()
+        
         improved_enhanced_query_system.conversation_memory.clear()
         logger.info("Successfully cleared all conversation memory")
+        
     except Exception as e:
         logger.error(f"Error clearing all conversation memory: {e}") 
