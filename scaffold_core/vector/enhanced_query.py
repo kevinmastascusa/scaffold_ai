@@ -395,8 +395,13 @@ ANSWER:"""
         enhanced_prompt = self.generate_enhanced_prompt(query, final_candidates)
 
         try:
-            # Use lower temperature for more stable and consistent responses
-            llm_response = llm.generate_response(enhanced_prompt, temperature=0.1)
+            # Get temperature from config manager
+            from scaffold_core.config_manager import ConfigManager
+            config_manager = ConfigManager()
+            temperature = config_manager.get_model_settings('llm').get('temperature', 0.3)
+            
+            # Use configurable temperature for more stable and consistent responses
+            llm_response = llm.generate_response(enhanced_prompt, temperature=temperature)
         except Exception as e:
             logger.error(f"LLM response generation failed: {str(e)}")
             llm_response = f"Error generating response: {str(e)}"
