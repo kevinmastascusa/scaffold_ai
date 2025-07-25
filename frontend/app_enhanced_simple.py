@@ -194,8 +194,8 @@ def search_sustainability_data(query, k=10):
         print(f"Search error: {e}")
         return []
 
-def generate_response_from_sources(query, search_results):
-    """Generate a coherent response using LLM based on the search results."""
+def generate_response_from_sources(query, search_results, session_id=None):
+    """Generate a coherent response using LLM based on the search results and syllabus context."""
     if not search_results:
         return "I couldn't find specific information about that in my sustainability research database. Please try rephrasing your question or ask about a different sustainability topic.", []
     
@@ -234,22 +234,39 @@ def generate_response_from_sources(query, search_results):
     # Combine context
     context = "\n\n".join(context_parts)
     
-    # Create LLM prompt with strict constraints
+    # Get syllabus context if session_id provided
+    syllabus_context = ""
+    if session_id:
+        conversation = get_conversation_history(session_id)
+        for msg in conversation:
+            if msg.get('type') == 'syllabus_context':
+                syllabus_context = msg.get('content', '')
+                break
+    
+    # Build syllabus section
+    syllabus_section = ""
+    if syllabus_context:
+        syllabus_section = f"""
+{syllabus_context}
+
+"""
+    
+    # Create LLM prompt with strict constraints and syllabus context
     prompt = f"""STRICT INSTRUCTION: Answer ONLY the specific question asked. Do not generate additional questions, examples beyond what is directly asked, or suggest other topics.
 
-You are an expert in sustainability education and engineering curriculum development. Based on the following research excerpts, provide a focused response to the user's specific question.
+You are an expert in sustainability education and engineering curriculum development. Based on the following research excerpts and uploaded syllabus context, provide a focused response to the user's specific question.
 
-User Question: {query}
+{syllabus_section}User Question: {query}
 
 Research Context:
 {context}
 
 Provide a focused response that:
 1. Addresses ONLY the specific question asked
-2. Uses information from the provided research
+2. Uses information from the provided research and syllabus context
 3. Does not suggest additional questions or topics
 4. Stays strictly on topic
-5. Provides practical, actionable suggestions based on the research
+5. Provides practical, actionable suggestions based on the research and course content
 
 Response:"""
     
@@ -407,6 +424,25 @@ def upload_syllabus():
             processing_result = process_syllabus_upload(str(file_path), session_id)
             
             if processing_result['processing_status'] == 'success':
+                # Add syllabus content to conversation memory for context
+                syllabus_context = f"""UPLOADED SYLLABUS CONTEXT:
+Course: {processing_result['analysis'].get('course_info', {}).get('title', 'Unknown Course')}
+Course Code: {processing_result['analysis'].get('course_info', {}).get('code', 'N/A')}
+Topics: {', '.join(processing_result['analysis'].get('topics', [])[:5])}
+Content Summary: {processing_result.get('text_content', '')[:500]}..."""
+                
+                # Store syllabus context for this session
+                conversation = get_conversation_history(session_id)
+                syllabus_message = {
+                    'id': str(uuid.uuid4()),
+                    'type': 'syllabus_context',
+                    'content': syllabus_context,
+                    'timestamp': datetime.datetime.now().isoformat(),
+                    'filename': filename
+                }
+                conversation.append(syllabus_message)
+                save_conversation_history(session_id, conversation)
+                
                 return jsonify({
                     'success': True,
                     'filename': filename,
@@ -476,8 +512,8 @@ def chat():
                 # Search the sustainability database
                 search_results = search_sustainability_data(message, k=10)
                 
-                # Generate response using LLM
-                response_content, sources = generate_response_from_sources(message, search_results)
+                # Generate response using LLM with syllabus context
+                response_content, sources = generate_response_from_sources(message, search_results, session_id)
                 
                 # Create AI response with sources
                 ai_message = {
