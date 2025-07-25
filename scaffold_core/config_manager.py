@@ -40,7 +40,7 @@ class ConfigManager:
             "model_settings": {
                 "llm": {
                     "temperature": 0.3,
-                    "max_new_tokens": 800,
+                    "max_new_tokens": 2048,
                     "top_p": 0.9
                 },
                 "embedding": {
@@ -103,7 +103,7 @@ class ConfigManager:
             "model_settings": {
                 "llm": {
                     "temperature": 0.3,
-                    "max_new_tokens": 800,
+                    "max_new_tokens": 2048,
                     "top_p": 0.9
                 },
                 "embedding": {

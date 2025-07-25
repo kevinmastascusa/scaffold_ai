@@ -48,7 +48,7 @@ TOP_K_FINAL = 5
 MIN_CROSS_SCORE = -2.0  # Minimum cross-encoder score threshold
 MIN_CONTEXTUAL_SCORE = 1  # Minimum contextual score threshold
 MAX_MEMORY_MESSAGES = 10  # Maximum number of previous messages to include
-MAX_MEMORY_TOKENS = 1500  # Maximum tokens for conversation history
+MAX_MEMORY_TOKENS = 1800  # Increased from 1500
 
 class ImprovedEnhancedQuerySystem:
     """Improved enhanced query system with better prompt engineering and chat memory."""
