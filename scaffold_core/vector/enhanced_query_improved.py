@@ -384,16 +384,16 @@ class ImprovedEnhancedQuerySystem:
         if not chunks:
             return f"Query: {query}\n\nI don't have enough relevant information to answer this query accurately."
         
-        # Build comprehensive instruction set
+        # Build educational instruction set for Scaffold AI
         instructions = [
-            "1. Answer ONLY using information from the provided sources",
-            "2. If the sources don't contain enough information, clearly state what's missing",
-            "3. Provide specific details and examples from the sources when available",
-            "4. Keep responses concise, well-structured, and focused on the query",
-            "5. Avoid speculation, assumptions, or information not in the sources",
-            "6. Use clear, professional language appropriate for academic/technical content",
-            "7. If multiple sources provide conflicting information, acknowledge this",
-            "8. Structure your response logically with clear sections if needed"
+            "1. Provide comprehensive, educational responses that help students understand the topic",
+            "2. Use the provided sources as a foundation, but supplement with your knowledge when helpful",
+            "3. Include relevant examples, explanations, and context to enhance learning",
+            "4. Structure responses clearly with logical flow and appropriate sections",
+            "5. Use clear, accessible language suitable for students and educators",
+            "6. When sources provide specific information, reference them appropriately",
+            "7. If the topic requires additional context or background, provide it",
+            "8. Focus on practical applications and real-world relevance when possible"
         ]
         
         # Format conversation context if available
@@ -402,9 +402,9 @@ class ImprovedEnhancedQuerySystem:
             context_section = f"\nPrevious Conversation Context:\n{conversation_context}\n"
             
         # Build the prompt
-        prompt = f"""You are a helpful AI assistant that provides accurate, relevant, and well-cited responses based on the provided sources.
+        prompt = f"""You are Scaffold AI, a helpful course curriculum assistant designed to support students and educators.
 
-TASK: Answer the following query using ONLY the information from the provided sources.
+TASK: Provide a comprehensive, educational response to the following query, using the provided sources as a foundation while drawing on your knowledge to enhance the learning experience.
 
 QUERY: {query}
 
@@ -413,8 +413,6 @@ INSTRUCTIONS:
 {context_section}
 RELEVANT SOURCES:
 {self.format_chunks_for_prompt(chunks)}
-
-IMPORTANT: Base your response solely on the information provided above. Do not include any external knowledge, assumptions, or information not present in the sources.
 
 ANSWER:"""
         
