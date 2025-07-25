@@ -738,8 +738,8 @@
                         <button class="model-btn secondary" onclick="resetToDefaults()">
                             <i class="fas fa-undo"></i> Reset
                         </button>
-                        <button class="model-btn secondary" onclick="testNotification()" style="font-size: 10px;">
-                            <i class="fas fa-bell"></i> Test
+                        <button class="model-btn secondary" onclick="clearMemory()">
+                            <i class="fas fa-eraser"></i> Clear Memory
                         </button>
                     </div>
                     
@@ -1431,6 +1431,26 @@
                     }, 300);
                 }
             }, 5000);
+        }
+
+        function clearMemory() {
+            if (confirm('Are you sure you want to clear the AI\'s memory? This will reset the AI\'s memory but keep the chat history.')) {
+                fetch('/api/clear-memory', {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showNotification('AI memory cleared successfully', 'success');
+                    } else {
+                        showNotification('Error clearing AI memory', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error clearing memory:', error);
+                    showNotification('Error clearing AI memory', 'error');
+                });
+            }
         }
 
 

@@ -399,7 +399,7 @@ class ImprovedEnhancedQuerySystem:
             
             # Check token limit
             if estimated_tokens + chunk_tokens > max_context_tokens:
-                logger.warning(f"Truncating context at chunk {i+1}")
+                logger.warning(f"Truncating context at chunk {i}")
                 break
             
             source = chunk.get('source', {})
@@ -407,8 +407,8 @@ class ImprovedEnhancedQuerySystem:
             citation_name = source.get('name', 'Unknown Source')
             ref = f"[{i+1}]"
             
-            # Add chunk with better formatting
-            context_parts.append(f"Source {ref}:\n{chunk_text}\n")
+            # Add chunk with better formatting and clear separation
+            context_parts.append(f"\n=== Source {ref} ===\n{chunk_text}\n")
             estimated_tokens += chunk_tokens
             
             # Store citation details
@@ -417,49 +417,50 @@ class ImprovedEnhancedQuerySystem:
                     'ref': ref, 'id': citation_id, 'name': citation_name
                 })
         
-        # Create context string
+        # Create context string with clear section markers
         context = "\n".join(context_parts)
         
-        # Create citation list
-        citations_str = "\n".join([f"{c['ref']}: {c['name']}" for c in citation_refs])
+        # Create citation list with clear formatting
+        citations = [f"{c['ref']}: {c['name']}" for c in citation_refs]
+        citations_str = "\n".join(citations)
         
-        # Build conversation context section
+        # Build conversation context section with clear markers
         conversation_section = ""
         if conversation_context:
             conversation_section = f"""
-CONVERSATION HISTORY:
+=== Previous Conversation ===
 {conversation_context}
+=== End Previous Conversation ===
 
 """
         
-        # Improved prompt template with conversation context
-        prompt = f"""You are a helpful AI assistant that provides accurate, relevant, and well-cited responses based on the provided sources. You have access to the current conversation history to provide context-aware responses.
+        # Improved prompt template with clear section markers and explicit instructions
+        prompt = f"""You are a helpful AI assistant specializing in sustainability education. Your task is to provide accurate, relevant, and well-cited responses based ONLY on the provided sources.
 
-TASK: Answer the following query using ONLY the information from the provided sources. Consider the conversation history for context and continuity.
+=== Current Query ===
+{query}
 
-{conversation_section}QUERY: {query}
-
-SOURCES:
+=== Available Sources ===
 {context}
 
-CITATION LIST:
+=== Citations ===
 {citations_str}
 
-INSTRUCTIONS:
-1. Answer the query comprehensively using information from the sources
+=== Instructions ===
+1. Base your response ONLY on the information from the provided sources
 2. Use specific details and examples from the sources
-3. Cite sources using [1], [2], etc. format at the end of relevant sentences
-4. Consider the conversation history for context and continuity
-5. If referring to previous parts of the conversation, acknowledge them naturally
-6. Avoid repetition and stay focused on the query
-7. If the sources don't contain enough information, say so clearly
-8. Write in a clear, professional tone
-9. Keep the response concise but complete
+3. Cite sources using [1], [2], etc. at the end of relevant statements
+4. Keep responses focused and relevant to the query
+5. If the sources don't contain enough information, say so clearly
+6. Write in a clear, professional tone
+7. Avoid speculation or information not found in the sources
+8. Format your response with clear paragraphs and structure
 
-ANSWER:"""
+=== Your Response ===
+"""
         
         total_tokens = len(prompt) // 4
-        logger.info(f"Generated improved prompt with ~{total_tokens} tokens (including conversation context)")
+        logger.info(f"Generated improved prompt with ~{total_tokens} tokens")
         
         return prompt
     
