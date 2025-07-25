@@ -448,14 +448,14 @@ class ImprovedEnhancedQuerySystem:
         formatted_chunks = self.format_chunks_for_prompt(chunks, max_tokens=available_tokens)
             
         # Build the prompt with natural constraints
-        prompt = f"""Based on the sources provided, give practical advice for this question:
+        prompt = f"""Answer this question directly and clearly. Focus on practical, actionable advice. Do not mention yourself or the system.
 
-{query}
+Question: {query}
 {context_section}
 Sources:
 {formatted_chunks}
 
-Provide specific, actionable steps:"""
+Answer:"""
         
         # Log token usage for debugging
         total_tokens = len(prompt.split())
@@ -571,11 +571,11 @@ Provide specific, actionable steps:"""
             chunk_text = chunks[0].get('text', '')[:300]  # Limit to 300 chars
             context = f"\nRelevant information: {chunk_text}"
         
-        return f"""Give practical advice for this question:
+        return f"""Answer this question directly:
 
 {query}{context}
 
-Provide specific steps:"""
+Answer:"""
     
     def _generate_fallback_response(self, query: str) -> str:
         """Generate a fallback response when all else fails."""
