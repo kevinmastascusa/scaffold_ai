@@ -102,6 +102,9 @@ model_config.json
 conversations/
 uploads/
 
+# Standalone utilities
+clear_memory.py
+
 # SageMath parsed files
 *.sage.py
 

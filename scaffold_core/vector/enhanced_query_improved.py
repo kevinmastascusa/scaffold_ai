@@ -718,15 +718,18 @@ def clear_conversation_memory(session_id: str):
             logger.warning("No session_id provided for memory clearing")
             return
         
-        # Ensure the system is initialized
-        if not improved_enhanced_query_system.initialized:
-            logger.info("Initializing enhanced query system for memory clearing")
-            improved_enhanced_query_system.initialize()
-        
-        # Check if there's actually memory to clear
-        internal_memory_exists = session_id in improved_enhanced_query_system.conversation_memory
+        # Check if there's actually memory to clear (without full initialization)
+        internal_memory_exists = False
         external_file_exists = False
         
+        # Check internal memory if system is initialized
+        try:
+            if improved_enhanced_query_system.initialized:
+                internal_memory_exists = session_id in improved_enhanced_query_system.conversation_memory
+        except Exception:
+            pass
+        
+        # Check external conversation file
         try:
             from pathlib import Path
             conversations_dir = Path("conversations")
@@ -739,8 +742,13 @@ def clear_conversation_memory(session_id: str):
             logger.info(f"No memory found to clear for session: {session_id}")
             return
         
-        improved_enhanced_query_system.clear_memory(session_id)
-        logger.info(f"Successfully cleared memory for session: {session_id}")
+        # Clear memory if system is initialized
+        try:
+            if improved_enhanced_query_system.initialized:
+                improved_enhanced_query_system.clear_memory(session_id)
+                logger.info(f"Successfully cleared memory for session: {session_id}")
+        except Exception as e:
+            logger.debug(f"Could not clear internal memory: {e}")
         
     except Exception as e:
         logger.error(f"Error clearing conversation memory for session {session_id}: {e}")
@@ -768,15 +776,18 @@ def get_conversation_memory(session_id: str) -> List[Dict]:
 def clear_all_conversation_memory():
     """Clear all conversation memory for debugging."""
     try:
-        # Ensure the system is initialized
-        if not improved_enhanced_query_system.initialized:
-            logger.info("Initializing enhanced query system for memory clearing")
-            improved_enhanced_query_system.initialize()
-        
-        # Check if there's actually memory to clear
-        internal_memory_count = len(improved_enhanced_query_system.conversation_memory)
+        # Check if there's actually memory to clear (without full initialization)
+        internal_memory_count = 0
         external_file_count = 0
         
+        # Check internal memory if system is initialized
+        try:
+            if improved_enhanced_query_system.initialized:
+                internal_memory_count = len(improved_enhanced_query_system.conversation_memory)
+        except Exception:
+            pass
+        
+        # Check external conversation files
         try:
             from pathlib import Path
             conversations_dir = Path("conversations")
@@ -789,11 +800,15 @@ def clear_all_conversation_memory():
             logger.info("No conversation memory found to clear")
             return
         
-        # Clear internal memory
-        improved_enhanced_query_system.conversation_memory.clear()
-        logger.info(f"Successfully cleared {internal_memory_count} internal conversation memory entries")
+        # Clear internal memory if system is initialized
+        try:
+            if improved_enhanced_query_system.initialized:
+                improved_enhanced_query_system.conversation_memory.clear()
+                logger.info(f"Successfully cleared {internal_memory_count} internal conversation memory entries")
+        except Exception as e:
+            logger.debug(f"Could not clear internal memory: {e}")
         
-        # Also clear external conversation files
+        # Clear external conversation files
         try:
             from pathlib import Path
             conversations_dir = Path("conversations")
