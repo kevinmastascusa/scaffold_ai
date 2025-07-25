@@ -506,6 +506,56 @@ Provide a clear, educational response that helps students understand the topic:"
         
         return "\n\n".join(formatted_chunks)
     
+    def _is_response_garbled(self, response: str) -> bool:
+        """Check if response contains garbled or corrupted text."""
+        if not response or not isinstance(response, str):
+            return True
+        
+        # Check for repetitive patterns
+        words = response.split()
+        if len(words) < 10:
+            return False
+        
+        # Check for excessive repetition
+        word_counts = {}
+        for word in words:
+            word_counts[word] = word_counts.get(word, 0) + 1
+            if word_counts[word] > len(words) * 0.3:  # More than 30% repetition
+                return True
+        
+        # Check for garbled text patterns
+        garbled_patterns = [
+            r'[A-Za-z]{20,}',  # Very long words
+            r'[^\w\s\.\,\!\?]{3,}',  # Multiple special characters
+            r'(.)\1{5,}',  # Repeated characters
+            r'[A-Z]{10,}',  # All caps words
+        ]
+        
+        for pattern in garbled_patterns:
+            if re.search(pattern, response):
+                return True
+        
+        return False
+    
+    def _generate_minimal_prompt(self, query: str, chunks: List[Dict]) -> str:
+        """Generate a minimal prompt with very limited context."""
+        context = ""
+        if chunks:
+            chunk_text = chunks[0].get('text', '')[:300]  # Limit to 300 chars
+            context = f"\nRelevant information: {chunk_text}"
+        
+        return f"""You are Scaffold AI, a course curriculum assistant.
+
+Answer this question briefly and clearly:
+
+QUERY: {query}{context}
+
+Provide a concise, educational response:"""
+    
+    def _generate_fallback_response(self, query: str) -> str:
+        """Generate a fallback response when all else fails."""
+        return f"I apologize, but I'm having trouble generating a response for your question about '{query}'. Please try rephrasing your question or ask about a different topic."
+    
     def query(self, query: str, session_id: Optional[str] = None) -> Dict[str, Any]:
         """Process a query and return relevant results with improved prompt engineering."""
         if not self.initialized:
@@ -564,20 +614,39 @@ Provide a clear, educational response that helps students understand the topic:"
             # Get temperature from config manager
             temperature = config_manager.get_model_settings('llm').get('temperature', 0.3)
             
-            # Generate response using LLM with better error handling
+            # Generate response using LLM with comprehensive error handling
+            llm_response = ""
             try:
+                # First attempt with full context
                 llm_response = llm.generate_response(improved_prompt, temperature=temperature)
+                
+                # Validate response quality
+                if self._is_response_garbled(llm_response):
+                    logger.warning("Detected garbled response, retrying with reduced context")
+                    raise ValueError("Garbled response detected")
+                    
             except Exception as e:
                 logger.error(f"Error in LLM response generation: {e}")
-                # Fall back to a shorter prompt if token limit exceeded
-                if "maximum length" in str(e).lower():
-                    logger.warning("Token limit exceeded, trying with reduced context")
-                    improved_prompt = self.generate_improved_prompt(
-                        query, final_candidates[:2], ""  # Use fewer sources, no conversation context
-                    )
-                    llm_response = llm.generate_response(improved_prompt, temperature=temperature)
-                else:
-                    raise
+                
+                # Try with reduced context
+                try:
+                    logger.warning("Retrying with minimal context")
+                    minimal_prompt = self._generate_minimal_prompt(query, final_candidates[:1])
+                    llm_response = llm.generate_response(minimal_prompt, temperature=temperature)
+                    
+                    # Validate response again
+                    if self._is_response_garbled(llm_response):
+                        logger.error("Still getting garbled response, using fallback")
+                        llm_response = self._generate_fallback_response(query)
+                        
+                except Exception as e2:
+                    logger.error(f"Second attempt failed: {e2}")
+                    llm_response = self._generate_fallback_response(query)
+            
+            # Validate and truncate response if necessary
+            if len(llm_response) > 2000:  # Limit response length
+                llm_response = llm_response[:2000] + "..."
+                logger.warning("Response truncated due to length limit")
             
             # Store query and response in memory if session_id provided
             if session_id:
