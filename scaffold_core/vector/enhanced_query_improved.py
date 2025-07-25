@@ -384,77 +384,48 @@ class ImprovedEnhancedQuerySystem:
         if not chunks:
             return f"Query: {query}\n\nI don't have enough relevant information to answer this query accurately."
         
-        # Prepare context and citations
+        # Prepare context
         context_parts = []
-        citation_refs = []
         estimated_tokens = 0
-        max_context_tokens = 1000  # Further reduced context window
-        max_chunk_tokens = 200     # Reduced chunk size
-        max_chunks = 3             # Limit number of chunks
+        max_context_tokens = 800  # Reduced context window
+        max_chunk_tokens = 200    # Per chunk limit
+        max_chunks = 3            # Max chunks to include
         
-        for i, chunk in enumerate(chunks[:max_chunks]):  # Only process max_chunks
+        for i, chunk in enumerate(chunks[:max_chunks]):
             chunk_text = chunk.get('text', '').strip()
             if not chunk_text:
                 continue
                 
-            # Estimate tokens (rough approximation)
+            # Estimate tokens
             chunk_tokens = len(chunk_text.split())
-            
-            # Truncate long chunks
             if chunk_tokens > max_chunk_tokens:
                 chunk_text = ' '.join(chunk_text.split()[:max_chunk_tokens]) + "..."
                 chunk_tokens = max_chunk_tokens
             
-            # Check total token limit
             if estimated_tokens + chunk_tokens > max_context_tokens:
-                logger.warning(f"Truncating context at chunk {i}")
                 break
-            
-            source = chunk.get('source', {})
-            citation_id = source.get('id', f'source_{i+1}')
-            citation_name = source.get('name', 'Unknown Source')
-            ref = f"[{i+1}]"
-            
-            # Add chunk with minimal formatting
-            context_parts.append(f"Source {ref}:\n{chunk_text}\n")
+                
+            context_parts.append(f"Context {i+1}:\n{chunk_text}\n")
             estimated_tokens += chunk_tokens
-            
-            # Store citation details
-            if citation_id not in [c['id'] for c in citation_refs]:
-                citation_refs.append({
-                    'ref': ref, 'id': citation_id, 'name': citation_name
-                })
-        
-        # Create context string with minimal formatting
-        context = "\n".join(context_parts)
-        
-        # Create citation list with minimal formatting
-        citations = [f"{c['ref']}: {c['name']}" for c in citation_refs]
-        citations_str = "\n".join(citations)
         
         # Build conversation context section (limited)
         conversation_section = ""
         if conversation_context:
-            # Only keep last 3 exchanges and truncate each
-            conv_lines = [line[:200] for line in conversation_context.split('\n')[:3]]
+            conv_lines = [line[:200] for line in conversation_context.split('\n')[-3:]]
             conversation_section = f"Previous Context:\n{'\n'.join(conv_lines)}\n\n"
         
         # Streamlined prompt template
-        prompt = f"""You are an AI assistant for sustainability education. Answer based ONLY on these sources.
+        prompt = f"""You are an AI assistant for sustainability education. Answer the query using ONLY the provided context.
 
 Query: {query}
 
-Sources:
-{context}
-
-Citations:
-{citations_str}
+{'\n'.join(context_parts)}
 
 Instructions:
-1. Use ONLY information from sources
-2. Cite using [1], [2], etc.
-3. Be concise and focused
-4. Say if sources lack information
+1. Use ONLY information from the provided context
+2. Be clear, concise, and specific
+3. If context lacks needed information, say so
+4. Focus on practical, actionable insights
 
 Response:"""
         
