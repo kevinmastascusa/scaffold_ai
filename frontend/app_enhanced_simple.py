@@ -234,28 +234,38 @@ def generate_response_from_sources(query, search_results):
     # Combine context
     context = "\n\n".join(context_parts)
     
-    # Create LLM prompt
-    prompt = f"""You are an expert in sustainability education and engineering curriculum development. Based on the following research excerpts, provide a comprehensive and practical response to the user's question about incorporating sustainability into their engineering course.
+    # Create LLM prompt with strict constraints
+    prompt = f"""STRICT INSTRUCTION: Answer ONLY the specific question asked. Do not generate additional questions, examples beyond what is directly asked, or suggest other topics.
+
+You are an expert in sustainability education and engineering curriculum development. Based on the following research excerpts, provide a focused response to the user's specific question.
 
 User Question: {query}
 
 Research Context:
 {context}
 
-Please provide a well-structured response that:
-1. Directly addresses the user's question
-2. Incorporates insights from the provided research
-3. Offers practical, actionable suggestions
-4. Maintains academic rigor while being accessible
-5. Includes specific examples and approaches
+Provide a focused response that:
+1. Addresses ONLY the specific question asked
+2. Uses information from the provided research
+3. Does not suggest additional questions or topics
+4. Stays strictly on topic
+5. Provides practical, actionable suggestions based on the research
 
 Response:"""
     
     try:
-        # Generate response using LLM
+        # Generate response using LLM with stop sequences
         if llm_manager is not None:
             print("🤖 Generating LLM response...")
-            response = llm_manager.generate_response(prompt, max_new_tokens=800)
+            response = llm_manager.generate_response(prompt, max_new_tokens=800, temperature=0.05)
+            
+            # Apply stop sequences to prevent hallucination
+            stop_sequences = ["Question:", "Q:", "Another", "Also consider", "You might also", "Additionally", "Furthermore", "Other questions"]
+            for stop_seq in stop_sequences:
+                if stop_seq in response:
+                    response = response.split(stop_seq)[0].strip()
+                    break
+                    
             print("✅ LLM response generated successfully")
         else:
             # Fallback to template-based response

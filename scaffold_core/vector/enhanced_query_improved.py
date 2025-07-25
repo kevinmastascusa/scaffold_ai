@@ -1,6 +1,7 @@
 """
 Improved Enhanced Query System for Scaffold AI
 Better prompt engineering and citation handling for stable responses.
+Now with chat memory support.
 """
 
 import datetime
@@ -42,9 +43,11 @@ TOP_K_INITIAL = 50
 TOP_K_FINAL = 5
 MIN_CROSS_SCORE = -2.0  # Minimum cross-encoder score threshold
 MIN_CONTEXTUAL_SCORE = 2  # Minimum contextual score threshold
+MAX_MEMORY_MESSAGES = 10  # Maximum number of previous messages to include
+MAX_MEMORY_TOKENS = 1500  # Maximum tokens for conversation history
 
 class ImprovedEnhancedQuerySystem:
-    """Improved enhanced query system with better prompt engineering."""
+    """Improved enhanced query system with better prompt engineering and chat memory."""
     
     def __init__(self):
         self.initialized = False
@@ -52,6 +55,7 @@ class ImprovedEnhancedQuerySystem:
         self.cross_encoder = None
         self.faiss_index = None
         self.metadata = []
+        self.conversation_memory = {}  # Store conversation history by session_id
         
     def initialize(self):
         """Initialize the enhanced query system."""
@@ -95,27 +99,87 @@ class ImprovedEnhancedQuerySystem:
             logger.error(f"Error loading metadata from {path}: {e}")
             return []
     
+    def add_to_memory(self, session_id: str, message: Dict[str, Any]):
+        """Add a message to conversation memory."""
+        if session_id not in self.conversation_memory:
+            self.conversation_memory[session_id] = []
+        
+        # Add message with timestamp
+        message_with_timestamp = {
+            **message,
+            'timestamp': datetime.datetime.now().isoformat()
+        }
+        
+        self.conversation_memory[session_id].append(message_with_timestamp)
+        
+        # Keep only the last MAX_MEMORY_MESSAGES messages
+        if len(self.conversation_memory[session_id]) > MAX_MEMORY_MESSAGES:
+            self.conversation_memory[session_id] = self.conversation_memory[session_id][-MAX_MEMORY_MESSAGES:]
+        
+        logger.debug(f"Added message to memory for session {session_id}. Total messages: {len(self.conversation_memory[session_id])}")
+    
+    def get_conversation_context(self, session_id: str) -> str:
+        """Get conversation context for the given session."""
+        if session_id not in self.conversation_memory:
+            return ""
+        
+        messages = self.conversation_memory[session_id]
+        if not messages:
+            return ""
+        
+        # Build conversation context
+        context_parts = []
+        total_tokens = 0
+        
+        for msg in messages[-MAX_MEMORY_MESSAGES:]:  # Get last N messages
+            role = msg.get('type', 'user')
+            content = msg.get('content', '')
+            
+            if role == 'user':
+                context_parts.append(f"User: {content}")
+            elif role == 'assistant':
+                context_parts.append(f"Assistant: {content}")
+            
+            # Estimate tokens (rough approximation)
+            message_tokens = len(content) // 4
+            total_tokens += message_tokens
+            
+            # Stop if we exceed token limit
+            if total_tokens > MAX_MEMORY_TOKENS:
+                logger.warning(f"Conversation context truncated due to token limit")
+                break
+        
+        conversation_context = "\n".join(context_parts)
+        logger.debug(f"Generated conversation context with ~{total_tokens} tokens")
+        
+        return conversation_context
+    
+    def clear_memory(self, session_id: str):
+        """Clear conversation memory for a session."""
+        if session_id in self.conversation_memory:
+            del self.conversation_memory[session_id]
+            logger.info(f"Cleared conversation memory for session {session_id}")
+
     def extract_keywords(self, text: str) -> List[str]:
         """Extract meaningful keywords from text."""
         # Remove punctuation and convert to lowercase
         text = re.sub(r'[^\w\s]', ' ', text.lower())
+        
+        # Split into words and filter
         words = text.split()
         
         # Filter out common stop words and short words
-        stop_words = {
-            'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for',
-            'of', 'with', 'by', 'is', 'are', 'was', 'were', 'be', 'been', 'being',
-            'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could',
-            'should', 'may', 'might', 'can', 'this', 'that', 'these', 'those',
-            'i', 'you', 'he', 'she', 'it', 'we', 'they', 'me', 'him', 'her',
-            'us', 'them', 'my', 'your', 'his', 'her', 'its', 'our', 'their'
-        }
+        stop_words = {'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'is', 'are', 'was', 'were', 'be', 'been', 'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'can', 'this', 'that', 'these', 'those', 'i', 'you', 'he', 'she', 'it', 'we', 'they', 'me', 'him', 'her', 'us', 'them'}
         
         keywords = [word for word in words if len(word) > 2 and word not in stop_words]
-        return keywords
+        
+        return keywords[:20]  # Limit to top 20 keywords
     
     def semantic_search(self, query: str, k: int = TOP_K_INITIAL) -> List[Dict]:
         """Perform semantic search using sentence transformers."""
+        if not self.initialized or self.embedding_model is None or self.faiss_index is None:
+            return []
+            
         try:
             # Encode query
             query_embedding = self.embedding_model.encode([query])
@@ -209,8 +273,8 @@ class ImprovedEnhancedQuerySystem:
     
     def cross_encoder_rerank(self, query: str, candidates: List[Dict]) -> List[Dict]:
         """Rerank candidates using cross-encoder with improved error handling."""
-        if not candidates:
-            return []
+        if not candidates or not self.initialized or self.cross_encoder is None:
+            return candidates
         
         try:
             # Prepare pairs for cross-encoder
@@ -270,8 +334,8 @@ class ImprovedEnhancedQuerySystem:
             logger.error(f"Error in contextual filtering: {e}")
             return candidates
     
-    def generate_improved_prompt(self, query: str, chunks: List[Dict]) -> str:
-        """Generate an improved prompt with better engineering."""
+    def generate_improved_prompt(self, query: str, chunks: List[Dict], conversation_context: str = "") -> str:
+        """Generate an improved prompt with better engineering and conversation context."""
         if not chunks:
             return f"Query: {query}\n\nI don't have enough relevant information to answer this query accurately."
         
@@ -314,12 +378,21 @@ class ImprovedEnhancedQuerySystem:
         # Create citation list
         citations_str = "\n".join([f"{c['ref']}: {c['name']}" for c in citation_refs])
         
-        # Improved prompt template
-        prompt = f"""You are a helpful AI assistant that provides accurate, relevant, and well-cited responses based on the provided sources.
+        # Build conversation context section
+        conversation_section = ""
+        if conversation_context:
+            conversation_section = f"""
+CONVERSATION HISTORY:
+{conversation_context}
 
-TASK: Answer the following query using ONLY the information from the provided sources.
+"""
+        
+        # Improved prompt template with conversation context
+        prompt = f"""You are a helpful AI assistant that provides accurate, relevant, and well-cited responses based on the provided sources. You have access to the current conversation history to provide context-aware responses.
 
-QUERY: {query}
+TASK: Answer the following query using ONLY the information from the provided sources. Consider the conversation history for context and continuity.
+
+{conversation_section}QUERY: {query}
 
 SOURCES:
 {context}
@@ -331,26 +404,34 @@ INSTRUCTIONS:
 1. Answer the query comprehensively using information from the sources
 2. Use specific details and examples from the sources
 3. Cite sources using [1], [2], etc. format at the end of relevant sentences
-4. Avoid repetition and stay focused on the query
-5. If the sources don't contain enough information, say so clearly
-6. Write in a clear, professional tone
-7. Keep the response concise but complete
+4. Consider the conversation history for context and continuity
+5. If referring to previous parts of the conversation, acknowledge them naturally
+6. Avoid repetition and stay focused on the query
+7. If the sources don't contain enough information, say so clearly
+8. Write in a clear, professional tone
+9. Keep the response concise but complete
 
 ANSWER:"""
         
         total_tokens = len(prompt) // 4
-        logger.info(f"Generated improved prompt with ~{total_tokens} tokens")
+        logger.info(f"Generated improved prompt with ~{total_tokens} tokens (including conversation context)")
         
         return prompt
     
-    def query(self, query: str) -> Dict[str, Any]:
-        """Main query function with improved processing."""
+    def query(self, query: str, session_id: Optional[str] = None) -> Dict[str, Any]:
+        """Main query function with improved processing and chat memory."""
         if not self.initialized:
             self.initialize()
         
-        logger.info(f"Processing query: {query}")
+        logger.info(f"Processing query: {query} (session: {session_id})")
         
         try:
+            # Get conversation context if session_id provided
+            conversation_context = ""
+            if session_id:
+                conversation_context = self.get_conversation_context(session_id)
+                logger.debug(f"Retrieved conversation context for session {session_id}")
+            
             # Step 1: Hybrid search
             initial_candidates = self.hybrid_search(query, TOP_K_INITIAL)
             logger.debug(f"Found {len(initial_candidates)} initial candidates")
@@ -367,11 +448,19 @@ ANSWER:"""
             final_candidates = filtered_candidates[:TOP_K_FINAL]
             logger.debug(f"Selected {len(final_candidates)} final candidates")
             
-            # Step 5: Generate improved prompt and get LLM response
-            improved_prompt = self.generate_improved_prompt(query, final_candidates)
+            # Step 5: Generate improved prompt with conversation context and get LLM response
+            improved_prompt = self.generate_improved_prompt(query, final_candidates, conversation_context)
             
             # Generate response with lower temperature for more stable output
             llm_response = llm.generate_response(improved_prompt, temperature=0.1)
+            
+            # Add user message to memory
+            if session_id:
+                user_message = {
+                    'type': 'user',
+                    'content': query
+                }
+                self.add_to_memory(session_id, user_message)
             
             # Prepare results with improved structure
             results = {
@@ -392,8 +481,17 @@ ANSWER:"""
                     "filtered_candidates": len(filtered_candidates),
                     "final_candidates": len(final_candidates)
                 },
+                "conversation_context": bool(conversation_context),
                 "timestamp": str(datetime.datetime.now())
             }
+            
+            # Add assistant response to memory
+            if session_id:
+                assistant_message = {
+                    'type': 'assistant',
+                    'content': llm_response
+                }
+                self.add_to_memory(session_id, assistant_message)
             
             return results
             
@@ -405,12 +503,23 @@ ANSWER:"""
                 "candidates_found": 0,
                 "sources": [],
                 "search_stats": {},
+                "conversation_context": False,
                 "timestamp": str(datetime.datetime.now())
             }
 
 # Global instance
 improved_enhanced_query_system = ImprovedEnhancedQuerySystem()
 
-def query_enhanced_improved(query: str) -> Dict[str, Any]:
-    """Convenience function for improved enhanced querying."""
-    return improved_enhanced_query_system.query(query) 
+def query_enhanced_improved(query: str, session_id: Optional[str] = None) -> Dict[str, Any]:
+    """Convenience function for improved enhanced querying with chat memory."""
+    return improved_enhanced_query_system.query(query, session_id)
+
+def clear_conversation_memory(session_id: str):
+    """Clear conversation memory for a session."""
+    improved_enhanced_query_system.clear_memory(session_id)
+
+def get_conversation_memory(session_id: str) -> List[Dict]:
+    """Get conversation memory for a session."""
+    if session_id in improved_enhanced_query_system.conversation_memory:
+        return improved_enhanced_query_system.conversation_memory[session_id]
+    return [] 

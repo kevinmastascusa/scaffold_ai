@@ -106,7 +106,7 @@ def upload_syllabus():
             return jsonify({'error': 'Only PDF files are allowed'}), 400
         
         # Secure the filename and save
-        filename = secure_filename(file.filename)
+        filename = secure_filename(file.filename or "")
         session_id = session.get('session_id', str(uuid.uuid4()))
         file_path = UPLOAD_FOLDER / f"{session_id}_{filename}"
         
