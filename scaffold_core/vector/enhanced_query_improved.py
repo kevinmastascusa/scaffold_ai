@@ -426,15 +426,15 @@ class ImprovedEnhancedQuerySystem:
         # Format chunks with remaining token budget
         formatted_chunks = self.format_chunks_for_prompt(chunks, max_tokens=available_tokens)
             
-        # Build the prompt
-        prompt = f"""Answer this question directly and clearly. Focus on practical, actionable advice. Do not mention yourself or the system.
+        # Build the prompt with natural constraints
+        prompt = f"""Based on the sources provided, give practical advice for this question:
 
-QUERY: {query}
+{query}
 {context_section}
-RELEVANT SOURCES:
+Sources:
 {formatted_chunks}
 
-Provide specific, practical guidance:"""
+Provide specific, actionable steps:"""
         
         # Log token usage for debugging
         total_tokens = len(prompt.split())
@@ -521,25 +521,6 @@ Provide specific, practical guidance:"""
             if word_counts[word] > len(words) * 0.3:  # More than 30% repetition
                 return True
         
-        # Check for self-referential content
-        self_ref_patterns = [
-            r'scaffold ai.*has incorporated',
-            r'scaffold ai.*course curriculum',
-            r'this comprehensive syllabus',
-            r'by incorporating sustainability.*course curriculum',
-            r'overall.*scaffold ai',
-            r'the integration of sustainability.*course curriculum',
-            r'students are equipped.*knowledge and skills',
-            r'case study.*demonstrates',
-            r'evaluation of sustainability content',
-            r'effectively incorporated sustainability',
-        ]
-        
-        response_lower = response.lower()
-        for pattern in self_ref_patterns:
-            if re.search(pattern, response_lower):
-                return True
-        
         # Check for garbled text patterns
         garbled_patterns = [
             r'[A-Za-z]{20,}',  # Very long words
@@ -561,11 +542,11 @@ Provide specific, practical guidance:"""
             chunk_text = chunks[0].get('text', '')[:300]  # Limit to 300 chars
             context = f"\nRelevant information: {chunk_text}"
         
-        return f"""Answer this question directly. Focus on practical steps and specific examples.
+        return f"""Give practical advice for this question:
 
-QUERY: {query}{context}
+{query}{context}
 
-Provide actionable advice:"""
+Provide specific steps:"""
     
     def _generate_fallback_response(self, query: str) -> str:
         """Generate a fallback response when all else fails."""
