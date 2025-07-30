@@ -92,7 +92,6 @@ CROSS_ENCODER_MODELS = {
 }
 SELECTED_CROSS_ENCODER_MODEL = CROSS_ENCODER_MODELS["miniLM"]["name"]
 
-
 # LLM Models Registry
 LLM_MODELS = {
     "mistral": {
@@ -101,15 +100,14 @@ LLM_MODELS = {
     },
     "mixtral": {
         "name": "mistralai/Mixtral-8x7B-Instruct-v0.1",
-        "desc": "Large Mixture-of-Experts model, high quality, requires more resources."
+        "desc": "Large Mixture-of-Experts model, high quality, higher resource usage."
     },
     "tinyllama": {
         "name": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
         "desc": "Very fast, low resource, lower quality."
     },
 }
-# Change the default model here if desired:
-SELECTED_LLM_MODEL = LLM_MODELS["tinyllama"]["name"]  # or "mixtral"/"mistral"
+SELECTED_LLM_MODEL = LLM_MODELS["tinyllama"]["name"]
 
 # Model registry for tracking status/compatibility
 MODEL_REGISTRY = {
@@ -133,7 +131,6 @@ MIXTRAL_API_KEY = os.getenv(
     "MIXTRAL_API_KEY",
     os.getenv("HUGGINGFACE_TOKEN", "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")
 )
-
 
 # Use Mixtral key if Mixtral model is selected
 if LLM_MODEL == LLM_MODELS.get("mixtral", {}).get("name"):
@@ -159,7 +156,7 @@ TOP_K_FINAL = 3  # Reduced from 10 to prevent token limit issues
 LLM_TASK = "text-generation"
 LLM_DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 LLM_MAX_LENGTH = 8192  # Increased from 4096
-LLM_MAX_NEW_TOKENS = 2048  # Increased from 800
+LLM_MAX_NEW_TOKENS = 4096  # Increased from 2048
 LLM_TEMPERATURE = 0.3
 LLM_TOP_P = 0.9
 LLM_BATCH_SIZE = 1

@@ -375,6 +375,21 @@ Provide a clear, educational response that helps students understand the topic:"
         if len(query) > 1000:  # Limit query length
             query = query[:1000] + "..."
 
+        # Debug: print embedding model info
+        from scaffold_core.config import EMBEDDING_MODEL
+        logger.info(f"[DEBUG] Embedding model for querying: {getattr(self.embedding_model, 'name', str(self.embedding_model))}")
+        logger.info(f"[DEBUG] EMBEDDING_MODEL from config: {EMBEDDING_MODEL}")
+        if hasattr(self.embedding_model, 'get_sentence_embedding_dimension'):
+            logger.info(f"[DEBUG] Embedding dimension: {self.embedding_model.get_sentence_embedding_dimension()}")
+
+        # Debug: print query embedding stats
+        try:
+            query_embedding = self.embedding_model.encode([query])
+            logger.info(f"[DEBUG] Query embedding shape: {getattr(query_embedding, 'shape', None)}")
+            logger.info(f"[DEBUG] Query embedding sample: {query_embedding[0][:5] if hasattr(query_embedding, '__getitem__') else query_embedding}")
+        except Exception as e:
+            logger.error(f"[DEBUG] Error generating query embedding: {e}")
+
         logger.info(f"Processing query: {query}")
 
         # Step 1: Hybrid search
