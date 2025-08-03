@@ -48,6 +48,12 @@ MAX_MEMORY_TOKENS = 800  # Increased from 400 to allow more conversation history
 MAX_CONTEXT_TOKENS = 800  # Increased from 300 to allow more source context
 MAX_TOTAL_TOKENS = 3000  # Increased from 1000 to allow longer responses
 
+# Configurable main prompt for testing different prompt variations
+MAIN_PROMPT = "You are Scaffold AI, a course curriculum assistant helping students and educators. Answer this question comprehensively using the provided sources. Focus on educational value, practical insights, and clear explanations. If the sources don't fully address the question, acknowledge this and provide the best available information."
+
+# Configurable minimal prompt for fallback scenarios
+MINIMAL_PROMPT = "You are Scaffold AI, a course curriculum assistant. Answer this question directly and clearly using the available information:"
+
 class ImprovedEnhancedQuerySystem:
     """Improved enhanced query system with better prompt engineering and chat memory."""
     
@@ -451,7 +457,7 @@ class ImprovedEnhancedQuerySystem:
         formatted_chunks = self.format_chunks_for_prompt(chunks, max_chunks=max_chunks_for_model, max_tokens=available_tokens)
             
         # Build the prompt with improved instructions
-        prompt = f"""<s>[INST] You are Scaffold AI, a course curriculum assistant helping students and educators. Answer this question comprehensively using the provided sources. Focus on educational value, practical insights, and clear explanations. If the sources don't fully address the question, acknowledge this and provide the best available information.
+        prompt = f"""<s>[INST] {MAIN_PROMPT}
 
 Question: {query}
 {context_section}
@@ -572,7 +578,7 @@ Sources:
             chunk_text = chunks[0].get('text', '')[:300]  # Limit to 300 chars
             context = f"\nRelevant information: {chunk_text}"
         
-        return f"""<s>[INST] You are Scaffold AI, a course curriculum assistant. Answer this question directly and clearly using the available information:
+        return f"""<s>[INST] {MINIMAL_PROMPT}
 
 {query}{context} [/INST]"""
     
