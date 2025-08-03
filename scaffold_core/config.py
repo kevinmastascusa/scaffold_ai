@@ -148,24 +148,29 @@ FAISS_INDEX_TYPE = "IndexFlatL2"
 
 # Search configuration
 TOP_K_INITIAL = 50
-TOP_K_FINAL = 3  # Reduced from 10 to prevent token limit issues
+TOP_K_FINAL = 5  # Increased from 3 to provide more context
 
 # -------------------
 # LLM pipeline/task configuration
 # -------------------
 LLM_TASK = "text-generation"
 LLM_DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-LLM_MAX_LENGTH = 8192  # Increased from 4096
-LLM_MAX_NEW_TOKENS = 4096  # Increased from 2048
+LLM_MAX_LENGTH = 1024  # Increased from 8192 to prevent truncation
+LLM_MAX_NEW_TOKENS = 512  # Increased from 4096 to allow longer responses
 LLM_TEMPERATURE = 0.3
 LLM_TOP_P = 0.9
 LLM_BATCH_SIZE = 1
-LLM_LOAD_IN_8BIT = False
-LLM_LOAD_IN_4BIT = False
+LLM_LOAD_IN_8BIT = True
+LLM_LOAD_IN_4BIT = True
 
 # Python 3.12.10 optimizations
 TORCH_COMPILE = False
-CUDA_OPTIMIZATIONS = True
+CUDA_OPTIMIZATIONS = False
+
+# Response quality settings
+ENABLE_TRUNCATION_DETECTION = True
+MIN_RESPONSE_WORDS = 50  # Minimum expected response length
+MAX_RESPONSE_WORDS = 2000  # Maximum expected response length
 
 
 def ensure_directories():

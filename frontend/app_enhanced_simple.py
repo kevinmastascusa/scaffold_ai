@@ -274,7 +274,9 @@ Response:"""
         # Generate response using LLM with stop sequences
         if llm_manager is not None:
             print("🤖 Generating LLM response...")
-            response = llm_manager.generate_response(prompt, max_new_tokens=800, temperature=0.05)
+            # Get temperature from config
+            from scaffold_core.config import LLM_TEMPERATURE
+            response = llm_manager.generate_response(prompt, max_new_tokens=800, temperature=LLM_TEMPERATURE)
             
             # Apply stop sequences to prevent hallucination
             stop_sequences = ["Question:", "Q:", "Another", "Also consider", "You might also", "Additionally", "Furthermore", "Other questions"]

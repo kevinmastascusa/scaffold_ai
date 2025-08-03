@@ -37,20 +37,16 @@ from scaffold_core.config import (
     get_faiss_index_path, get_metadata_json_path
 )
 from scaffold_core.llm import llm
-from scaffold_core.config_manager import ConfigManager
-
-# Initialize config manager
-config_manager = ConfigManager()
 
 # Constants
 TOP_K_INITIAL = 50
-TOP_K_FINAL = 3  # Reduced from 5 to 3 to limit context
-MIN_CROSS_SCORE = -2.0  # Minimum cross-encoder score threshold
-MIN_CONTEXTUAL_SCORE = 1  # Minimum contextual score threshold
-MAX_MEMORY_MESSAGES = 2  # Further reduced to prevent token overflow
-MAX_MEMORY_TOKENS = 400  # Further reduced to stay well under 2048 limit
-MAX_CONTEXT_TOKENS = 300  # Reduced maximum tokens for source context
-MAX_TOTAL_TOKENS = 1000  # More conservative total token limit
+TOP_K_FINAL = 5  # Increased from 3 to 5 to provide more context
+MIN_CROSS_SCORE = -5.0  # Relaxed from -2.0 to keep more sources
+MIN_CONTEXTUAL_SCORE = 0  # Relaxed from 1 to keep more sources
+MAX_MEMORY_MESSAGES = 4  # Increased from 2 to provide better context
+MAX_MEMORY_TOKENS = 800  # Increased from 400 to allow more conversation history
+MAX_CONTEXT_TOKENS = 800  # Increased from 300 to allow more source context
+MAX_TOTAL_TOKENS = 3000  # Increased from 1000 to allow longer responses
 
 class ImprovedEnhancedQuerySystem:
     """Improved enhanced query system with better prompt engineering and chat memory."""
@@ -376,9 +372,10 @@ class ImprovedEnhancedQuerySystem:
             for candidate, score in zip(candidates, cross_scores):
                 candidate["cross_score"] = float(score)
                 
-                # Filter out candidates with very low scores
+                # Only filter out candidates with very low scores (relaxed threshold)
                 if candidate["cross_score"] < MIN_CROSS_SCORE:
                     candidate["filtered_out"] = True
+                    logger.debug(f"Filtered out candidate with cross_score: {candidate['cross_score']}")
             
             # Remove filtered candidates
             candidates = [c for c in candidates if not c.get("filtered_out", False)]
@@ -386,6 +383,7 @@ class ImprovedEnhancedQuerySystem:
             # Sort by cross-encoder score
             candidates.sort(key=lambda x: x["cross_score"], reverse=True)
             
+            logger.debug(f"Cross-encoder reranking: {len(candidates)} candidates remaining after filtering")
             return candidates
             
         except Exception as e:
@@ -407,9 +405,10 @@ class ImprovedEnhancedQuerySystem:
                 shared_keywords = query_keywords.intersection(text_keywords)
                 candidate['contextual_score'] = len(shared_keywords)
                 
-                # Filter out candidates with very low contextual scores
+                # Only filter out candidates with very low contextual scores (relaxed threshold)
                 if candidate['contextual_score'] < MIN_CONTEXTUAL_SCORE:
                     candidate["filtered_out"] = True
+                    logger.debug(f"Filtered out candidate with contextual_score: {candidate['contextual_score']}")
             
             # Remove filtered candidates
             candidates = [c for c in candidates if not c.get("filtered_out", False)]
@@ -417,6 +416,7 @@ class ImprovedEnhancedQuerySystem:
             # Sort by contextual score
             candidates.sort(key=lambda x: x['contextual_score'], reverse=True)
             
+            logger.debug(f"Contextual filtering: {len(candidates)} candidates remaining after filtering")
             return candidates
             
         except Exception as e:
@@ -424,31 +424,34 @@ class ImprovedEnhancedQuerySystem:
             return candidates
     
     def generate_improved_prompt(self, query: str, chunks: List[Dict], conversation_context: str = "") -> str:
-        """Generate an improved prompt with strict token management to prevent overflow."""
+        """Generate an improved prompt with better token management to prevent overflow."""
         if not chunks:
             return f"Query: {query}\n\nI don't have enough relevant information to answer this query accurately."
         
         # Calculate available tokens for context (reserve space for prompt template)
-        max_total_tokens = MAX_TOTAL_TOKENS  # Use conservative limit
-        prompt_template_tokens = 100  # Further reduced estimate for prompt template
+        # Use more conservative limits to prevent model overflow
+        max_total_tokens = min(MAX_TOTAL_TOKENS, 1500)  # Cap at 1500 to prevent overflow
+        prompt_template_tokens = 200  # Estimate for prompt template
         available_tokens = max_total_tokens - prompt_template_tokens
         
         # Format conversation context with token limit
         context_section = ""
         if conversation_context:
             context_tokens = len(conversation_context.split())
-            if context_tokens > available_tokens // 2:  # Use max 1/2 for conversation
+            if context_tokens > available_tokens // 3:  # Use max 1/3 for conversation
                 # Truncate conversation context
-                words = conversation_context.split()[:available_tokens // 2]
+                words = conversation_context.split()[:available_tokens // 3]
                 conversation_context = ' '.join(words) + "..."
             context_section = f"\nPrevious Conversation Context:\n{conversation_context}\n"
             available_tokens -= len(conversation_context.split())
         
-        # Format chunks with remaining token budget
-        formatted_chunks = self.format_chunks_for_prompt(chunks, max_tokens=available_tokens)
+        # Format chunks with strict token budget to prevent overflow
+        # Use fewer chunks but ensure we stay within token limits
+        max_chunks_for_model = 4  # Reduced from 8 to prevent overflow
+        formatted_chunks = self.format_chunks_for_prompt(chunks, max_chunks=max_chunks_for_model, max_tokens=available_tokens)
             
-        # Build the prompt with natural constraints
-        prompt = f"""<s>[INST] Answer this question directly and clearly. Focus on practical, actionable advice. Do not mention yourself or the system.
+        # Build the prompt with improved instructions
+        prompt = f"""<s>[INST] You are Scaffold AI, a course curriculum assistant helping students and educators. Answer this question comprehensively using the provided sources. Focus on educational value, practical insights, and clear explanations. If the sources don't fully address the question, acknowledge this and provide the best available information.
 
 Question: {query}
 {context_section}
@@ -495,7 +498,7 @@ Sources:
                 
         return "\n\n".join(context_parts)
     
-    def format_chunks_for_prompt(self, chunks: List[Dict], max_chunks: int = 2, max_tokens: Optional[int] = None) -> str:
+    def format_chunks_for_prompt(self, chunks: List[Dict], max_chunks: int = 8, max_tokens: Optional[int] = None) -> str:
         """Format chunks for the prompt, limiting length and number with token management."""
         formatted_chunks = []
         total_tokens = 0
@@ -516,11 +519,11 @@ Sources:
                 chunk_text = ' '.join(words) + "..."
                 chunk_tokens = len(words)
             
-            # Truncate chunk if too long (100 words max per chunk)
-            if chunk_tokens > 100:
-                words = chunk_text.split()[:100]
+            # Truncate chunk if too long (150 words max per chunk - reduced to prevent overflow)
+            if chunk_tokens > 150:
+                words = chunk_text.split()[:150]
                 chunk_text = ' '.join(words) + "..."
-                chunk_tokens = 100
+                chunk_tokens = 150
             
             formatted_chunks.append(chunk_text)
             total_tokens += chunk_tokens
@@ -569,13 +572,13 @@ Sources:
             chunk_text = chunks[0].get('text', '')[:300]  # Limit to 300 chars
             context = f"\nRelevant information: {chunk_text}"
         
-        return f"""<s>[INST] Answer this question directly:
+        return f"""<s>[INST] You are Scaffold AI, a course curriculum assistant. Answer this question directly and clearly using the available information:
 
 {query}{context} [/INST]"""
     
     def _generate_fallback_response(self, query: str) -> str:
         """Generate a fallback response when all else fails."""
-        return f"I apologize, but I'm having trouble generating a response for your question about '{query}'. Please try rephrasing your question or ask about a different topic."
+        return f"I apologize, but I'm having trouble generating a comprehensive response for your question about '{query}'. This could be due to limited relevant information in the available sources or technical issues. Please try rephrasing your question, asking about a different topic, or contact support if the issue persists."
     
     def query(self, query: str, session_id: Optional[str] = None) -> Dict[str, Any]:
         """Process a query and return relevant results with improved prompt engineering."""
@@ -623,17 +626,18 @@ Sources:
             filtered_candidates = self.contextual_filtering(query, reranked_candidates)
             logger.debug(f"Filtered to {len(filtered_candidates)} candidates")
             
-            # Select top candidates
-            final_candidates = filtered_candidates[:TOP_K_FINAL]
-            logger.debug(f"Selected {len(final_candidates)} final candidates")
+            # Use all filtered candidates instead of limiting to top 5
+            final_candidates = filtered_candidates
+            logger.debug(f"Using all {len(final_candidates)} filtered candidates")
             
             # Generate improved prompt
             improved_prompt = self.generate_improved_prompt(
                 query, final_candidates, conversation_context
             )
             
-            # Get temperature from config manager
-            temperature = config_manager.get_model_settings('llm').get('temperature', 0.3)
+            # Get temperature from config
+            from scaffold_core.config import LLM_TEMPERATURE
+            temperature = LLM_TEMPERATURE
             
             # Generate response using LLM with comprehensive error handling
             llm_response = ""
@@ -665,9 +669,9 @@ Sources:
                     llm_response = self._generate_fallback_response(query)
             
             # Validate and truncate response if necessary
-            if len(llm_response) > 2000:  # Limit response length
-                llm_response = llm_response[:2000] + "..."
-                logger.warning("Response truncated due to length limit")
+            if len(llm_response) > 8000:  # Increased from 2000 to allow longer responses
+                llm_response = llm_response[:8000] + "..."
+                logger.warning("Response truncated due to length limit (8000 chars)")
             
             # Store query and response in memory if session_id provided
             if session_id:
