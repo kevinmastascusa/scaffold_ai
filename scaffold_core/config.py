@@ -106,6 +106,14 @@ LLM_MODELS = {
         "name": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
         "desc": "Very fast, low resource, lower quality."
     },
+    "llama3.1-8b": {
+        "name": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+        "desc": "Meta's latest 8B model with excellent reasoning and instruction following."
+    },
+    "llama3.1-70b": {
+        "name": "meta-llama/Meta-Llama-3.1-70B-Instruct",
+        "desc": "Meta's flagship 70B model with state-of-the-art performance, requires significant resources."
+    },
 }
 SELECTED_LLM_MODEL = LLM_MODELS["tinyllama"]["name"]
 
