@@ -1,0 +1,107 @@
+[
+  {
+    "prompt": "Hi",
+    "temperature": 0.1,
+    "error": "LLMManager.generate_response() got an unexpected keyword argument 'do_sample'",
+    "response_time_seconds": 7.867813110351562e-06,
+    "timestamp": "2025-08-03T00:16:29.211868"
+  },
+  {
+    "prompt": "Hi",
+    "temperature": 0.3,
+    "error": "LLMManager.generate_response() got an unexpected keyword argument 'do_sample'",
+    "response_time_seconds": 3.814697265625e-06,
+    "timestamp": "2025-08-03T00:16:29.211881"
+  },
+  {
+    "prompt": "Hi",
+    "temperature": 0.7,
+    "error": "LLMManager.generate_response() got an unexpected keyword argument 'do_sample'",
+    "response_time_seconds": 2.6226043701171875e-06,
+    "timestamp": "2025-08-03T00:16:29.211889"
+  },
+  {
+    "prompt": "Hello",
+    "temperature": 0.1,
+    "error": "LLMManager.generate_response() got an unexpected keyword argument 'do_sample'",
+    "response_time_seconds": 3.814697265625e-06,
+    "timestamp": "2025-08-03T00:16:29.211900"
+  },
+  {
+    "prompt": "Hello",
+    "temperature": 0.3,
+    "error": "LLMManager.generate_response() got an unexpected keyword argument 'do_sample'",
+    "response_time_seconds": 3.0994415283203125e-06,
+    "timestamp": "2025-08-03T00:16:29.211906"
+  },
+  {
+    "prompt": "Hello",
+    "temperature": 0.7,
+    "error": "LLMManager.generate_response() got an unexpected keyword argument 'do_sample'",
+    "response_time_seconds": 1.9073486328125e-06,
+    "timestamp": "2025-08-03T00:16:29.211911"
+  },
+  {
+    "prompt": "Test",
+    "temperature": 0.1,
+    "error": "LLMManager.generate_response() got an unexpected keyword argument 'do_sample'",
+    "response_time_seconds": 2.6226043701171875e-06,
+    "timestamp": "2025-08-03T00:16:29.211920"
+  },
+  {
+    "prompt": "Test",
+    "temperature": 0.3,
+    "error": "LLMManager.generate_response() got an unexpected keyword argument 'do_sample'",
+    "response_time_seconds": 2.1457672119140625e-06,
+    "timestamp": "2025-08-03T00:16:29.211925"
+  },
+  {
+    "prompt": "Test",
+    "temperature": 0.7,
+    "error": "LLMManager.generate_response() got an unexpected keyword argument 'do_sample'",
+    "response_time_seconds": 5.507469177246094e-05,
+    "timestamp": "2025-08-03T00:16:29.211984"
+  },
+  {
+    "prompt": "Quick",
+    "temperature": 0.1,
+    "error": "LLMManager.generate_response() got an unexpected keyword argument 'do_sample'",
+    "response_time_seconds": 5.245208740234375e-06,
+    "timestamp": "2025-08-03T00:16:29.212005"
+  },
+  {
+    "prompt": "Quick",
+    "temperature": 0.3,
+    "error": "LLMManager.generate_response() got an unexpected keyword argument 'do_sample'",
+    "response_time_seconds": 3.0994415283203125e-06,
+    "timestamp": "2025-08-03T00:16:29.212013"
+  },
+  {
+    "prompt": "Quick",
+    "temperature": 0.7,
+    "error": "LLMManager.generate_response() got an unexpected keyword argument 'do_sample'",
+    "response_time_seconds": 3.0994415283203125e-06,
+    "timestamp": "2025-08-03T00:16:29.212020"
+  },
+  {
+    "prompt": "Fast",
+    "temperature": 0.1,
+    "error": "LLMManager.generate_response() got an unexpected keyword argument 'do_sample'",
+    "response_time_seconds": 3.0994415283203125e-06,
+    "timestamp": "2025-08-03T00:16:29.212030"
+  },
+  {
+    "prompt": "Fast",
+    "temperature": 0.3,
+    "error": "LLMManager.generate_response() got an unexpected keyword argument 'do_sample'",
+    "response_time_seconds": 3.0994415283203125e-06,
+    "timestamp": "2025-08-03T00:16:29.212037"
+  },
+  {
+    "prompt": "Fast",
+    "temperature": 0.7,
+    "error": "LLMManager.generate_response() got an unexpected keyword argument 'do_sample'",
+    "response_time_seconds": 3.0994415283203125e-06,
+    "timestamp": "2025-08-03T00:16:29.212043"
+  }
+]

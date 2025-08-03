@@ -1,0 +1,435 @@
+Quick LLM Performance Test Results
+============================================================
+
+OVERALL STATISTICS
+------------------------------
+Total Tests: 15
+Successful: 15
+Failed: 0
+Average Response Time: 1.48 seconds
+Average Response Length: 135 characters
+
+============================================================
+
+TEST 1
+------------------------------
+Prompt: Hi
+Temperature: 0.1
+Response Time: 2.95 seconds
+STATUS: SUCCESS
+Response Length: 190 characters
+
+MODEL PARAMETERS:
+  Model: gpt2
+  Max New Tokens: 50
+  Max Length: 100
+  Temperature: 0.1
+  Top P: 0.9
+
+FULL RESPONSE:
+Hi,
+
+<|user|>I'm a software engineer. I'm a software engineer.
+
+<|user|>I'm a software engineer.
+
+<|user|>I'm a software engineer.
+
+<
+
+[Note: Response may be incomplete due to length limits]
+
+Timestamp: 2025-08-03T00:17:21.082586
+
+============================================================
+
+TEST 2
+------------------------------
+Prompt: Hi
+Temperature: 0.3
+Response Time: 1.36 seconds
+STATUS: SUCCESS
+Response Length: 240 characters
+
+MODEL PARAMETERS:
+  Model: gpt2
+  Max New Tokens: 50
+  Max Length: 100
+  Temperature: 0.3
+  Top P: 0.9
+
+FULL RESPONSE:
+Hi,
+
+I'm a student at the University of Texas at Austin. I'm a student at the University of Texas at Austin.
+
+I'm a student at the University of Texas at Austin.
+
+I'm a student at the
+
+[Note: Response may be incomplete due to length limits]
+
+Timestamp: 2025-08-03T00:17:22.439102
+
+============================================================
+
+TEST 3
+------------------------------
+Prompt: Hi
+Temperature: 0.7
+Response Time: 1.39 seconds
+STATUS: SUCCESS
+Response Length: 297 characters
+
+MODEL PARAMETERS:
+  Model: gpt2
+  Max New Tokens: 50
+  Max Length: 100
+  Temperature: 0.7
+  Top P: 0.9
+
+FULL RESPONSE:
+Hi there! We're very excited to announce that we've launched a new service for our new readers. We're now offering you the ability to read on-line reviews from your favorite authors. We're also offering the ability to create new chapters in
+
+[Note: Response may be incomplete due to length limits]
+
+Timestamp: 2025-08-03T00:17:23.824628
+
+============================================================
+
+TEST 4
+------------------------------
+Prompt: Hello
+Temperature: 0.1
+Response Time: 1.36 seconds
+STATUS: SUCCESS
+Response Length: 146 characters
+
+MODEL PARAMETERS:
+  Model: gpt2
+  Max New Tokens: 50
+  Max Length: 100
+  Temperature: 0.1
+  Top P: 0.9
+
+FULL RESPONSE:
+Hello,
+
+<|user|>Hello,
+
+<|user|>Hello,
+
+<|user|>Hello,
+
+<|user|>Hello,
+
+<|user|>Hello,
+
+<
+
+[Note: Response may be incomplete due to length limits]
+
+Timestamp: 2025-08-03T00:17:25.179823
+
+============================================================
+
+TEST 5
+------------------------------
+Prompt: Hello
+Temperature: 0.3
+Response Time: 1.34 seconds
+STATUS: SUCCESS
+Response Length: 62 characters
+
+MODEL PARAMETERS:
+  Model: gpt2
+  Max New Tokens: 50
+  Max Length: 100
+  Temperature: 0.3
+  Top P: 0.9
+
+FULL RESPONSE:
+Hello
+
+[Note: Response may be incomplete due to length limits]
+
+Timestamp: 2025-08-03T00:17:26.523921
+
+============================================================
+
+TEST 6
+------------------------------
+Prompt: Hello
+Temperature: 0.7
+Response Time: 1.48 seconds
+STATUS: SUCCESS
+Response Length: 151 characters
+
+MODEL PARAMETERS:
+  Model: gpt2
+  Max New Tokens: 50
+  Max Length: 100
+  Temperature: 0.7
+  Top P: 0.9
+
+FULL RESPONSE:
+Hello!
+
+<|admin|>Hello!
+
+<|admin|>Hello!
+
+<|admin|>Hello!
+
+<|admin|>Hello!
+
+<|admin|>Hello!
+
+<
+
+[Note: Response may be incomplete due to length limits]
+
+Timestamp: 2025-08-03T00:17:28.003819
+
+============================================================
+
+TEST 7
+------------------------------
+Prompt: Test
+Temperature: 0.1
+Response Time: 1.49 seconds
+STATUS: SUCCESS
+Response Length: 58 characters
+
+MODEL PARAMETERS:
+  Model: gpt2
+  Max New Tokens: 50
+  Max Length: 100
+  Temperature: 0.1
+  Top P: 0.9
+
+FULL RESPONSE:
+<
+
+[Note: Response may be incomplete due to length limits]
+
+Timestamp: 2025-08-03T00:17:29.496190
+
+============================================================
+
+TEST 8
+------------------------------
+Prompt: Test
+Temperature: 0.3
+Response Time: 1.36 seconds
+STATUS: SUCCESS
+Response Length: 58 characters
+
+MODEL PARAMETERS:
+  Model: gpt2
+  Max New Tokens: 50
+  Max Length: 100
+  Temperature: 0.3
+  Top P: 0.9
+
+FULL RESPONSE:
+<
+
+[Note: Response may be incomplete due to length limits]
+
+Timestamp: 2025-08-03T00:17:30.859166
+
+============================================================
+
+TEST 9
+------------------------------
+Prompt: Test
+Temperature: 0.7
+Response Time: 1.37 seconds
+STATUS: SUCCESS
+Response Length: 222 characters
+
+MODEL PARAMETERS:
+  Model: gpt2
+  Max New Tokens: 50
+  Max Length: 100
+  Temperature: 0.7
+  Top P: 0.9
+
+FULL RESPONSE:
+What does it mean?
+
+It means that a user can use the given user ID or password to enter a specific message or input an input.
+
+<|session|>A session.
+
+<|session_id|>A
+
+[Note: Response may be incomplete due to length limits]
+
+Timestamp: 2025-08-03T00:17:32.229022
+
+============================================================
+
+TEST 10
+------------------------------
+Prompt: Quick
+Temperature: 0.1
+Response Time: 1.37 seconds
+STATUS: SUCCESS
+Response Length: 58 characters
+
+MODEL PARAMETERS:
+  Model: gpt2
+  Max New Tokens: 50
+  Max Length: 100
+  Temperature: 0.1
+  Top P: 0.9
+
+FULL RESPONSE:
+<
+
+[Note: Response may be incomplete due to length limits]
+
+Timestamp: 2025-08-03T00:17:33.602968
+
+============================================================
+
+TEST 11
+------------------------------
+Prompt: Quick
+Temperature: 0.3
+Response Time: 1.36 seconds
+STATUS: SUCCESS
+Response Length: 58 characters
+
+MODEL PARAMETERS:
+  Model: gpt2
+  Max New Tokens: 50
+  Max Length: 100
+  Temperature: 0.3
+  Top P: 0.9
+
+FULL RESPONSE:
+<
+
+[Note: Response may be incomplete due to length limits]
+
+Timestamp: 2025-08-03T00:17:34.966463
+
+============================================================
+
+TEST 12
+------------------------------
+Prompt: Quick
+Temperature: 0.7
+Response Time: 1.35 seconds
+STATUS: SUCCESS
+Response Length: 147 characters
+
+MODEL PARAMETERS:
+  Model: gpt2
+  Max New Tokens: 50
+  Max Length: 100
+  Temperature: 0.7
+  Top P: 0.9
+
+FULL RESPONSE:
+Frequency>
+
+<|>Safeguarding>
+
+<|>Offering>
+
+<|>Frequency>
+
+<|>Offering>
+
+<|>Offering>
+
+<|>
+
+[Note: Response may be incomplete due to length limits]
+
+Timestamp: 2025-08-03T00:17:36.320165
+
+============================================================
+
+TEST 13
+------------------------------
+Prompt: Fast
+Temperature: 0.1
+Response Time: 1.35 seconds
+STATUS: SUCCESS
+Response Length: 58 characters
+
+MODEL PARAMETERS:
+  Model: gpt2
+  Max New Tokens: 50
+  Max Length: 100
+  Temperature: 0.1
+  Top P: 0.9
+
+FULL RESPONSE:
+<
+
+[Note: Response may be incomplete due to length limits]
+
+Timestamp: 2025-08-03T00:17:37.673284
+
+============================================================
+
+TEST 14
+------------------------------
+Prompt: Fast
+Temperature: 0.3
+Response Time: 1.35 seconds
+STATUS: SUCCESS
+Response Length: 58 characters
+
+MODEL PARAMETERS:
+  Model: gpt2
+  Max New Tokens: 50
+  Max Length: 100
+  Temperature: 0.3
+  Top P: 0.9
+
+FULL RESPONSE:
+<
+
+[Note: Response may be incomplete due to length limits]
+
+Timestamp: 2025-08-03T00:17:39.024771
+
+============================================================
+
+TEST 15
+------------------------------
+Prompt: Fast
+Temperature: 0.7
+Response Time: 1.34 seconds
+STATUS: SUCCESS
+Response Length: 219 characters
+
+MODEL PARAMETERS:
+  Model: gpt2
+  Max New Tokens: 50
+  Max Length: 100
+  Temperature: 0.7
+  Top P: 0.9
+
+FULL RESPONSE:
+Quick to know what is wrong with your car
+
+<|car dealer|>Quick to know what is wrong with your car
+
+<|dealer|>Quick to know what is wrong with your car
+
+<|dealer|
+
+[Note: Response may be incomplete due to length limits]
+
+Timestamp: 2025-08-03T00:17:40.366963
+
+============================================================
+

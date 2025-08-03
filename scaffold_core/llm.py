@@ -163,7 +163,7 @@ class LLMManager:
         
         Args:
             prompt: The input prompt
-            max_length: Optional override for max response length
+            max_new_tokens: Optional override for max response length
             temperature: Optional override for temperature
             top_p: Optional override for top-p sampling
             
@@ -214,6 +214,32 @@ class LLMManager:
                     response_text = response_text.split("<|assistant|>")[-1].strip()
                 if "<|endoftext|>" in response_text:
                     response_text = response_text.split("<|endoftext|>")[0].strip()
+            
+            # Check for truncation indicators
+            truncation_indicators = [
+                "...", "etc.", "and so on", "continues", "more", 
+                "further", "additionally", "moreover", "furthermore"
+            ]
+            
+            is_truncated = False
+            for indicator in truncation_indicators:
+                if response_text.lower().endswith(indicator.lower()):
+                    is_truncated = True
+                    break
+            
+            # Check if response seems incomplete (ends mid-sentence)
+            if response_text and not response_text.endswith(('.', '!', '?', ':', ';')):
+                is_truncated = True
+            
+            if is_truncated:
+                logger.warning("Response appears to be truncated - consider increasing max_new_tokens")
+                # Add a note about truncation
+                response_text += "\n\n[Note: Response may be incomplete due to length limits]"
+            
+            # Log response statistics
+            response_tokens = len(response_text.split())
+            logger.info(f"Generated response with {response_tokens} words")
+            
             return response_text
             
         except Exception as e:

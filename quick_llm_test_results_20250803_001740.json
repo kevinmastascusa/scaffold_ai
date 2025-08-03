@@ -1,0 +1,227 @@
+[
+  {
+    "prompt": "Hi",
+    "temperature": 0.1,
+    "response": "Hi,\n\n<|user|>I'm a software engineer. I'm a software engineer.\n\n<|user|>I'm a software engineer.\n\n<|user|>I'm a software engineer.\n\n<\n\n[Note: Response may be incomplete due to length limits]",
+    "response_length": 190,
+    "response_time_seconds": 2.948305130004883,
+    "model_parameters": {
+      "model": "gpt2",
+      "max_new_tokens": 50,
+      "max_length": 100,
+      "temperature": 0.1,
+      "top_p": 0.9
+    },
+    "timestamp": "2025-08-03T00:17:21.082586"
+  },
+  {
+    "prompt": "Hi",
+    "temperature": 0.3,
+    "response": "Hi,\n\nI'm a student at the University of Texas at Austin. I'm a student at the University of Texas at Austin.\n\nI'm a student at the University of Texas at Austin.\n\nI'm a student at the\n\n[Note: Response may be incomplete due to length limits]",
+    "response_length": 240,
+    "response_time_seconds": 1.3564836978912354,
+    "model_parameters": {
+      "model": "gpt2",
+      "max_new_tokens": 50,
+      "max_length": 100,
+      "temperature": 0.3,
+      "top_p": 0.9
+    },
+    "timestamp": "2025-08-03T00:17:22.439102"
+  },
+  {
+    "prompt": "Hi",
+    "temperature": 0.7,
+    "response": "Hi there! We're very excited to announce that we've launched a new service for our new readers. We're now offering you the ability to read on-line reviews from your favorite authors. We're also offering the ability to create new chapters in\n\n[Note: Response may be incomplete due to length limits]",
+    "response_length": 297,
+    "response_time_seconds": 1.385497808456421,
+    "model_parameters": {
+      "model": "gpt2",
+      "max_new_tokens": 50,
+      "max_length": 100,
+      "temperature": 0.7,
+      "top_p": 0.9
+    },
+    "timestamp": "2025-08-03T00:17:23.824628"
+  },
+  {
+    "prompt": "Hello",
+    "temperature": 0.1,
+    "response": "Hello,\n\n<|user|>Hello,\n\n<|user|>Hello,\n\n<|user|>Hello,\n\n<|user|>Hello,\n\n<|user|>Hello,\n\n<\n\n[Note: Response may be incomplete due to length limits]",
+    "response_length": 146,
+    "response_time_seconds": 1.3551640510559082,
+    "model_parameters": {
+      "model": "gpt2",
+      "max_new_tokens": 50,
+      "max_length": 100,
+      "temperature": 0.1,
+      "top_p": 0.9
+    },
+    "timestamp": "2025-08-03T00:17:25.179823"
+  },
+  {
+    "prompt": "Hello",
+    "temperature": 0.3,
+    "response": "Hello\n\n[Note: Response may be incomplete due to length limits]",
+    "response_length": 62,
+    "response_time_seconds": 1.3440661430358887,
+    "model_parameters": {
+      "model": "gpt2",
+      "max_new_tokens": 50,
+      "max_length": 100,
+      "temperature": 0.3,
+      "top_p": 0.9
+    },
+    "timestamp": "2025-08-03T00:17:26.523921"
+  },
+  {
+    "prompt": "Hello",
+    "temperature": 0.7,
+    "response": "Hello!\n\n<|admin|>Hello!\n\n<|admin|>Hello!\n\n<|admin|>Hello!\n\n<|admin|>Hello!\n\n<|admin|>Hello!\n\n<\n\n[Note: Response may be incomplete due to length limits]",
+    "response_length": 151,
+    "response_time_seconds": 1.4798729419708252,
+    "model_parameters": {
+      "model": "gpt2",
+      "max_new_tokens": 50,
+      "max_length": 100,
+      "temperature": 0.7,
+      "top_p": 0.9
+    },
+    "timestamp": "2025-08-03T00:17:28.003819"
+  },
+  {
+    "prompt": "Test",
+    "temperature": 0.1,
+    "response": "<\n\n[Note: Response may be incomplete due to length limits]",
+    "response_length": 58,
+    "response_time_seconds": 1.492337942123413,
+    "model_parameters": {
+      "model": "gpt2",
+      "max_new_tokens": 50,
+      "max_length": 100,
+      "temperature": 0.1,
+      "top_p": 0.9
+    },
+    "timestamp": "2025-08-03T00:17:29.496190"
+  },
+  {
+    "prompt": "Test",
+    "temperature": 0.3,
+    "response": "<\n\n[Note: Response may be incomplete due to length limits]",
+    "response_length": 58,
+    "response_time_seconds": 1.3629510402679443,
+    "model_parameters": {
+      "model": "gpt2",
+      "max_new_tokens": 50,
+      "max_length": 100,
+      "temperature": 0.3,
+      "top_p": 0.9
+    },
+    "timestamp": "2025-08-03T00:17:30.859166"
+  },
+  {
+    "prompt": "Test",
+    "temperature": 0.7,
+    "response": "What does it mean?\n\nIt means that a user can use the given user ID or password to enter a specific message or input an input.\n\n<|session|>A session.\n\n<|session_id|>A\n\n[Note: Response may be incomplete due to length limits]",
+    "response_length": 222,
+    "response_time_seconds": 1.3698267936706543,
+    "model_parameters": {
+      "model": "gpt2",
+      "max_new_tokens": 50,
+      "max_length": 100,
+      "temperature": 0.7,
+      "top_p": 0.9
+    },
+    "timestamp": "2025-08-03T00:17:32.229022"
+  },
+  {
+    "prompt": "Quick",
+    "temperature": 0.1,
+    "response": "<\n\n[Note: Response may be incomplete due to length limits]",
+    "response_length": 58,
+    "response_time_seconds": 1.3739142417907715,
+    "model_parameters": {
+      "model": "gpt2",
+      "max_new_tokens": 50,
+      "max_length": 100,
+      "temperature": 0.1,
+      "top_p": 0.9
+    },
+    "timestamp": "2025-08-03T00:17:33.602968"
+  },
+  {
+    "prompt": "Quick",
+    "temperature": 0.3,
+    "response": "<\n\n[Note: Response may be incomplete due to length limits]",
+    "response_length": 58,
+    "response_time_seconds": 1.3634698390960693,
+    "model_parameters": {
+      "model": "gpt2",
+      "max_new_tokens": 50,
+      "max_length": 100,
+      "temperature": 0.3,
+      "top_p": 0.9
+    },
+    "timestamp": "2025-08-03T00:17:34.966463"
+  },
+  {
+    "prompt": "Quick",
+    "temperature": 0.7,
+    "response": "Frequency>\n\n<|>Safeguarding>\n\n<|>Offering>\n\n<|>Frequency>\n\n<|>Offering>\n\n<|>Offering>\n\n<|>\n\n[Note: Response may be incomplete due to length limits]",
+    "response_length": 147,
+    "response_time_seconds": 1.3536770343780518,
+    "model_parameters": {
+      "model": "gpt2",
+      "max_new_tokens": 50,
+      "max_length": 100,
+      "temperature": 0.7,
+      "top_p": 0.9
+    },
+    "timestamp": "2025-08-03T00:17:36.320165"
+  },
+  {
+    "prompt": "Fast",
+    "temperature": 0.1,
+    "response": "<\n\n[Note: Response may be incomplete due to length limits]",
+    "response_length": 58,
+    "response_time_seconds": 1.353088140487671,
+    "model_parameters": {
+      "model": "gpt2",
+      "max_new_tokens": 50,
+      "max_length": 100,
+      "temperature": 0.1,
+      "top_p": 0.9
+    },
+    "timestamp": "2025-08-03T00:17:37.673284"
+  },
+  {
+    "prompt": "Fast",
+    "temperature": 0.3,
+    "response": "<\n\n[Note: Response may be incomplete due to length limits]",
+    "response_length": 58,
+    "response_time_seconds": 1.3514621257781982,
+    "model_parameters": {
+      "model": "gpt2",
+      "max_new_tokens": 50,
+      "max_length": 100,
+      "temperature": 0.3,
+      "top_p": 0.9
+    },
+    "timestamp": "2025-08-03T00:17:39.024771"
+  },
+  {
+    "prompt": "Fast",
+    "temperature": 0.7,
+    "response": "Quick to know what is wrong with your car\n\n<|car dealer|>Quick to know what is wrong with your car\n\n<|dealer|>Quick to know what is wrong with your car\n\n<|dealer|\n\n[Note: Response may be incomplete due to length limits]",
+    "response_length": 219,
+    "response_time_seconds": 1.3421430587768555,
+    "model_parameters": {
+      "model": "gpt2",
+      "max_new_tokens": 50,
+      "max_length": 100,
+      "temperature": 0.7,
+      "top_p": 0.9
+    },
+    "timestamp": "2025-08-03T00:17:40.366963"
+  }
+]

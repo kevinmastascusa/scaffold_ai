@@ -98,7 +98,7 @@ Here are the {len(chunks)} candidate chunks:\n\n"""
         logger.debug("Generating LLM response...")
         response = llm.generate_response(
             prompt,
-            temperature=0.3  # Lower temperature for more focused responses
+            temperature=LLM_TEMPERATURE  # Use config temperature
         )
         logger.debug("Successfully generated LLM response")
         return response

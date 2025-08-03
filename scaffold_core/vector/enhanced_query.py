@@ -297,13 +297,14 @@ class EnhancedQuerySystem:
     ) -> str:
         """
         Generate an enhanced prompt for the LLM with citations.
+        Optimized for token efficiency to prevent truncation.
         """
         context = ""
         citation_refs = []
         
         # Estimate token count (rough approximation: 1 token ≈ 4 characters)
         estimated_tokens = 0
-        max_context_tokens = 1500  # Leave room for query, instructions, and response
+        max_context_tokens = 2000  # Increased from 1500 to allow more context
         
         for i, chunk in enumerate(chunks):
             chunk_text = chunk['text']
@@ -336,10 +337,10 @@ class EnhancedQuerySystem:
             [f"{c['ref']}: {c['name']}" for c in citation_refs]
         )
 
-        # Simplified prompt template for educational AI assistant
-        prompt = f"""You are Scaffold AI, a course curriculum assistant helping students and educators.
+        # Optimized prompt template - more concise to save tokens
+        prompt = f"""You are Scaffold AI, a course curriculum assistant.
 
-Answer the following question comprehensively, using the provided sources and your knowledge to provide educational value:
+Answer this question comprehensively using the provided sources:
 
 QUERY: {query}
 
@@ -349,7 +350,7 @@ SOURCES:
 CITATION LIST:
 {citations_str}
 
-Provide a clear, educational response that helps students understand the topic:"""
+Provide a clear, educational response with proper citations:"""
         
         # Log estimated token count
         total_estimated_tokens = len(prompt) // 4
