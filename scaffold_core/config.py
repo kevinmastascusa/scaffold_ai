@@ -107,15 +107,15 @@ LLM_MODELS = {
         "desc": "Very fast, low resource, lower quality."
     },
     "llama3.1-8b": {
-        "name": "meta-llama/Meta-Llama-3.1-8B-Instruct",
+        "name": "meta-llama/Llama-3.1-8B",
         "desc": "Meta's latest 8B model with excellent reasoning and instruction following."
     },
     "llama3.1-70b": {
-        "name": "meta-llama/Meta-Llama-3.1-70B-Instruct",
+        "name": "meta-llama/Llama-3.1-70B",
         "desc": "Meta's flagship 70B model with state-of-the-art performance, requires significant resources."
     },
 }
-SELECTED_LLM_MODEL = LLM_MODELS["tinyllama"]["name"]
+SELECTED_LLM_MODEL = LLM_MODELS["llama3.1-8b"]["name"]
 
 # Model registry for tracking status/compatibility
 MODEL_REGISTRY = {
@@ -163,8 +163,8 @@ TOP_K_FINAL = 5  # Increased from 3 to provide more context
 # -------------------
 LLM_TASK = "text-generation"
 LLM_DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-LLM_MAX_LENGTH = 1024  # Increased from 8192 to prevent truncation
-LLM_MAX_NEW_TOKENS = 512  # Increased from 4096 to allow longer responses
+LLM_MAX_LENGTH = 4096  # Increased for Llama 3.1 to prevent truncation
+LLM_MAX_NEW_TOKENS = 2048  # Increased for Llama 3.1 to allow longer responses
 LLM_TEMPERATURE = 0.3
 LLM_TOP_P = 0.9
 LLM_BATCH_SIZE = 1
@@ -178,7 +178,7 @@ CUDA_OPTIMIZATIONS = False
 # Response quality settings
 ENABLE_TRUNCATION_DETECTION = True
 MIN_RESPONSE_WORDS = 50  # Minimum expected response length
-MAX_RESPONSE_WORDS = 2000  # Maximum expected response length
+MAX_RESPONSE_WORDS = 4000  # Increased for Llama 3.1 to allow longer responses
 
 
 def ensure_directories():

@@ -47,7 +47,9 @@ class LLMManager:
         logger.debug(f"Initializing LLM Manager with model: {LLM_MODEL}")
         logger.debug(f"Using device: {LLM_DEVICE}")
         
-        if not HF_TOKEN:
+        # Try to get token from environment or use a fallback
+        self.hf_token = HF_TOKEN or os.getenv("HUGGINGFACE_TOKEN")
+        if not self.hf_token:
             raise EnvironmentError(
                 "HUGGINGFACE_TOKEN environment variable not set. "
                 "Please set it to access the model."
@@ -68,7 +70,7 @@ class LLMManager:
         try:
             self.tokenizer = AutoTokenizer.from_pretrained(
                 LLM_MODEL,
-                token=HF_TOKEN,
+                token=self.hf_token,
                 trust_remote_code=True,
                 cache_dir=local_model_dir,
                 use_fast=False  # Use slow tokenizer to avoid version compatibility issues
@@ -78,7 +80,7 @@ class LLMManager:
             logger.debug("Trying alternative tokenizer loading method...")
             self.tokenizer = AutoTokenizer.from_pretrained(
                 LLM_MODEL,
-                token=HF_TOKEN,
+                token=self.hf_token,
                 trust_remote_code=True,
                 cache_dir=local_model_dir,
                 use_fast=False,  # Use slow tokenizer to avoid v3 tokenizer issues
@@ -123,7 +125,7 @@ class LLMManager:
         
         self.model = AutoModelForCausalLM.from_pretrained(
             LLM_MODEL,
-            token=HF_TOKEN,
+            token=self.hf_token,
             torch_dtype=torch.float16 if LLM_DEVICE == "cuda" else torch.float32,
             device_map="auto" if LLM_DEVICE == "cuda" else None,
             low_cpu_mem_usage=low_cpu_mem_usage,
@@ -275,5 +277,15 @@ class LLMManager:
             for prompt in prompts
         ]
 
-# Global instance
-llm = LLMManager() 
+# Global instance - lazy loaded
+_llm_instance = None
+
+def get_llm():
+    """Get the global LLM instance, creating it if necessary."""
+    global _llm_instance
+    if _llm_instance is None:
+        _llm_instance = LLMManager()
+    return _llm_instance
+
+# For backward compatibility
+llm = get_llm() 
