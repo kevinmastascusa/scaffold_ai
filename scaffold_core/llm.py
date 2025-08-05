@@ -4,7 +4,8 @@ LLM integration module using Hugging Face Transformers.
 
 from typing import List, Dict, Any, Optional
 import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
+from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers.pipelines import pipeline
 import os
 import sys
 import logging
@@ -47,7 +48,9 @@ from scaffold_core.config import (
     LLM_LOAD_IN_8BIT,
     LLM_LOAD_IN_4BIT,
     HF_TOKEN,
-    USE_ONNX
+    USE_ONNX,
+    get_dynamic_temperature,
+    get_dynamic_top_p
 )
 logger.debug("Configuration imported successfully")
 
@@ -197,12 +200,15 @@ You are an expert in sustainability education and engineering curriculum develop
 <|assistant|>"""
         
         try:
-            # Generate response
+            # Generate response with dynamic temperature
+            current_temperature = temperature or get_dynamic_temperature()
+            current_top_p = top_p or get_dynamic_top_p()
+            
             outputs = self.pipeline(
                 formatted_prompt,
-                max_new_tokens=max_new_tokens or 512,
-                temperature=temperature or LLM_TEMPERATURE,
-                top_p=top_p or LLM_TOP_P,
+                max_new_tokens=max_new_tokens or LLM_MAX_NEW_TOKENS,
+                temperature=current_temperature,
+                top_p=current_top_p,
                 do_sample=True
             )
             
@@ -229,6 +235,22 @@ You are an expert in sustainability education and engineering curriculum develop
                     response_text = response_text.split("<|assistant|>")[-1].strip()
                 if "<|endoftext|>" in response_text:
                     response_text = response_text.split("<|endoftext|>")[0].strip()
+            
+            # Clean up response formatting
+            response_text = response_text.strip()
+            
+            # Remove common formatting artifacts
+            artifacts_to_remove = [
+                "Response:", "Answer:", "Assistant:", "AI:", 
+                "<|assistant|>", "<|user|>", "<|system|>",
+                "[/INST]", "</s>", "<|endoftext|>"
+            ]
+            
+            for artifact in artifacts_to_remove:
+                response_text = response_text.replace(artifact, "").strip()
+            
+            # Ensure proper bullet point formatting
+            response_text = response_text.replace("•", "•").replace("·", "•")
             
             # Check for truncation indicators
             truncation_indicators = [
@@ -260,6 +282,125 @@ You are an expert in sustainability education and engineering curriculum develop
         except Exception as e:
             logger.error(f"Error during generation: {str(e)}")
             return f"Error generating response: {str(e)}"
+
+    def generate_response_with_continuation(
+        self, 
+        prompt: str,
+        max_new_tokens: Optional[int] = None,
+        temperature: Optional[float] = None,
+        top_p: Optional[float] = None
+    ) -> str:
+        """
+        Generate a response with automatic continuation if truncated.
+        
+        Args:
+            prompt: The input prompt
+            max_new_tokens: Optional override for max response length
+            temperature: Optional override for temperature
+            top_p: Optional override for top-p sampling
+            
+        Returns:
+            Complete response text (potentially with continuation)
+        """
+        try:
+            # Generate initial response
+            response_text = self.generate_response(prompt, max_new_tokens, temperature, top_p)
+            
+            # Check if continuation is needed
+            if self._is_response_truncated(response_text):
+                logger.info("Detected truncated response, generating continuation...")
+                continuation = self._generate_continuation(
+                    prompt, response_text, max_new_tokens, temperature, top_p
+                )
+                if continuation and continuation.strip():
+                    # Remove the truncation note if it exists
+                    if "[Note: Response may be incomplete due to length limits]" in response_text:
+                        response_text = response_text.replace("\n\n[Note: Response may be incomplete due to length limits]", "")
+                    
+                    # Combine responses with better formatting
+                    response_text = response_text.rstrip() + " " + continuation.strip()
+                    logger.info("Successfully generated continuation")
+            
+            # Log final response statistics
+            response_tokens = len(response_text.split())
+            logger.info(f"Generated complete response with {response_tokens} words")
+            
+            return response_text
+            
+        except Exception as e:
+            logger.error(f"Error during enhanced generation: {str(e)}")
+            return f"Error generating response: {str(e)}"
+
+    def _is_response_truncated(self, response_text: str) -> bool:
+        """Check if a response appears to be truncated."""
+        # Check for truncation indicators
+        truncation_indicators = [
+            "...", "etc.", "and so on", "continues", "more", 
+            "further", "additionally", "moreover", "furthermore",
+            "[Note: Response may be incomplete due to length limits]"
+        ]
+        
+        for indicator in truncation_indicators:
+            if indicator.lower() in response_text.lower():
+                return True
+        
+        # Check if response seems incomplete (ends mid-sentence)
+        if response_text and not response_text.strip().endswith(('.', '!', '?', ':', ';')):
+            return True
+        
+        return False
+
+    def _generate_continuation(
+        self,
+        original_prompt: str,
+        partial_response: str,
+        max_new_tokens: Optional[int] = None,
+        temperature: Optional[float] = None,
+        top_p: Optional[float] = None
+    ) -> str:
+        """Generate a continuation for a truncated response."""
+        try:
+            # Clean up partial response for continuation prompt
+            clean_partial = partial_response.replace("\n\n[Note: Response may be incomplete due to length limits]", "").strip()
+            
+            # Get the last few sentences to provide context
+            sentences = clean_partial.split('.')
+            if len(sentences) > 3:
+                context = '. '.join(sentences[-3:]).strip()
+            else:
+                context = clean_partial
+            
+            # Create continuation prompt
+            continuation_prompt = f"""Please continue and complete this response about: "{original_prompt}"
+
+The response so far ends with: "{context}"
+
+Continue from where it left off and provide a complete conclusion:"""
+            
+            logger.debug("Generating continuation with context")
+            
+            # Generate continuation with shorter length to avoid infinite recursion
+            continuation_tokens = min(max_new_tokens or LLM_MAX_NEW_TOKENS, 500)
+            
+            # Use original generate_response to avoid recursion
+            continuation = self.generate_response(
+                continuation_prompt,
+                max_new_tokens=continuation_tokens,
+                temperature=temperature,
+                top_p=top_p
+            )
+            
+            # Clean up continuation (remove any repetition of context)
+            if continuation and len(continuation.strip()) > 20:
+                # Remove the truncation note from continuation if present
+                continuation = continuation.replace("\n\n[Note: Response may be incomplete due to length limits]", "")
+                return continuation.strip()
+            
+            return ""
+            
+        except Exception as e:
+            logger.error(f"Error generating continuation: {str(e)}")
+            return ""
 
     def batch_generate(
         self,

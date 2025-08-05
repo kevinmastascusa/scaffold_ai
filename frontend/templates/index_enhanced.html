@@ -915,13 +915,19 @@
                 showTypingIndicator();
                 
                 console.log('Sending request to /api/chat');
+                // Get current temperature setting
+                const temperature = parseFloat(document.getElementById('temperature').value);
+                
                 // Send to API
                 fetch('/api/chat', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ message: message })
+                    body: JSON.stringify({ 
+                        message: message,
+                        temperature: temperature
+                    })
                 })
                 .then(response => {
                     console.log('Response received:', response.status);
@@ -1192,8 +1198,8 @@
                     // Load current settings
                     if (data.settings) {
                         if (data.settings.llm) {
-                            document.getElementById('temperature').value = data.settings.llm.temperature || 0.7;
-                            document.getElementById('temperatureValue').textContent = data.settings.llm.temperature || 0.7;
+                                            document.getElementById('temperature').value = data.settings.llm.temperature || 0.3;
+                document.getElementById('temperatureValue').textContent = data.settings.llm.temperature || 0.3;
                             document.getElementById('maxTokens').value = data.settings.llm.max_new_tokens || 1000;
                             document.getElementById('maxTokensValue').textContent = data.settings.llm.max_new_tokens || 1000;
                         }
@@ -1360,8 +1366,8 @@
         }
 
         function resetToDefaults() {
-            document.getElementById('temperature').value = 0.7;
-            document.getElementById('temperatureValue').textContent = '0.7';
+            document.getElementById('temperature').value = 0.3;
+            document.getElementById('temperatureValue').textContent = '0.3';
             document.getElementById('maxTokens').value = 1000;
             document.getElementById('maxTokensValue').textContent = '1000';
             document.getElementById('chunkSize').value = 1000;

@@ -44,6 +44,9 @@ def check_dependencies():
 
 def check_data_files():
     """Check if required data files exist."""
+    # Get project root directory
+    project_root = Path(__file__).parent.parent
+    
     required_files = [
         "vector_outputs/scaffold_index_1.faiss",
         "vector_outputs/scaffold_metadata_1.json"
@@ -52,7 +55,8 @@ def check_data_files():
     missing_files = []
     
     for file_path in required_files:
-        if not Path(file_path).exists():
+        full_path = project_root / file_path
+        if not full_path.exists():
             missing_files.append(file_path)
     
     if missing_files:
