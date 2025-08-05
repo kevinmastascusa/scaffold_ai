@@ -10,6 +10,7 @@ import sys
 import json
 import uuid
 import datetime
+import re
 from pathlib import Path
 from flask import Flask, render_template, request, jsonify, session
 from flask_cors import CORS
@@ -27,6 +28,11 @@ CORS(app)
 app.secret_key = 'scaffold_ai_enhanced_ui_secret_key_2024'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 
+# Context Management Configuration
+MAX_TOKENS = 1500  # Conservative limit to stay well under model's 2048 token limit
+SUMMARY_LENGTH = 200  # Target length for conversation summaries
+MAX_CONVERSATION_ITEMS = 5  # Maximum conversation items to keep in context
+
 # Directories
 UPLOAD_FOLDER = project_root / 'uploads'
 CONVERSATIONS_DIR = project_root / 'conversations'
@@ -43,6 +49,117 @@ index = None
 metadata = None
 llm_manager = None
 system_initialized = False
+
+def count_tokens_approximate(text):
+    """
+    Approximate token counting for context management.
+    Based on research showing ~4 characters per token for English text.
+    """
+    # Remove special characters and normalize
+    cleaned_text = re.sub(r'[^\w\s]', '', text)
+    # Approximate tokens (4 characters per token)
+    return len(cleaned_text) // 4
+
+def summarize_conversation(conversation_items):
+    """
+    Create a summary of conversation history to reduce token usage.
+    """
+    if not conversation_items:
+        return ""
+    
+    # Extract key information from recent conversations
+    summary_parts = []
+    for item in conversation_items[-3:]:  # Last 3 items
+        if 'user' in item and 'assistant' in item:
+            user_msg = item['user'][:100]  # First 100 chars
+            summary_parts.append(f"User asked about: {user_msg}...")
+    
+    if summary_parts:
+        return "Previous conversation summary: " + " ".join(summary_parts)
+    return ""
+
+def manage_conversation_context(conversation_items, current_query, syllabus_content=""):
+    """
+    Manage conversation context to stay within token limits.
+    Based on best practices from VerticalServe and Anthropic documentation.
+    """
+    # Count tokens for current query and syllabus
+    query_tokens = count_tokens_approximate(current_query)
+    syllabus_tokens = count_tokens_approximate(syllabus_content)
+    
+    # Calculate available tokens for conversation history
+    available_tokens = MAX_TOKENS - query_tokens - syllabus_tokens - 200  # Buffer
+    
+    if available_tokens <= 0:
+        # If even basic content exceeds limits, return minimal context
+        return {
+            'conversation_history': [],
+            'summary': "Previous conversation context removed due to token limits.",
+            'total_tokens': query_tokens + syllabus_tokens
+        }
+    
+    # Start with most recent conversations
+    selected_items = []
+    current_tokens = 0
+    
+    # Add items from most recent to oldest
+    for item in reversed(conversation_items):
+        item_text = f"{item.get('user', '')} {item.get('assistant', '')}"
+        item_tokens = count_tokens_approximate(item_text)
+        
+        if current_tokens + item_tokens <= available_tokens:
+            selected_items.insert(0, item)  # Insert at beginning to maintain order
+            current_tokens += item_tokens
+        else:
+            break
+    
+    # If we have too many items, create a summary
+    if len(selected_items) > MAX_CONVERSATION_ITEMS:
+        summary = summarize_conversation(selected_items[:-MAX_CONVERSATION_ITEMS])
+        selected_items = selected_items[-MAX_CONVERSATION_ITEMS:]
+    else:
+        summary = ""
+    
+    return {
+        'conversation_history': selected_items,
+        'summary': summary,
+        'total_tokens': current_tokens + query_tokens + syllabus_tokens
+    }
+
+def format_conversation_for_prompt(conversation_data, current_query, syllabus_content=""):
+    """
+    Format conversation history for LLM prompt with context management.
+    """
+    # Get managed context
+    context = manage_conversation_context(
+        conversation_data.get('conversation_history', []),
+        current_query,
+        syllabus_content
+    )
+    
+    # Build prompt with managed context
+    prompt_parts = []
+    
+    # Add syllabus content if available
+    if syllabus_content:
+        prompt_parts.append(f"Syllabus Context:\n{syllabus_content}")
+    
+    # Add conversation summary if available
+    if context['summary']:
+        prompt_parts.append(f"Conversation Summary:\n{context['summary']}")
+    
+    # Add recent conversation history
+    if context['conversation_history']:
+        history_text = "\n".join([
+            f"User: {item.get('user', '')}\nAssistant: {item.get('assistant', '')}"
+            for item in context['conversation_history']
+        ])
+        prompt_parts.append(f"Recent Conversation:\n{history_text}")
+    
+    # Add current query
+    prompt_parts.append(f"Current Question: {current_query}")
+    
+    return "\n\n".join(prompt_parts), context['total_tokens']
 
 def allowed_file(filename):
     """Check if file extension is allowed."""
@@ -235,49 +352,45 @@ def generate_response_from_sources(query, search_results, session_id=None, tempe
     context = "\n\n".join(context_parts)
     
     # Get conversation context if session_id provided
-    syllabus_context = ""
-    conversation_context = ""
+    syllabus_content = ""
+    conversation_data = {'conversation_history': []}
+    
     if session_id:
         conversation = get_conversation_history(session_id)
         
         # Extract syllabus context
         for msg in conversation:
             if msg.get('type') == 'syllabus_context':
-                syllabus_context = msg.get('content', '')
+                syllabus_content = msg.get('content', '')
                 break
         
-        # Build conversation history (last 5 messages to avoid token limits)
-        recent_messages = []
-        for msg in conversation[-10:]:  # Get last 10 messages
-            if msg.get('type') in ['user', 'assistant']:
-                role = "User" if msg.get('type') == 'user' else "Assistant"
-                content = msg.get('content', '')
-                if content.strip():
-                    recent_messages.append(f"{role}: {content}")
+        # Build conversation history for context management
+        conversation_items = []
+        for msg in conversation:
+            if msg.get('type') == 'user':
+                conversation_items.append({
+                    'user': msg.get('content', ''),
+                    'assistant': ''
+                })
+            elif msg.get('type') == 'assistant':
+                if conversation_items:
+                    conversation_items[-1]['assistant'] = msg.get('content', '')
         
-        if recent_messages:
-            conversation_context = "\n".join(recent_messages[-5:])  # Last 5 messages
+        conversation_data['conversation_history'] = conversation_items
     
-    # Build context sections
-    syllabus_section = ""
-    if syllabus_context:
-        syllabus_section = f"""
-{syllabus_context}
-
-"""
+    # Use context management to format prompt
+    formatted_prompt, total_tokens = format_conversation_for_prompt(
+        conversation_data, 
+        query, 
+        syllabus_content
+    )
     
-    conversation_section = ""
-    if conversation_context:
-        conversation_section = f"""
-Previous Conversation:
-{conversation_context}
+    # Add research context to the formatted prompt
+    final_prompt = f"""You are an expert in sustainability education. Provide a comprehensive response to this question.
 
-"""
-    
-    # Create LLM prompt with strict constraints, syllabus context, and conversation history
-    prompt = f"""You are an expert in sustainability education. Provide a comprehensive response to this question: {query}
+{formatted_prompt}
 
-{syllabus_section}Research Context:
+Research Context:
 {context}
 
 Provide a detailed response with:
@@ -288,6 +401,36 @@ Provide a detailed response with:
 
 Response:"""
     
+    # Log token usage for debugging
+    print(f"📊 Token usage: {total_tokens} (limit: {MAX_TOKENS})")
+    
+    # Check if we're approaching token limits and clear context if needed
+    if total_tokens > MAX_TOKENS * 0.9:  # If we're at 90% of limit
+        print(f"⚠️ Token usage high ({total_tokens}/{MAX_TOKENS}), clearing context...")
+        if session_id:
+            force_context_clear(session_id)
+            # Recalculate with cleared context
+            formatted_prompt, total_tokens = format_conversation_for_prompt(
+                {'conversation_history': []}, 
+                query, 
+                syllabus_content
+            )
+            final_prompt = f"""You are an expert in sustainability education. Provide a comprehensive response to this question.
+
+{formatted_prompt}
+
+Research Context:
+{context}
+
+Provide a detailed response with:
+• Specific, actionable suggestions
+• Clear bullet points and structure
+• Focus on immediate implementation
+• Practical examples and applications
+
+Response:"""
+            print(f"📊 Token usage after clear: {total_tokens} (limit: {MAX_TOKENS})")
+    
     try:
         # Generate response using LLM
         if llm_manager is not None:
@@ -296,7 +439,7 @@ Response:"""
             if temperature is None:
                 from scaffold_core.config import get_dynamic_temperature
                 temperature = get_dynamic_temperature()
-            response = llm_manager.generate_response(prompt, max_new_tokens=800, temperature=temperature)
+            response = llm_manager.generate_response(final_prompt, max_new_tokens=800, temperature=temperature)
             
             # Clean up response formatting
             response = response.strip()
@@ -589,6 +732,137 @@ def clear_conversation():
         return jsonify({
             'success': True,
             'message': 'Conversation cleared'
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/clear-memory', methods=['POST'])
+def clear_memory():
+    """Clear the AI's memory while keeping chat history."""
+    try:
+        session_id = session.get('session_id', str(uuid.uuid4()))
+        
+        # Get current conversation
+        conversation = get_conversation_history(session_id)
+        
+        # Keep only the most recent conversation items to reduce context
+        if len(conversation) > MAX_CONVERSATION_ITEMS:
+            # Keep syllabus context and most recent items
+            syllabus_context = None
+            recent_items = []
+            
+            for msg in conversation:
+                if msg.get('type') == 'syllabus_context':
+                    syllabus_context = msg
+                elif msg.get('type') in ['user', 'assistant']:
+                    recent_items.append(msg)
+            
+            # Keep only the most recent conversation items
+            recent_items = recent_items[-MAX_CONVERSATION_ITEMS:]
+            
+            # Rebuild conversation with reduced context
+            new_conversation = []
+            if syllabus_context:
+                new_conversation.append(syllabus_context)
+            new_conversation.extend(recent_items)
+            
+            # Save the reduced conversation
+            save_conversation_history(session_id, new_conversation)
+            
+            return jsonify({
+                'success': True,
+                'message': f'Memory cleared. Kept {len(recent_items)} recent conversation items.'
+            })
+        else:
+            return jsonify({
+                'success': True,
+                'message': 'Memory cleared. Conversation history was already within limits.'
+            })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+def force_context_clear(session_id):
+    """
+    Force clear context when token limits are exceeded.
+    This is called automatically when the system detects token overflow.
+    """
+    try:
+        conversation = get_conversation_history(session_id)
+        
+        # Keep only syllabus context and the most recent exchange
+        syllabus_context = None
+        recent_exchange = []
+        
+        for msg in conversation:
+            if msg.get('type') == 'syllabus_context':
+                syllabus_context = msg
+            elif msg.get('type') in ['user', 'assistant']:
+                recent_exchange.append(msg)
+        
+        # Keep only the last user-assistant exchange
+        if len(recent_exchange) >= 2:
+            recent_exchange = recent_exchange[-2:]
+        
+        # Rebuild conversation with minimal context
+        new_conversation = []
+        if syllabus_context:
+            new_conversation.append(syllabus_context)
+        new_conversation.extend(recent_exchange)
+        
+        # Save the minimal conversation
+        save_conversation_history(session_id, new_conversation)
+        
+        print(f"🔄 Forced context clear for session {session_id}")
+        return True
+        
+    except Exception as e:
+        print(f"Error in force_context_clear: {e}")
+        return False
+
+@app.route('/api/context-status', methods=['GET'])
+def get_context_status():
+    """Get current context status and token usage for debugging."""
+    try:
+        session_id = session.get('session_id', str(uuid.uuid4()))
+        conversation = get_conversation_history(session_id)
+        
+        # Calculate current token usage
+        conversation_items = []
+        syllabus_content = ""
+        
+        for msg in conversation:
+            if msg.get('type') == 'syllabus_context':
+                syllabus_content = msg.get('content', '')
+            elif msg.get('type') in ['user', 'assistant']:
+                conversation_items.append({
+                    'user': msg.get('content', ''),
+                    'assistant': ''
+                })
+            elif msg.get('type') == 'assistant':
+                if conversation_items:
+                    conversation_items[-1]['assistant'] = msg.get('content', '')
+        
+        # Calculate token usage
+        query_tokens = count_tokens_approximate("test query")
+        syllabus_tokens = count_tokens_approximate(syllabus_content)
+        conversation_tokens = sum([
+            count_tokens_approximate(f"{item.get('user', '')} {item.get('assistant', '')}")
+            for item in conversation_items
+        ])
+        
+        total_tokens = query_tokens + syllabus_tokens + conversation_tokens
+        
+        return jsonify({
+            'session_id': session_id,
+            'total_tokens': total_tokens,
+            'token_limit': MAX_TOKENS,
+            'usage_percentage': (total_tokens / MAX_TOKENS) * 100,
+            'conversation_items': len(conversation_items),
+            'max_conversation_items': MAX_CONVERSATION_ITEMS,
+            'syllabus_content_length': len(syllabus_content),
+            'status': 'healthy' if total_tokens < MAX_TOKENS * 0.8 else 'warning' if total_tokens < MAX_TOKENS else 'critical'
         })
         
     except Exception as e:
