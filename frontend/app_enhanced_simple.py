@@ -194,7 +194,7 @@ def search_sustainability_data(query, k=10):
         print(f"Search error: {e}")
         return []
 
-def generate_response_from_sources(query, search_results, session_id=None):
+def generate_response_from_sources(query, search_results, session_id=None, temperature=None):
     """Generate a coherent response using LLM based on the search results and syllabus context."""
     if not search_results:
         return "I couldn't find specific information about that in my sustainability research database. Please try rephrasing your question or ask about a different sustainability topic.", []
@@ -203,14 +203,14 @@ def generate_response_from_sources(query, search_results, session_id=None):
     sources_used = []
     
     # Get the most relevant chunks (limit to avoid token limits)
-    top_results = search_results[:3]  # Use top 3 sources for LLM processing
+    top_results = search_results[:5]  # Use top 5 sources for LLM processing
     
     # Prepare context for LLM
     context_parts = []
     for result in top_results:
         text = result.get('text', '')
-        # Always use the chunk, even if short
-        truncated_text = text[:800] if len(text) > 800 else text
+        # Increase context length for better responses
+        truncated_text = text[:1200] if len(text) > 1200 else text
         context_parts.append(truncated_text)
         # Create source display
         source = result.get('source', {})
@@ -234,16 +234,31 @@ def generate_response_from_sources(query, search_results, session_id=None):
     # Combine context
     context = "\n\n".join(context_parts)
     
-    # Get syllabus context if session_id provided
+    # Get conversation context if session_id provided
     syllabus_context = ""
+    conversation_context = ""
     if session_id:
         conversation = get_conversation_history(session_id)
+        
+        # Extract syllabus context
         for msg in conversation:
             if msg.get('type') == 'syllabus_context':
                 syllabus_context = msg.get('content', '')
                 break
+        
+        # Build conversation history (last 5 messages to avoid token limits)
+        recent_messages = []
+        for msg in conversation[-10:]:  # Get last 10 messages
+            if msg.get('type') in ['user', 'assistant']:
+                role = "User" if msg.get('type') == 'user' else "Assistant"
+                content = msg.get('content', '')
+                if content.strip():
+                    recent_messages.append(f"{role}: {content}")
+        
+        if recent_messages:
+            conversation_context = "\n".join(recent_messages[-5:])  # Last 5 messages
     
-    # Build syllabus section
+    # Build context sections
     syllabus_section = ""
     if syllabus_context:
         syllabus_section = f"""
@@ -251,49 +266,57 @@ def generate_response_from_sources(query, search_results, session_id=None):
 
 """
     
-    # Create LLM prompt with strict constraints and syllabus context
-    prompt = f"""STRICT INSTRUCTION: Answer ONLY the specific question asked. Do not generate additional questions, examples beyond what is directly asked, or suggest other topics.
+    conversation_section = ""
+    if conversation_context:
+        conversation_section = f"""
+Previous Conversation:
+{conversation_context}
 
-You are an expert in sustainability education and engineering curriculum development. Based on the following research excerpts and uploaded syllabus context, provide a focused response to the user's specific question.
+"""
+    
+    # Create LLM prompt with strict constraints, syllabus context, and conversation history
+    prompt = f"""You are an expert in sustainability education. Provide a comprehensive response to this question: {query}
 
-{syllabus_section}User Question: {query}
-
-Research Context:
+{syllabus_section}Research Context:
 {context}
 
-Provide a focused response that:
-1. Addresses ONLY the specific question asked
-2. Uses information from the provided research and syllabus context
-3. Does not suggest additional questions or topics
-4. Stays strictly on topic
-5. Provides practical, actionable suggestions based on the research and course content
+Provide a detailed response with:
+• Specific, actionable suggestions
+• Clear bullet points and structure
+• Focus on immediate implementation
+• Practical examples and applications
 
 Response:"""
     
     try:
-        # Generate response using LLM with stop sequences
+        # Generate response using LLM
         if llm_manager is not None:
             print("🤖 Generating LLM response...")
-            # Get temperature from config
-            from scaffold_core.config import LLM_TEMPERATURE
-            response = llm_manager.generate_response(prompt, max_new_tokens=800, temperature=LLM_TEMPERATURE)
+            # Use dynamic temperature if not provided
+            if temperature is None:
+                from scaffold_core.config import get_dynamic_temperature
+                temperature = get_dynamic_temperature()
+            response = llm_manager.generate_response(prompt, max_new_tokens=800, temperature=temperature)
             
-            # Apply stop sequences to prevent hallucination
-            stop_sequences = ["Question:", "Q:", "Another", "Also consider", "You might also", "Additionally", "Furthermore", "Other questions"]
-            for stop_seq in stop_sequences:
-                if stop_seq in response:
-                    response = response.split(stop_seq)[0].strip()
-                    break
-                    
+            # Clean up response formatting
+            response = response.strip()
+            
+            # Clean up any remaining formatting artifacts
+            response = response.replace("Response:", "").strip()
+            response = response.replace("Answer:", "").strip()
+            
+            # Ensure proper bullet point formatting
+            response = response.replace("•", "•").replace("·", "•")
+            
             print("✅ LLM response generated successfully")
         else:
-            # Fallback to template-based response
-            print("⚠️ LLM not available, using fallback response")
-            response = generate_fallback_response(query, top_results)
+            # Return error message if LLM not available
+            print("⚠️ LLM not available")
+            response = "I'm sorry, but I'm currently unable to generate a response. Please try again later."
             
     except Exception as e:
-        print(f"❌ LLM generation failed: {e}, using fallback")
-        response = generate_fallback_response(query, top_results)
+        print(f"❌ LLM generation failed: {e}")
+        response = "I encountered an error while processing your request. Please try again."
     
     return response, sources_used
 
@@ -302,52 +325,28 @@ def generate_fallback_response(query, search_results):
     query_lower = query.lower()
     
     if 'fluid mechanics' in query_lower or 'fluid' in query_lower:
-        response = "Based on sustainability research in engineering education, here are specific ways to incorporate sustainability into your Fluid Mechanics course:\n\n"
-        response += "**Key Integration Areas:**\n\n"
-        response += "• **Energy Efficiency**: Focus on pump and turbine efficiency, renewable energy applications, and sustainable fluid systems\n"
-        response += "• **Environmental Impact**: Cover water treatment, pollution control, and sustainable water management practices\n"
-        response += "• **Real-world Applications**: Include case studies of sustainable fluid systems in buildings, infrastructure, and renewable energy\n"
-        response += "• **Green Technologies**: Explore wind turbines, hydroelectric power, and sustainable HVAC systems\n\n"
+        response = "For Fluid Mechanics, integrate sustainability through:\n\n"
+        response += "• Energy Efficiency: Pump/turbine efficiency, renewable energy applications\n"
+        response += "• Environmental Impact: Water treatment, pollution control, sustainable water management\n"
+        response += "• Real-world Applications: Case studies of sustainable fluid systems in buildings and infrastructure\n"
         
     elif 'thermodynamics' in query_lower:
-        response = "Here are research-backed approaches for integrating sustainability into Thermodynamics courses:\n\n"
-        response += "**Core Integration Areas:**\n\n"
-        response += "• **Energy Conservation**: Apply First and Second Law principles to sustainable energy systems\n"
-        response += "• **Renewable Energy Cycles**: Study solar thermal, geothermal, and biomass energy applications\n"
-        response += "• **Efficiency Analysis**: Analyze heat engines, refrigeration cycles, and combined heat and power systems\n"
-        response += "• **Environmental Thermodynamics**: Explore climate change, atmospheric processes, and carbon cycles\n\n"
+        response = "For Thermodynamics, integrate sustainability through:\n\n"
+        response += "• Energy Conservation: First/Second Law applications to sustainable systems\n"
+        response += "• Renewable Energy: Solar thermal, geothermal, biomass energy cycles\n"
+        response += "• Efficiency Analysis: Heat engines, refrigeration cycles, combined heat and power\n"
         
     elif 'materials' in query_lower:
-        response = "Here are effective strategies for integrating sustainability into Materials Science courses:\n\n"
-        response += "**Key Integration Areas:**\n\n"
-        response += "• **Sustainable Materials**: Study biodegradable, recyclable, and renewable materials\n"
-        response += "• **Life Cycle Assessment**: Analyze environmental impact from extraction to disposal\n"
-        response += "• **Green Manufacturing**: Explore energy-efficient production processes\n"
-        response += "• **Circular Economy**: Focus on material reuse, recycling, and waste reduction\n\n"
+        response = "For Materials Science, integrate sustainability through:\n\n"
+        response += "• Sustainable Materials: Biodegradable, recyclable, renewable materials\n"
+        response += "• Life Cycle Assessment: Environmental impact from extraction to disposal\n"
+        response += "• Circular Economy: Material reuse, recycling, waste reduction\n"
         
     else:
-        response = "Based on sustainability research in engineering education, here are general approaches for incorporating sustainability into your course:\n\n"
-        response += "**Core Principles:**\n\n"
-        response += "• **Systems Thinking**: Help students understand interconnected environmental, social, and economic impacts\n"
-        response += "• **Life Cycle Analysis**: Consider environmental impacts from design to disposal\n"
-        response += "• **Stakeholder Engagement**: Include diverse perspectives in problem-solving\n"
-        response += "• **Innovation for Sustainability**: Encourage creative solutions to environmental challenges\n\n"
-    
-    # Add research-based insights if available
-    if search_results:
-        response += "**Research-Based Insights:**\n\n"
-        for i, result in enumerate(search_results[:2], 1):
-            text = result.get('text', '')
-            if len(text) > 100:
-                # Extract a meaningful excerpt
-                start_idx = max(0, text.find('sustainability') - 50)
-                end_idx = min(len(text), start_idx + 300)
-                excerpt = text[start_idx:end_idx]
-                clean_excerpt = excerpt.replace('\n', ' ').strip()
-                sentences = clean_excerpt.split('.')
-                if len(sentences) > 1:
-                    clean_excerpt = '. '.join(sentences[:2]) + '.'
-                response += f"**Finding {i}**: {clean_excerpt}\n\n"
+        response = "For engineering courses, integrate sustainability through:\n\n"
+        response += "• Systems Thinking: Environmental, social, and economic impacts\n"
+        response += "• Life Cycle Analysis: Consider impacts from design to disposal\n"
+        response += "• Innovation: Creative solutions to environmental challenges\n"
     
     return response
 
@@ -511,11 +510,17 @@ def chat():
             if initialize_search_system():
                 print(f"🤖 Processing query with LLM-powered search: {message[:50]}...")
                 
+                # Get temperature from request or use dynamic default
+                temperature = data.get('temperature')
+                if temperature is None:
+                    from scaffold_core.config import get_dynamic_temperature
+                    temperature = get_dynamic_temperature()
+                
                 # Search the sustainability database
                 search_results = search_sustainability_data(message, k=10)
                 
-                # Generate response using LLM with syllabus context
-                response_content, sources = generate_response_from_sources(message, search_results, session_id)
+                # Generate response using LLM with syllabus context and temperature
+                response_content, sources = generate_response_from_sources(message, search_results, session_id, temperature)
                 
                 # Create AI response with sources
                 ai_message = {
@@ -530,14 +535,13 @@ def chat():
                 raise Exception("Search system not available")
                 
         except Exception as e:
-            print(f"⚠️ Search error: {e}, using fallback response")
-            # Use fallback response
-            response_data = get_fallback_response(message)
+            print(f"❌ Search error: {e}")
+            # Return error message instead of fallback
             ai_message = {
                 'id': str(uuid.uuid4()),
                 'type': 'assistant',
-                'content': response_data['content'],
-                'sources': response_data['sources'],
+                'content': "I'm sorry, but I'm currently unable to generate a response. Please try again later.",
+                'sources': [],
                 'timestamp': datetime.datetime.now().isoformat()
             }
         

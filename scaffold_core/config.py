@@ -94,30 +94,51 @@ SELECTED_CROSS_ENCODER_MODEL = CROSS_ENCODER_MODELS["miniLM"]["name"]
 
 # LLM Models Registry
 LLM_MODELS = {
-    "mistral": {
-        "name": "mistralai/Mistral-7B-Instruct-v0.2",
-        "desc": "Recommended: Good balance of quality and speed."
+    "gpt2": {
+        "name": "gpt2",
+        "desc": "Public GPT-2 model, no token required, good for testing.",
+        "requires_token": False
     },
-    "mixtral": {
-        "name": "mistralai/Mixtral-8x7B-Instruct-v0.1",
-        "desc": "Large Mixture-of-Experts model, high quality, higher resource usage."
+    "distilgpt2": {
+        "name": "distilgpt2",
+        "desc": "Lightweight GPT-2 variant, fast and public access.",
+        "requires_token": False
+    },
+    "dialogpt": {
+        "name": "microsoft/DialoGPT-medium",
+        "desc": "Conversational model, good for dialogue, no token required.",
+        "requires_token": False
     },
     "tinyllama": {
         "name": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
-        "desc": "Very fast, low resource, lower quality."
+        "desc": "Very fast, low resource, may require token.",
+        "requires_token": True
     },
     "tinyllama-onnx": {
         "name": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
         "desc": "ONNX optimized version for maximum CPU speed.",
-        "use_onnx": True
+        "use_onnx": True,
+        "requires_token": True
+    },
+    "mistral": {
+        "name": "mistralai/Mistral-7B-Instruct-v0.2",
+        "desc": "Good balance of quality and speed, requires token.",
+        "requires_token": True
+    },
+    "mixtral": {
+        "name": "mistralai/Mixtral-8x7B-Instruct-v0.1",
+        "desc": "Large Mixture-of-Experts model, high quality, requires token.",
+        "requires_token": True
     },
     "llama3.1-8b": {
         "name": os.getenv("LLAMA3_8B_PATH") or "meta-llama/Llama-3.1-8B-Instruct",
-        "desc": "Meta's latest 8B model with excellent reasoning and instruction following."
+        "desc": "Meta's latest 8B model, requires token and approval.",
+        "requires_token": True
     },
     "llama3.1-70b": {
         "name": os.getenv("LLAMA3_70B_PATH") or "meta-llama/Llama-3.1-70B-Instruct",
-        "desc": "Meta's flagship 70B model with state-of-the-art performance, requires significant resources."
+        "desc": "Meta's flagship 70B model, requires token and approval.",
+        "requires_token": True
     },
 }
 SELECTED_LLM_MODEL = LLM_MODELS["tinyllama-onnx"]["name"]
@@ -137,10 +158,15 @@ CROSS_ENCODER_MODEL = SELECTED_CROSS_ENCODER_MODEL
 LLM_MODEL = SELECTED_LLM_MODEL
 
 # Check if selected model has ONNX flag
+USE_ONNX = False
 for model_key, model_info in LLM_MODELS.items():
     if model_info["name"] == SELECTED_LLM_MODEL and model_info.get("use_onnx", False):
         USE_ONNX = True
         logger.info(f"ONNX optimization enabled for model: {SELECTED_LLM_MODEL}")
+        break
+
+if not USE_ONNX:
+    logger.info(f"Using standard model (no ONNX): {SELECTED_LLM_MODEL}")
 
 # -------------------
 # Model API Keys
@@ -176,8 +202,18 @@ LLM_TASK = "text-generation"
 LLM_DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 LLM_MAX_LENGTH = 4096  # Increased for Llama 3.1 to prevent truncation
 LLM_MAX_NEW_TOKENS = 2048  # Increased for Llama 3.1 to allow longer responses
-LLM_TEMPERATURE = 0.3
-LLM_TOP_P = 0.9
+
+# Dynamic temperature and settings - will be loaded from config manager
+try:
+    from .config_manager import ConfigManager
+    config_manager = ConfigManager()
+    LLM_TEMPERATURE = config_manager.get_model_settings('llm').get('temperature', 0.3)
+    LLM_TOP_P = config_manager.get_model_settings('llm').get('top_p', 0.9)
+except ImportError:
+    # Fallback to default values
+    LLM_TEMPERATURE = 0.3
+    LLM_TOP_P = 0.9
+
 LLM_BATCH_SIZE = 1
 LLM_LOAD_IN_8BIT = False
 LLM_LOAD_IN_4BIT = True
@@ -192,6 +228,24 @@ ENABLE_TRUNCATION_DETECTION = True
 MIN_RESPONSE_WORDS = 50  # Minimum expected response length
 MAX_RESPONSE_WORDS = 4000  # Increased for Llama 3.1 to allow longer responses
 
+
+def get_dynamic_temperature() -> float:
+    """Get the current temperature setting from config manager."""
+    try:
+        from .config_manager import ConfigManager
+        config_manager = ConfigManager()
+        return config_manager.get_model_settings('llm').get('temperature', 0.3)
+    except ImportError:
+        return 0.3
+
+def get_dynamic_top_p() -> float:
+    """Get the current top_p setting from config manager."""
+    try:
+        from .config_manager import ConfigManager
+        config_manager = ConfigManager()
+        return config_manager.get_model_settings('llm').get('top_p', 0.9)
+    except ImportError:
+        return 0.9
 
 def ensure_directories():
     """Create all necessary directories if they don't exist."""

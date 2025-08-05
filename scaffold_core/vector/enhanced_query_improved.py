@@ -660,8 +660,8 @@ Sources:
             # Generate response using LLM with comprehensive error handling
             llm_response = ""
             try:
-                # First attempt with full context
-                llm_response = get_llm().generate_response(improved_prompt, temperature=temperature)
+                # First attempt with full context and continuation support
+                llm_response = get_llm().generate_response_with_continuation(improved_prompt, temperature=temperature)
                 
                 # Validate response quality
                 if self._is_response_garbled(llm_response):
@@ -675,7 +675,7 @@ Sources:
                 try:
                     logger.warning("Retrying with minimal context")
                     minimal_prompt = self._generate_minimal_prompt(query, final_candidates[:1])
-                    llm_response = get_llm().generate_response(minimal_prompt, temperature=temperature)
+                    llm_response = get_llm().generate_response_with_continuation(minimal_prompt, temperature=temperature)
                     
                     # Validate response again
                     if self._is_response_garbled(llm_response):
