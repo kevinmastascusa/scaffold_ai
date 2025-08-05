@@ -106,16 +106,21 @@ LLM_MODELS = {
         "name": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
         "desc": "Very fast, low resource, lower quality."
     },
+    "tinyllama-onnx": {
+        "name": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+        "desc": "ONNX optimized version for maximum CPU speed.",
+        "use_onnx": True
+    },
     "llama3.1-8b": {
-        "name": "meta-llama/Llama-3.1-8B",
+        "name": os.getenv("LLAMA3_8B_PATH") or "meta-llama/Llama-3.1-8B-Instruct",
         "desc": "Meta's latest 8B model with excellent reasoning and instruction following."
     },
     "llama3.1-70b": {
-        "name": "meta-llama/Llama-3.1-70B",
+        "name": os.getenv("LLAMA3_70B_PATH") or "meta-llama/Llama-3.1-70B-Instruct",
         "desc": "Meta's flagship 70B model with state-of-the-art performance, requires significant resources."
     },
 }
-SELECTED_LLM_MODEL = LLM_MODELS["llama3.1-8b"]["name"]
+SELECTED_LLM_MODEL = LLM_MODELS["tinyllama-onnx"]["name"]
 
 # Model registry for tracking status/compatibility
 MODEL_REGISTRY = {
@@ -131,10 +136,16 @@ EMBEDDING_MODEL = SELECTED_EMBEDDING_MODEL
 CROSS_ENCODER_MODEL = SELECTED_CROSS_ENCODER_MODEL
 LLM_MODEL = SELECTED_LLM_MODEL
 
+# Check if selected model has ONNX flag
+for model_key, model_info in LLM_MODELS.items():
+    if model_info["name"] == SELECTED_LLM_MODEL and model_info.get("use_onnx", False):
+        USE_ONNX = True
+        logger.info(f"ONNX optimization enabled for model: {SELECTED_LLM_MODEL}")
+
 # -------------------
 # Model API Keys
 # -------------------
-HF_TOKEN = os.getenv("HUGGINGFACE_TOKEN")
+HF_TOKEN = os.getenv("HUGGINGFACE_TOKEN") or os.getenv("HF_TOKEN")
 MIXTRAL_API_KEY = os.getenv(
     "MIXTRAL_API_KEY",
     os.getenv("HUGGINGFACE_TOKEN", "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")
@@ -155,8 +166,8 @@ if not HF_TOKEN:
 FAISS_INDEX_TYPE = "IndexFlatL2"
 
 # Search configuration
-TOP_K_INITIAL = 50
-TOP_K_FINAL = 5  # Increased from 3 to provide more context
+TOP_K_INITIAL = 30
+TOP_K_FINAL = 3  # Increased from 3 to provide more context
 
 # -------------------
 # LLM pipeline/task configuration
@@ -168,12 +179,13 @@ LLM_MAX_NEW_TOKENS = 2048  # Increased for Llama 3.1 to allow longer responses
 LLM_TEMPERATURE = 0.3
 LLM_TOP_P = 0.9
 LLM_BATCH_SIZE = 1
-LLM_LOAD_IN_8BIT = True
+LLM_LOAD_IN_8BIT = False
 LLM_LOAD_IN_4BIT = True
 
 # Python 3.12.10 optimizations
-TORCH_COMPILE = False
+TORCH_COMPILE = True
 CUDA_OPTIMIZATIONS = False
+USE_ONNX = False  # Will be set to True if selected model has use_onnx=True
 
 # Response quality settings
 ENABLE_TRUNCATION_DETECTION = True
