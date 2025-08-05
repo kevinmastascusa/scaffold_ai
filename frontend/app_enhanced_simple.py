@@ -29,9 +29,10 @@ app.secret_key = 'scaffold_ai_enhanced_ui_secret_key_2024'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 
 # Context Management Configuration
-MAX_TOKENS = 1500  # Conservative limit to stay well under model's 2048 token limit
-SUMMARY_LENGTH = 200  # Target length for conversation summaries
-MAX_CONVERSATION_ITEMS = 5  # Maximum conversation items to keep in context
+MAX_TOKENS = 800  # Reduced from 1500 to be more conservative and prevent overflow
+SUMMARY_LENGTH = 150  # Reduced from 200 for shorter summaries
+MAX_CONVERSATION_ITEMS = 3  # Reduced from 5 to keep context smaller
+CONTEXT_CLEAR_THRESHOLD = 0.8  # Clear context when 80% of tokens are used
 
 # Directories
 UPLOAD_FOLDER = project_root / 'uploads'
@@ -77,6 +78,61 @@ def summarize_conversation(conversation_items):
     if summary_parts:
         return "Previous conversation summary: " + " ".join(summary_parts)
     return ""
+
+def manage_context_with_states(conversation_items, current_query, syllabus_content=""):
+    """
+    Advanced context management using 4-state system from Marlin Verlag's token hygiene article.
+    States: ACTIVE, SLUMBERING, HIDDEN, TRASHED
+    """
+    # Count tokens for current query and syllabus
+    query_tokens = count_tokens_approximate(current_query)
+    syllabus_tokens = count_tokens_approximate(syllabus_content)
+    
+    # Calculate available tokens for conversation history
+    available_tokens = MAX_TOKENS - query_tokens - syllabus_tokens - 200  # Buffer
+    
+    if available_tokens <= 0:
+        # If even basic content exceeds limits, return minimal context
+        return {
+            'conversation_history': [],
+            'summary': "Previous conversation context removed due to token limits.",
+            'total_tokens': query_tokens + syllabus_tokens,
+            'context_state': 'TRASHED'
+        }
+    
+    # Start with most recent conversations (ACTIVE state)
+    active_items = []
+    slumbering_items = []
+    current_tokens = 0
+    
+    # Add items from most recent to oldest
+    for item in reversed(conversation_items):
+        item_text = f"{item.get('user', '')} {item.get('assistant', '')}"
+        item_tokens = count_tokens_approximate(item_text)
+        
+        if current_tokens + item_tokens <= available_tokens:
+            active_items.insert(0, item)  # Insert at beginning to maintain order
+            current_tokens += item_tokens
+        else:
+            # Move to SLUMBERING state (visible but not sent to AI)
+            slumbering_items.insert(0, item)
+    
+    # If we have too many active items, create a summary and move to HIDDEN state
+    if len(active_items) > MAX_CONVERSATION_ITEMS:
+        summary = summarize_conversation(active_items[:-MAX_CONVERSATION_ITEMS])
+        active_items = active_items[-MAX_CONVERSATION_ITEMS:]
+        context_state = 'HIDDEN'
+    else:
+        summary = ""
+        context_state = 'ACTIVE'
+    
+    return {
+        'conversation_history': active_items,
+        'summary': summary,
+        'total_tokens': current_tokens + query_tokens + syllabus_tokens,
+        'context_state': context_state,
+        'slumbering_count': len(slumbering_items)
+    }
 
 def manage_conversation_context(conversation_items, current_query, syllabus_content=""):
     """
@@ -128,10 +184,11 @@ def manage_conversation_context(conversation_items, current_query, syllabus_cont
 
 def format_conversation_for_prompt(conversation_data, current_query, syllabus_content=""):
     """
-    Format conversation history for LLM prompt with context management.
+    Format conversation history for LLM prompt with advanced context management.
+    Uses the 4-state system from Marlin Verlag's token hygiene article.
     """
-    # Get managed context
-    context = manage_conversation_context(
+    # Get managed context using advanced state management
+    context = manage_context_with_states(
         conversation_data.get('conversation_history', []),
         current_query,
         syllabus_content
@@ -144,11 +201,11 @@ def format_conversation_for_prompt(conversation_data, current_query, syllabus_co
     if syllabus_content:
         prompt_parts.append(f"Syllabus Context:\n{syllabus_content}")
     
-    # Add conversation summary if available
+    # Add conversation summary if available (HIDDEN state content)
     if context['summary']:
         prompt_parts.append(f"Conversation Summary:\n{context['summary']}")
     
-    # Add recent conversation history
+    # Add recent conversation history (ACTIVE state content)
     if context['conversation_history']:
         history_text = "\n".join([
             f"User: {item.get('user', '')}\nAssistant: {item.get('assistant', '')}"
@@ -158,6 +215,9 @@ def format_conversation_for_prompt(conversation_data, current_query, syllabus_co
     
     # Add current query
     prompt_parts.append(f"Current Question: {current_query}")
+    
+    # Log context state for debugging
+    print(f"🔍 Context state: {context['context_state']}, Slumbering items: {context['slumbering_count']}")
     
     return "\n\n".join(prompt_parts), context['total_tokens']
 
@@ -405,17 +465,16 @@ Response:"""
     print(f"📊 Token usage: {total_tokens} (limit: {MAX_TOKENS})")
     
     # Check if we're approaching token limits and clear context if needed
-    if total_tokens > MAX_TOKENS * 0.9:  # If we're at 90% of limit
+    if session_id and total_tokens > MAX_TOKENS * CONTEXT_CLEAR_THRESHOLD:
         print(f"⚠️ Token usage high ({total_tokens}/{MAX_TOKENS}), clearing context...")
-        if session_id:
-            force_context_clear(session_id)
-            # Recalculate with cleared context
-            formatted_prompt, total_tokens = format_conversation_for_prompt(
-                {'conversation_history': []}, 
-                query, 
-                syllabus_content
-            )
-            final_prompt = f"""You are an expert in sustainability education. Provide a comprehensive response to this question.
+        auto_clear_context_if_needed(session_id, total_tokens)
+        # Recalculate with cleared context
+        formatted_prompt, total_tokens = format_conversation_for_prompt(
+            {'conversation_history': []}, 
+            query, 
+            syllabus_content
+        )
+        final_prompt = f"""You are an expert in sustainability education. Provide a comprehensive response to this question.
 
 {formatted_prompt}
 
@@ -429,7 +488,7 @@ Provide a detailed response with:
 • Practical examples and applications
 
 Response:"""
-            print(f"📊 Token usage after clear: {total_tokens} (limit: {MAX_TOKENS})")
+        print(f"📊 Token usage after clear: {total_tokens} (limit: {MAX_TOKENS})")
     
     try:
         # Generate response using LLM
@@ -782,6 +841,14 @@ def clear_memory():
         
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+def auto_clear_context_if_needed(session_id, current_tokens):
+    """Automatically clear context if token usage is too high."""
+    if current_tokens > MAX_TOKENS * CONTEXT_CLEAR_THRESHOLD:
+        print(f"⚠️ Auto-clearing context at {current_tokens}/{MAX_TOKENS} tokens")
+        force_context_clear(session_id)
+        return True
+    return False
 
 def force_context_clear(session_id):
     """
