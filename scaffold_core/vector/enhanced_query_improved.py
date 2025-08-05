@@ -36,7 +36,7 @@ from scaffold_core.config import (
     VECTOR_OUTPUTS_DIR, ITERATION, EMBEDDING_MODEL,
     get_faiss_index_path, get_metadata_json_path
 )
-from scaffold_core.llm import llm
+from scaffold_core.llm import get_llm
 
 # Constants
 TOP_K_INITIAL = 50
@@ -49,7 +49,17 @@ MAX_CONTEXT_TOKENS = 800  # Increased from 300 to allow more source context
 MAX_TOTAL_TOKENS = 3000  # Increased from 1000 to allow longer responses
 
 # Configurable main prompt for testing different prompt variations
-MAIN_PROMPT = "You are Scaffold AI, a course curriculum assistant helping students and educators. Answer this question comprehensively using the provided sources. Focus on educational value, practical insights, and clear explanations. If the sources don't fully address the question, acknowledge this and provide the best available information."
+MAIN_PROMPT = """You are an expert in sustainability education and engineering curriculum development. 
+Your role is to provide comprehensive, well-structured responses based on the provided sources.
+Always cite your sources clearly and provide detailed explanations.
+Focus on practical applications and educational strategies.
+
+Please provide a comprehensive answer that:
+1. Directly addresses the question
+2. Cites specific sources
+3. Provides practical examples
+4. Suggests educational strategies
+5. Considers implementation challenges"""
 
 # Configurable minimal prompt for fallback scenarios
 MINIMAL_PROMPT = "You are Scaffold AI, a course curriculum assistant. Answer this question directly and clearly using the available information:"
@@ -456,13 +466,15 @@ class ImprovedEnhancedQuerySystem:
         max_chunks_for_model = 4  # Reduced from 8 to prevent overflow
         formatted_chunks = self.format_chunks_for_prompt(chunks, max_chunks=max_chunks_for_model, max_tokens=available_tokens)
             
-        # Build the prompt with improved instructions
-        prompt = f"""<s>[INST] {MAIN_PROMPT}
-
-Question: {query}
+        # Build the prompt with Llama 3.1 specific formatting
+        prompt = f"""<|system|>
+{MAIN_PROMPT}
+<|user|>
+Based on the following sources, please answer this question: {query}
 {context_section}
 Sources:
-{formatted_chunks} [/INST]"""
+{formatted_chunks}
+<|assistant|>"""
         
         # Log token usage for debugging
         total_tokens = len(prompt.split())
@@ -504,7 +516,7 @@ Sources:
                 
         return "\n\n".join(context_parts)
     
-    def format_chunks_for_prompt(self, chunks: List[Dict], max_chunks: int = 8, max_tokens: Optional[int] = None) -> str:
+    def format_chunks_for_prompt(self, chunks: List[Dict], max_chunks: int = 5, max_tokens: Optional[int] = None) -> str:
         """Format chunks for the prompt, limiting length and number with token management."""
         formatted_chunks = []
         total_tokens = 0
@@ -649,7 +661,7 @@ Sources:
             llm_response = ""
             try:
                 # First attempt with full context
-                llm_response = llm.generate_response(improved_prompt, temperature=temperature)
+                llm_response = get_llm().generate_response(improved_prompt, temperature=temperature)
                 
                 # Validate response quality
                 if self._is_response_garbled(llm_response):
@@ -663,7 +675,7 @@ Sources:
                 try:
                     logger.warning("Retrying with minimal context")
                     minimal_prompt = self._generate_minimal_prompt(query, final_candidates[:1])
-                    llm_response = llm.generate_response(minimal_prompt, temperature=temperature)
+                    llm_response = get_llm().generate_response(minimal_prompt, temperature=temperature)
                     
                     # Validate response again
                     if self._is_response_garbled(llm_response):

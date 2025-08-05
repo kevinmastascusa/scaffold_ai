@@ -8,6 +8,15 @@ from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
 import os
 import sys
 import logging
+import time
+
+# Import ONNX Runtime components if available
+try:
+    from optimum.onnxruntime import ORTModelForCausalLM
+    ONNX_AVAILABLE = True
+except ImportError:
+    ONNX_AVAILABLE = False
+    logging.warning("ONNX Runtime not available. Install with: pip install optimum[onnxruntime]")
 
 # Configure logging
 logging.basicConfig(
@@ -37,7 +46,8 @@ from scaffold_core.config import (
     LLM_BATCH_SIZE,
     LLM_LOAD_IN_8BIT,
     LLM_LOAD_IN_4BIT,
-    HF_TOKEN
+    HF_TOKEN,
+    USE_ONNX
 )
 logger.debug("Configuration imported successfully")
 
@@ -56,14 +66,9 @@ class LLMManager:
             )
 
         # --- Robust local model caching logic ---
-        # Convert model name to a safe local directory name for cache
-        local_model_dir = os.path.join(
-            "models",
-            LLM_MODEL.replace("/", "_").replace("-", "_")
-        )
-        if not os.path.exists(local_model_dir):
-            os.makedirs(local_model_dir, exist_ok=True)
-            logger.info(f"Ensured local model cache directory exists: {local_model_dir}")
+        # Use HuggingFace cache directory
+        cache_dir = os.path.expanduser("~/.cache/huggingface/hub")
+        logger.debug(f"Using cache directory: {cache_dir}")
 
         logger.debug("Loading tokenizer...")
         from transformers import AutoTokenizer
@@ -72,7 +77,7 @@ class LLMManager:
                 LLM_MODEL,
                 token=self.hf_token,
                 trust_remote_code=True,
-                cache_dir=local_model_dir,
+                cache_dir=cache_dir,
                 use_fast=False  # Use slow tokenizer to avoid version compatibility issues
             )
         except Exception as e:
@@ -82,76 +87,72 @@ class LLMManager:
                 LLM_MODEL,
                 token=self.hf_token,
                 trust_remote_code=True,
-                cache_dir=local_model_dir,
+                cache_dir=cache_dir,
                 use_fast=False,  # Use slow tokenizer to avoid v3 tokenizer issues
-                legacy=True  # Use legacy mode for better compatibility
+                legacy=True,  # Use legacy mode for better compatibility
+                
             )
         if not self.tokenizer.pad_token:
             self.tokenizer.pad_token = self.tokenizer.eos_token
         logger.debug("Tokenizer loaded successfully")
 
-        logger.debug("Loading model...")
-        from transformers import AutoModelForCausalLM
-        
-        # Configure quantization for faster loading and inference
-        if LLM_LOAD_IN_4BIT and LLM_DEVICE == "cuda" and torch.cuda.is_available():
-            from transformers import BitsAndBytesConfig
-            quantization_config = BitsAndBytesConfig(
-                load_in_4bit=True,
-                bnb_4bit_compute_dtype=torch.float16,
-                bnb_4bit_use_double_quant=True,
-                bnb_4bit_quant_type="nf4"
-            )
-            logger.debug("Using 4-bit quantization")
-        elif LLM_LOAD_IN_8BIT and LLM_DEVICE == "cuda" and torch.cuda.is_available():
-            from transformers import BitsAndBytesConfig
-            quantization_config = BitsAndBytesConfig(
-                load_in_8bit=True,
-                llm_int8_threshold=6.0
-            )
-            logger.debug("Using 8-bit quantization")
+        # Check if we should use ONNX Runtime
+        if USE_ONNX and ONNX_AVAILABLE:
+            logger.debug("Loading model with ONNX Runtime optimization...")
+            try:
+                start_time = time.time()
+                
+                # Load model with ONNX Runtime optimization
+                model = ORTModelForCausalLM.from_pretrained(
+                    LLM_MODEL,
+                    export=True,  # Export to ONNX format
+                    provider="CPUExecutionProvider",  # Use CPU provider
+                    token=self.hf_token
+                )
+                
+                # Create pipeline with ONNX model
+                self.pipeline = pipeline(
+                    "text-generation",
+                    model=model,
+                    tokenizer=self.tokenizer,
+                    pad_token_id=self.tokenizer.pad_token_id,
+                    return_full_text=False  # Only return generated completion
+                )
+                
+                load_time = time.time() - start_time
+                logger.debug(f"ONNX optimized model loaded in {load_time:.2f} seconds")
+            except Exception as e:
+                logger.error(f"Failed to load ONNX model: {e}")
+                logger.warning("Falling back to standard model loading...")
+                self._load_standard_model()
         else:
-            quantization_config = None
-            logger.debug("Using full precision (no quantization)")
+            # Standard model loading
+            self._load_standard_model()
+    
+    def _load_standard_model(self):
+        """Load model using standard Hugging Face pipeline."""
+        logger.debug("Loading model using standard pipeline approach...")
         
-        # Check if accelerate is available for low_cpu_mem_usage
+        # Use pipeline for better memory management and compatibility
         try:
-            import accelerate
-            low_cpu_mem_usage = True
-            logger.debug("Using low_cpu_mem_usage=True (accelerate available)")
-        except ImportError:
-            low_cpu_mem_usage = False
-            logger.warning("accelerate not available, using low_cpu_mem_usage=False")
+            self.pipeline = pipeline(
+                "text-generation",
+                model=LLM_MODEL,
+                tokenizer=self.tokenizer,
+                token=self.hf_token,
+                torch_dtype=torch.float16,
+                device_map="auto",
+                trust_remote_code=True,
+                pad_token_id=self.tokenizer.pad_token_id,
+                return_full_text=False  # Only return generated completion
+            )
+            logger.debug("Pipeline loaded successfully")
+        except Exception as e:
+            logger.error(f"Failed to load pipeline: {e}")
+            raise
         
-        self.model = AutoModelForCausalLM.from_pretrained(
-            LLM_MODEL,
-            token=self.hf_token,
-            torch_dtype=torch.float16 if LLM_DEVICE == "cuda" else torch.float32,
-            device_map="auto" if LLM_DEVICE == "cuda" else None,
-            low_cpu_mem_usage=low_cpu_mem_usage,
-            trust_remote_code=True,
-            quantization_config=quantization_config,
-            use_cache=True,
-            cache_dir=local_model_dir
-        )
-        logger.debug("Model loaded successfully")
-        
-        logger.debug("Creating pipeline...")
-        self.pipeline = pipeline(
-            LLM_TASK,
-            model=self.model,
-            tokenizer=self.tokenizer,
-            max_new_tokens=LLM_MAX_NEW_TOKENS,
-            temperature=LLM_TEMPERATURE,
-            top_p=LLM_TOP_P,
-            batch_size=LLM_BATCH_SIZE,
-            trust_remote_code=True,
-            # Performance optimizations
-            do_sample=True,
-            pad_token_id=self.tokenizer.pad_token_id,
-            return_full_text=False  # Only return generated text, not input
-        )
-        logger.debug("Pipeline created successfully")
+        # Pipeline is already created above
+        logger.debug("Pipeline setup complete")
     
     def generate_response(
         self, 
@@ -172,9 +173,23 @@ class LLMManager:
         Returns:
             The generated response text
         """
-        # Format prompt for Mistral's chat format
+        # Format prompt based on model type
         if "mistral" in LLM_MODEL.lower():
             formatted_prompt = f"[INST] {prompt} [/INST]"
+        elif "llama" in LLM_MODEL.lower():
+            # Use tokenizer chat template if available
+            try:
+                messages = [
+                    {"role": "system", "content": "You are an expert in sustainability education and engineering curriculum development. Provide clear, detailed answers with citations."},
+                    {"role": "user", "content": prompt}
+                ]
+                formatted_prompt = self.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+            except Exception:
+                formatted_prompt = f"""<|system|>
+You are an expert in sustainability education and engineering curriculum development. Provide clear, detailed answers with citations.
+<|user|>
+{prompt}
+<|assistant|>"""
         else:
             # Fallback format for other models
             formatted_prompt = f"""<|system|>You are a helpful AI assistant.<|endoftext|>
@@ -185,12 +200,10 @@ class LLMManager:
             # Generate response
             outputs = self.pipeline(
                 formatted_prompt,
-                max_new_tokens=max_new_tokens or LLM_MAX_NEW_TOKENS,
+                max_new_tokens=max_new_tokens or 512,
                 temperature=temperature or LLM_TEMPERATURE,
                 top_p=top_p or LLM_TOP_P,
-                do_sample=True,
-                pad_token_id=self.tokenizer.pad_token_id,
-                return_full_text=True
+                do_sample=True
             )
             
             # Extract response text
@@ -284,8 +297,18 @@ def get_llm():
     """Get the global LLM instance, creating it if necessary."""
     global _llm_instance
     if _llm_instance is None:
+        # Load environment variables if not already loaded
+        env_file = ".env"
+        if os.path.exists(env_file):
+            with open(env_file, 'r') as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith('#') and '=' in line:
+                        key, value = line.split('=', 1)
+                        os.environ[key] = value
+        
         _llm_instance = LLMManager()
     return _llm_instance
 
-# For backward compatibility
-llm = get_llm() 
+# For backward compatibility - don't initialize at import time
+llm = None 
