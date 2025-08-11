@@ -4,11 +4,4 @@ services:
     env: python
     plan: free
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn --bind 0.0.0.0:$PORT --workers 2 --timeout 120 wsgi:application
-    envVars:
-      - key: PYTHON_VERSION
-        value: 3.12.10
-      - key: SC_LLM_KEY
-        value: distilgpt2
-      - key: PYTHONUNBUFFERED
-        value: 1
+    startCommand: gunicorn wsgi:application
