@@ -8,7 +8,7 @@ if defined _OLD_CODEPAGE (
     "%SystemRoot%\System32\chcp.com" 65001 > nul
 )
 
-set "VIRTUAL_ENV=E:\Scaffold AI Repositry\scaffold_ai\scaffold_env_312"
+set "VIRTUAL_ENV=C:\Users\dlaev\scaffold\scaffold_ai\scaffold_env_312"
 
 if not defined PROMPT set PROMPT=$P$G
 
