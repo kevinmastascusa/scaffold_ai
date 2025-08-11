@@ -141,7 +141,11 @@ LLM_MODELS = {
         "requires_token": True
     },
 }
-SELECTED_LLM_MODEL = LLM_MODELS["tinyllama-onnx"]["name"]
+_selected_key = os.getenv("SC_LLM_KEY")  # e.g., "distilgpt2", "gpt2", "tinyllama-onnx"
+if _selected_key and _selected_key in LLM_MODELS:
+    SELECTED_LLM_MODEL = LLM_MODELS[_selected_key]["name"]
+else:
+    SELECTED_LLM_MODEL = LLM_MODELS["tinyllama-onnx"]["name"]
 
 # Model registry for tracking status/compatibility
 MODEL_REGISTRY = {
