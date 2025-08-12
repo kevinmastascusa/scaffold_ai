@@ -104,7 +104,7 @@ def main():
     
     # Import and run the enhanced app
     try:
-        from app_enhanced import app
+        from frontend.app_enhanced import app
         
         print(f"📍 Access the Enhanced UI at: http://localhost:{args.port}")
         print(f"📊 Feedback dashboard at: http://localhost:{args.port}/feedback")

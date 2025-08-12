@@ -1,19 +1,18 @@
 @echo off
-echo Starting Scaffold AI...
+echo Starting Scaffold AI Enhanced UI...
 echo.
 
 REM Set environment variables
-set PORT=5002
-set SC_LLM_KEY=distilgpt2
-set PYTHONUNBUFFERED=1
+set SC_LLM_KEY=tinyllama
+set PYTHONPATH=%cd%
 
-REM Open browser
-start "" http://localhost:%PORT%
+REM Activate virtual environment and start the server
+call scaffold_env_312\Scripts\activate.bat
+python -m frontend.start_enhanced_ui --host 127.0.0.1 --port 5002
 
-REM Start the application
-echo Starting server on http://localhost:%PORT%
-echo Press Ctrl+C to stop the server
-echo.
-scaffold_env_312\Scripts\python -m frontend.start_enhanced_ui --host 127.0.0.1 --port %PORT%
-
-pause
+REM Keep the window open if there's an error
+if errorlevel 1 (
+    echo.
+    echo An error occurred. Press any key to exit...
+    pause
+)
