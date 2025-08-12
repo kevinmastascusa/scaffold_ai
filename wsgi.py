@@ -11,7 +11,8 @@ project_root = Path(__file__).parent.absolute()
 sys.path.insert(0, str(project_root))
 
 # Import the Flask app then expose as `application` for WSGI servers
-from frontend.app_enhanced import app as application  # noqa: E402
+# Use Railway-optimized app to avoid boot timeouts
+from frontend.app_railway import app as application  # noqa: E402
 
 if __name__ == "__main__":
     # For local development
