@@ -142,37 +142,53 @@ def upload_syllabus():
 def chat():
     try:
         data = request.get_json(force=True)
-        query = data.get('query', '').strip()
-        if not query:
+        # Accept both 'message' (from UI) and 'query' (API)
+        message = (data.get('message') or data.get('query') or '').strip()
+        if not message:
             return jsonify({'error': 'Empty query'}), 400
 
         session_id = session.get('session_id', str(uuid.uuid4()))
 
         # Ensure models are loaded
-        query_system = get_query_system()
+        get_query_system()
 
         from scaffold_core.vector.enhanced_query_improved import (
             query_enhanced_improved,
         )
-        result = query_enhanced_improved(query, session_id)
+        result = query_enhanced_improved(message, session_id)
 
         # Save conversation
         conversation = get_conversation_history(session_id)
         conversation.append({
             'id': str(uuid.uuid4()),
             'type': 'user',
-            'content': query,
+            'content': message,
             'timestamp': datetime.datetime.now().isoformat(),
         })
-        conversation.append({
+
+        # Build AI message compatible with Enhanced UI
+        ai_message = {
             'id': str(uuid.uuid4()),
             'type': 'assistant',
-            'content': result.get('answer', ''),
+            'content': result.get('response', result.get('answer', '')),
+            'sources': [
+                {
+                    'source': source.get('source', {}),
+                    'score': source.get('score', 0),
+                    'text_preview': source.get('text_preview', '')
+                }
+                for source in result.get('sources', [])[:5]
+            ],
             'timestamp': datetime.datetime.now().isoformat(),
-        })
+        }
+        conversation.append(ai_message)
         save_conversation_history(session_id, conversation)
 
-        return jsonify(result)
+        return jsonify({
+            'success': True,
+            'response': ai_message,
+            'conversation_id': session_id,
+        })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
