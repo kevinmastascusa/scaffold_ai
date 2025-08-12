@@ -35,6 +35,10 @@ scaffold_env_312/
 .env.development.local
 .env.test.local
 .env.production.local
+scaffold.env
+
+# Executables
+*.exe
 
 # IDE
 .vscode/
