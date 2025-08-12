@@ -39,9 +39,9 @@ from scaffold_core.config import (
 from scaffold_core.llm import get_llm
 
 # Constants
-TOP_K_INITIAL = 50
-TOP_K_FINAL = 5  # Increased from 3 to 5 to provide more context
-MIN_CROSS_SCORE = -5.0  # Relaxed from -2.0 to keep more sources
+TOP_K_INITIAL = 30
+TOP_K_FINAL = 3  # Increased from 3 to 5 to provide more context
+MIN_CROSS_SCORE = -8.0  # Relaxed from -2.0 to keep more sources
 MIN_CONTEXTUAL_SCORE = 0  # Relaxed from 1 to keep more sources
 MAX_MEMORY_MESSAGES = 4  # Increased from 2 to provide better context
 MAX_MEMORY_TOKENS = 800  # Increased from 400 to allow more conversation history
@@ -376,6 +376,20 @@ class ImprovedEnhancedQuerySystem:
         """Rerank candidates using cross-encoder with improved error handling."""
         if not candidates or not self.initialized or self.cross_encoder is None:
             return candidates
+        
+        # Fast path: skip expensive reranking for simple/short queries
+        try:
+            normalized_query = (query or "").strip().lower()
+        except Exception:
+            normalized_query = ""
+        simple_queries = {
+            "hi", "hello", "hey", "thanks", "thank you", "bye", "goodbye"
+        }
+        if normalized_query in simple_queries:
+            logger.debug(
+                f"Simple query detected: {query}. Skipping cross-encoder reranking."
+            )
+            return candidates[:TOP_K_FINAL]
         
         try:
             # Prepare pairs for cross-encoder
@@ -841,3 +855,5 @@ def clear_all_conversation_memory():
         
     except Exception as e:
         logger.error(f"Error clearing all conversation memory: {e}") 
+
+

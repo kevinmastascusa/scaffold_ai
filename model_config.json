@@ -1,17 +1,17 @@
-{
-  "selected_models": {
-    "llm": "tinyllama",
-    "embedding": "miniLM"
-  },
-  "model_settings": {
-    "llm": {
-      "temperature": 0.3,
-      "max_new_tokens": 512,
-      "top_p": 0.9
-    },
-    "embedding": {
-      "chunk_size": 1000,
-      "chunk_overlap": 200
-    }
-  }
-}
+{  
+  "selected_models": {  
+    "llm": "tinyllama",  
+    "embedding": "miniLM"  
+  },  
+  "model_settings": {  
+    "llm": {  
+      "temperature": 0.3,  
+      "max_new_tokens": 256,  
+      "top_p": 0.9  
+    },  
+    "embedding": {  
+      "chunk_size": 1000,  
+      "chunk_overlap": 200  
+    }  
+  }  
+}  
