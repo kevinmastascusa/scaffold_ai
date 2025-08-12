@@ -141,11 +141,11 @@ LLM_MODELS = {
         "requires_token": True
     },
 }
-_selected_key = os.getenv("SC_LLM_KEY")  # e.g., "distilgpt2", "gpt2", "tinyllama-onnx"
+_selected_key = os.getenv("SC_LLM_KEY")  # e.g., "distilgpt2", "gpt2", "tinyllama"
 if _selected_key and _selected_key in LLM_MODELS:
     SELECTED_LLM_MODEL = LLM_MODELS[_selected_key]["name"]
 else:
-    SELECTED_LLM_MODEL = LLM_MODELS["tinyllama-onnx"]["name"]
+    SELECTED_LLM_MODEL = LLM_MODELS["tinyllama"]["name"]
 
 # Model registry for tracking status/compatibility
 MODEL_REGISTRY = {
@@ -163,13 +163,11 @@ LLM_MODEL = SELECTED_LLM_MODEL
 
 # Check if selected model has ONNX flag
 USE_ONNX = False
-for model_key, model_info in LLM_MODELS.items():
-    if model_info["name"] == SELECTED_LLM_MODEL and model_info.get("use_onnx", False):
-        USE_ONNX = True
-        logger.info(f"ONNX optimization enabled for model: {SELECTED_LLM_MODEL}")
-        break
-
-if not USE_ONNX:
+# Check if the selected model key has ONNX flag
+if _selected_key in LLM_MODELS and LLM_MODELS[_selected_key].get("use_onnx", False):
+    USE_ONNX = True
+    logger.info(f"ONNX optimization enabled for model key: {_selected_key}")
+else:
     logger.info(f"Using standard model (no ONNX): {SELECTED_LLM_MODEL}")
 
 # -------------------
@@ -225,7 +223,7 @@ LLM_LOAD_IN_4BIT = True
 # Python 3.12.10 optimizations
 TORCH_COMPILE = True
 CUDA_OPTIMIZATIONS = False
-USE_ONNX = False  # Will be set to True if selected model has use_onnx=True
+# USE_ONNX is already set above based on model selection
 
 # Response quality settings
 ENABLE_TRUNCATION_DETECTION = True
