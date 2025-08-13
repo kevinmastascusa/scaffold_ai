@@ -3,7 +3,7 @@ echo Starting Scaffold AI Enhanced UI...
 echo.
 
 REM Set environment variables
-set SC_LLM_KEY=tinyllama
+set SC_LLM_KEY=tinyllama-onnx
 set PYTHONPATH=%cd%
 
 REM Activate virtual environment and start the server

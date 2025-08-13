@@ -201,9 +201,30 @@ TOP_K_FINAL = 3  # Increased from 3 to provide more context
 # LLM pipeline/task configuration
 # -------------------
 LLM_TASK = "text-generation"
-LLM_DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-LLM_MAX_LENGTH = 4096  # Prevent truncation
-LLM_MAX_NEW_TOKENS = 2048  # Upper bound if dynamic settings are unavailable
+
+# Auto-detect and configure GPU settings
+if torch.cuda.is_available():
+    LLM_DEVICE = "cuda"
+    logger.info(f"🚀 GPU detected: {torch.cuda.get_device_name(0)} with {torch.cuda.get_device_properties(0).total_memory / 1e9:.1f}GB VRAM")
+    # GPU-optimized settings
+    LLM_MAX_LENGTH = 8192  # Higher context for GPU
+    LLM_MAX_NEW_TOKENS = 2048  # Upper bound if dynamic settings are unavailable
+    LLM_BATCH_SIZE = 1
+    LLM_LOAD_IN_8BIT = False
+    LLM_LOAD_IN_4BIT = False  # Disable quantization for GPU speed
+    TORCH_COMPILE = True
+    CUDA_OPTIMIZATIONS = True
+else:
+    LLM_DEVICE = "cpu"
+    logger.info("💻 Using CPU - enabling optimizations for better performance")
+    # CPU-optimized settings
+    LLM_MAX_LENGTH = 4096  # Lower context for CPU memory
+    LLM_MAX_NEW_TOKENS = 1024  # Lower for CPU
+    LLM_BATCH_SIZE = 1
+    LLM_LOAD_IN_8BIT = False
+    LLM_LOAD_IN_4BIT = True  # Enable quantization for CPU memory
+    TORCH_COMPILE = False  # Disable for CPU
+    CUDA_OPTIMIZATIONS = False
 
 # Dynamic temperature and settings - will be loaded from config manager
 try:

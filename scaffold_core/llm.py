@@ -17,7 +17,16 @@ try:
     ONNX_AVAILABLE = True
 except ImportError:
     ONNX_AVAILABLE = False
-    logging.warning("ONNX Runtime not available. Install with: pip install optimum[onnxruntime]")
+    logging.warning(
+        "ONNX Runtime not available. Install with: pip install optimum[onnxruntime]"
+    )
+
+# Detect available ORT providers (CUDA vs CPU)
+try:
+    import onnxruntime as ort  # type: ignore
+    AVAILABLE_ORT_PROVIDERS = set(ort.get_available_providers())
+except Exception:
+    AVAILABLE_ORT_PROVIDERS = set()
 
 # Configure logging
 logging.basicConfig(
@@ -26,6 +35,18 @@ logging.basicConfig(
     datefmt='%Y-%m-%d %H:%M:%S'
 )
 logger = logging.getLogger(__name__)
+
+# CPU-specific optimizations
+if torch.cuda.is_available():
+    logger.debug("CUDA available - using GPU optimizations")
+else:
+    logger.debug("CUDA not available - applying CPU optimizations")
+    # Enable CPU optimizations for faster inference
+    torch.set_num_threads(6)  # Increased from 4 to 6
+    torch.backends.cudnn.benchmark = False  # Disable CUDA optimizations
+    torch.backends.cudnn.deterministic = True  # Deterministic CPU
+    # Add memory optimization
+    torch.backends.cudnn.enabled = False  # Disable cuDNN for CPU-only usage
 
 logger.debug("Starting LLM module initialization...")
 
@@ -56,11 +77,24 @@ from scaffold_core.config import (
 )
 logger.debug("Configuration imported successfully")
 
+# Global singleton instance for model caching
+_llm_manager_instance = None
+
 class LLMManager:
     def __init__(self):
         """Initialize the LLM pipeline."""
         logger.debug(f"Initializing LLM Manager with model: {LLM_MODEL}")
         logger.debug(f"Using device: {LLM_DEVICE}")
+        
+        # Check if we already have a cached instance
+        global _llm_manager_instance
+        if _llm_manager_instance is not None:
+            logger.debug("Using cached LLM Manager instance")
+            # Copy attributes from cached instance
+            self.tokenizer = _llm_manager_instance.tokenizer
+            self.pipeline = _llm_manager_instance.pipeline
+            self.hf_token = _llm_manager_instance.hf_token
+            return
         
         # Try to get token from environment or use a fallback
         self.hf_token = HF_TOKEN or os.getenv("HUGGINGFACE_TOKEN")
@@ -77,23 +111,35 @@ class LLMManager:
 
         logger.debug("Loading tokenizer...")
         from transformers import AutoTokenizer
+
+        # Prefer local cached tokenizer next to ONNX export for fast startups
+        onnx_cache_dir = os.path.join(
+            project_root, "outputs", "onnx_models", LLM_MODEL.replace("/", "__")
+        )
+        tokenizer_source = (
+            onnx_cache_dir if os.path.exists(os.path.join(onnx_cache_dir, "tokenizer.json"))
+            or os.path.exists(os.path.join(onnx_cache_dir, "vocab.json"))
+            else LLM_MODEL
+        )
+
         try:
             self.tokenizer = AutoTokenizer.from_pretrained(
-                LLM_MODEL,
+                tokenizer_source,
                 token=self.hf_token,
                 trust_remote_code=True,
                 cache_dir=cache_dir,
-                use_fast=False  # Use slow tokenizer to avoid version compatibility issues
+                use_fast=False,
+                local_files_only=os.path.isdir(tokenizer_source)
             )
         except Exception as e:
             logger.warning(f"Failed to load tokenizer with default method: {e}")
             logger.debug("Trying alternative tokenizer loading method...")
             self.tokenizer = AutoTokenizer.from_pretrained(
-                LLM_MODEL,
+                tokenizer_source,
                 token=self.hf_token,
                 trust_remote_code=True,
                 cache_dir=cache_dir,
-                use_fast=False,  # Use slow tokenizer to avoid v3 tokenizer issues
+                use_fast=False,
                 legacy=True,  # Use legacy mode for better compatibility
                 
             )
@@ -107,13 +153,94 @@ class LLMManager:
             try:
                 start_time = time.time()
                 
-                # Load model with ONNX Runtime optimization
-                model = ORTModelForCausalLM.from_pretrained(
-                    LLM_MODEL,
-                    export=True,  # Export to ONNX format
-                    provider="CPUExecutionProvider",  # Use CPU provider
-                    token=self.hf_token
+                # Configure ONNX Runtime session options for optimal threading
+                session_options = ort.SessionOptions()
+                use_cuda = (
+                    torch.cuda.is_available()
+                    and "CUDAExecutionProvider" in AVAILABLE_ORT_PROVIDERS
                 )
+
+                if use_cuda:
+                    # GPU-optimized settings for maximum performance
+                    session_options.execution_mode = ort.ExecutionMode.ORT_SEQUENTIAL
+                    session_options.graph_optimization_level = (
+                        ort.GraphOptimizationLevel.ORT_ENABLE_ALL
+                    )
+                    session_options.enable_mem_pattern = True
+                    session_options.enable_cpu_mem_arena = False  # Disable for GPU
+                    providers = ["CUDAExecutionProvider", "CPUExecutionProvider"]
+                    provider_options = [
+                        {
+                            "device_id": 0,
+                            "arena_extend_strategy": "kNextPowerOfTwo",
+                            "gpu_mem_limit": 10 * 1024 * 1024 * 1024,  # 10GB limit
+                            "cudnn_conv_use_max_workspace": "1",
+                            "do_copy_in_default_stream": "1"
+                        },
+                        {},
+                    ]
+                    logger.info("🚀 Using GPU-optimized ONNX Runtime settings")
+                else:
+                    # Optimized CPU threading
+                    session_options.intra_op_num_threads = 6
+                    session_options.inter_op_num_threads = 1
+                    session_options.execution_mode = ort.ExecutionMode.ORT_PARALLEL
+                    session_options.enable_mem_pattern = True
+                    session_options.enable_cpu_mem_arena = True
+                    session_options.graph_optimization_level = (
+                        ort.GraphOptimizationLevel.ORT_ENABLE_ALL
+                    )
+                    providers = ["CPUExecutionProvider"]
+                    provider_options = [{}]
+                
+                # Prepare persistent ONNX cache to avoid re-export on every start
+                onnx_cache_dir = os.path.join(
+                    project_root, "outputs", "onnx_models", LLM_MODEL.replace("/", "__")
+                )
+                os.makedirs(onnx_cache_dir, exist_ok=True)
+
+                # Detect pre-exported model
+                try:
+                    existing_files = os.listdir(onnx_cache_dir)
+                except Exception:
+                    existing_files = []
+                has_onnx = any(fname.endswith(".onnx") for fname in existing_files)
+                has_config = os.path.exists(os.path.join(onnx_cache_dir, "config.json"))
+                preexport_exists = has_onnx and has_config
+
+                if preexport_exists:
+                    logger.debug(
+                        f"Loading pre-exported ONNX model from cache: {onnx_cache_dir}"
+                    )
+                    model = ORTModelForCausalLM.from_pretrained(
+                        onnx_cache_dir,
+                        providers=providers,
+                        session_options=session_options,
+                        provider_options=provider_options,
+                    )
+                else:
+                    logger.debug("Exporting model to ONNX (first run) — this may take a while...")
+                    model = ORTModelForCausalLM.from_pretrained(
+                        LLM_MODEL,
+                        export=True,
+                        token=self.hf_token,
+                        session_options=session_options,
+                        providers=providers,
+                        provider_options=provider_options,
+                    )
+                    # Persist export for subsequent fast startups
+                    try:
+                        model.save_pretrained(onnx_cache_dir)
+                        logger.debug(f"Saved ONNX model to cache: {onnx_cache_dir}")
+                        # Also save tokenizer alongside for fully offline startup
+                        try:
+                            self.tokenizer.save_pretrained(onnx_cache_dir)
+                        except Exception as tok_err:
+                            logger.warning(
+                                f"Could not save tokenizer to ONNX cache: {tok_err}"
+                            )
+                    except Exception as save_err:
+                        logger.warning(f"Could not save ONNX model cache: {save_err}")
                 
                 # Create pipeline with ONNX model
                 self.pipeline = pipeline(
@@ -140,17 +267,35 @@ class LLMManager:
         
         # Use pipeline for better memory management and compatibility
         try:
-            self.pipeline = pipeline(
-                "text-generation",
-                model=LLM_MODEL,
-                tokenizer=self.tokenizer,
-                token=self.hf_token,
-                torch_dtype=torch.float16,
-                device_map="auto",
-                trust_remote_code=True,
-                pad_token_id=self.tokenizer.pad_token_id,
-                return_full_text=False  # Only return generated completion
-            )
+            # CPU-optimized pipeline configuration
+            pipeline_kwargs = {
+                "task": "text-generation",
+                "model": LLM_MODEL,
+                "tokenizer": self.tokenizer,
+                "token": self.hf_token,
+                "trust_remote_code": True,
+                "pad_token_id": self.tokenizer.pad_token_id,
+                "return_full_text": False,  # Only return generated completion
+            }
+            
+            # Device-specific optimizations
+            if LLM_DEVICE == "cpu":
+                pipeline_kwargs.update({
+                    "torch_dtype": torch.float32,  # Use float32 for CPU
+                    "device": "cpu",
+                    "low_cpu_mem_usage": True,  # Reduce memory usage
+                })
+                logger.info("💻 Using CPU-optimized pipeline settings")
+            else:
+                # GPU-optimized settings
+                pipeline_kwargs.update({
+                    "torch_dtype": torch.float16,  # Use float16 for GPU memory efficiency
+                    "device": "cuda:0",  # Explicitly use first GPU
+                    "low_cpu_mem_usage": False,  # Not needed for GPU
+                })
+                logger.info("🚀 Using GPU-optimized pipeline settings")
+            
+            self.pipeline = pipeline(**pipeline_kwargs)
             logger.debug("Pipeline loaded successfully")
         except Exception as e:
             logger.error(f"Failed to load pipeline: {e}")
@@ -158,6 +303,11 @@ class LLMManager:
         
         # Pipeline is already created above
         logger.debug("Pipeline setup complete")
+        
+        # Cache this instance globally
+        global _llm_manager_instance
+        _llm_manager_instance = self
+        logger.debug("LLM Manager instance cached for reuse")
     
     def generate_response(
         self, 

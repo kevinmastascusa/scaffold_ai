@@ -1,0 +1,3 @@
+SHA256 hash of ScaffoldAI-EnhancedUI-v0.2.0-gpu-onnx .exe:
+6eb1efccf316d7d8fd4d8b951230d97e1cb62c59849ec7368667214d8280cff9
+CertUtil: -hashfile command completed successfully.

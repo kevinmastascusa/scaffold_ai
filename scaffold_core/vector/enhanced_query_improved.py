@@ -38,28 +38,20 @@ from scaffold_core.config import (
 )
 from scaffold_core.llm import get_llm
 
-# Constants (reverted to original defaults)
-TOP_K_INITIAL = 50
-TOP_K_FINAL = 5
-MIN_CROSS_SCORE = -5.0
-MIN_CONTEXTUAL_SCORE = 1
-MAX_MEMORY_MESSAGES = 4  # Increased from 2 to provide better context
-MAX_MEMORY_TOKENS = 800  # Increased from 400 to allow more conversation history
-MAX_CONTEXT_TOKENS = 800  # Increased from 300 to allow more source context
-MAX_TOTAL_TOKENS = 3000  # Increased from 1000 to allow longer responses
+# Constants (balanced for quality and speed)
+TOP_K_INITIAL = 50  # Increase initial recall for better coverage
+TOP_K_FINAL = 5     # Use up to 5 sources in final context
+MIN_CROSS_SCORE = -10.0  # Keep relaxed to retain marginal candidates
+MIN_CONTEXTUAL_SCORE = 0  # Keep relaxed to retain marginal candidates
+MAX_MEMORY_MESSAGES = 3   # Allow a bit more chat memory
+MAX_MEMORY_TOKENS = 600   # Slightly higher memory token budget
+MAX_CONTEXT_TOKENS = 800  # Larger context for better answers
+MAX_TOTAL_TOKENS = 3000   # Raise total cap to avoid truncation
 
 # Configurable main prompt for testing different prompt variations (reverted)
-MAIN_PROMPT = """You are an expert in sustainability education and engineering curriculum development. 
-Your role is to provide comprehensive, well-structured responses based on the provided sources.
-Always cite your sources clearly and provide detailed explanations.
-Focus on practical applications and educational strategies.
-
-Please provide a comprehensive answer that:
-1. Directly addresses the question
-2. Cites specific sources
-3. Provides practical examples
-4. Suggests educational strategies
-5. Considers implementation challenges"""
+MAIN_PROMPT = """You are an expert in sustainability education and engineering curriculum development.
+Provide helpful, well-structured responses using the provided sources.
+Cite sources when relevant and focus on practical applications."""
 
 # Configurable minimal prompt for fallback scenarios
 MINIMAL_PROMPT = "You are Scaffold AI, a course curriculum assistant. Answer this question directly and clearly using the available information:"
@@ -383,11 +375,13 @@ class ImprovedEnhancedQuerySystem:
         except Exception:
             normalized_query = ""
         simple_queries = {
-            "hi", "hello", "hey", "thanks", "thank you", "bye", "goodbye"
+            "hi", "hello", "hey", "thanks", "thank you", "bye", "goodbye",
+            "what", "how", "why", "when", "where", "who", "which",
+            "yes", "no", "ok", "okay", "sure", "maybe", "probably"
         }
-        if normalized_query in simple_queries:
+        if normalized_query in simple_queries or len(query.split()) <= 3:
             logger.debug(
-                f"Simple query detected: {query}. Skipping cross-encoder reranking."
+                f"Simple/short query detected: {query}. Skipping cross-encoder reranking."
             )
             return candidates[:TOP_K_FINAL]
         
@@ -484,7 +478,7 @@ class ImprovedEnhancedQuerySystem:
         prompt = f"""<|system|>
 {MAIN_PROMPT}
 <|user|>
-Based on the following sources, please answer this question: {query}
+{query}
 {context_section}
 Sources:
 {formatted_chunks}

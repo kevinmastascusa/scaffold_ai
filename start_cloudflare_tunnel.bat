@@ -3,26 +3,23 @@ echo ========================================
 echo ScaffoldAI Cloudflare Tunnel Setup
 echo ========================================
 echo.
-echo This will start your ScaffoldAI app and expose it via Cloudflare Tunnel
+echo This will start your current Python server and expose it via Cloudflare Tunnel
 echo.
-echo Step 1: Starting ScaffoldAI Enhanced UI...
+echo Step 1: Starting ScaffoldAI Enhanced UI (GPU-optimized)...
 echo.
 
-REM Start the ScaffoldAI app in the background
-start /B "ScaffoldAI App" "ScaffoldAI-EnhancedUI.exe"
+REM Start the Python app in a new window
+start "ScaffoldAI App" cmd /c run_gpu_optimized.bat
 
 REM Wait for app to start
-echo Waiting for app to start (10 seconds)...
-timeout /t 10 /nobreak > nul
+echo Waiting for app to start (12 seconds)...
+timeout /t 12 /nobreak > nul
 
-REM Check if app is running
+REM Verify port 5002 is listening
 netstat -an | findstr ":5002" > nul
 if %errorlevel% neq 0 (
     echo ERROR: ScaffoldAI app is not running on port 5002
-    echo Please make sure you have:
-    echo 1. Downloaded ScaffoldAI-EnhancedUI.exe
-    echo 2. Created .env file with your Hugging Face token
-    echo 3. Placed both files in the same folder
+    echo Please ensure the server started successfully.
     echo.
     pause
     exit /b 1
