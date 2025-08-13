@@ -110,7 +110,7 @@ def main():
         print(f"📊 Feedback dashboard at: http://localhost:{args.port}/feedback")
         print(f"💡 Press Ctrl+C to stop the server")
         
-        app.run(host=args.host, port=args.port, debug=True)
+        app.run(host=args.host, port=args.port, debug=False, use_reloader=False, threaded=True)
         
     except ImportError as e:
         print(f"❌ Error importing enhanced app: {e}")
