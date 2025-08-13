@@ -38,17 +38,17 @@ from scaffold_core.config import (
 )
 from scaffold_core.llm import get_llm
 
-# Constants
-TOP_K_INITIAL = 30
-TOP_K_FINAL = 3  # Increased from 3 to 5 to provide more context
-MIN_CROSS_SCORE = -8.0  # Relaxed from -2.0 to keep more sources
-MIN_CONTEXTUAL_SCORE = 0  # Relaxed from 1 to keep more sources
+# Constants (reverted to original defaults)
+TOP_K_INITIAL = 50
+TOP_K_FINAL = 5
+MIN_CROSS_SCORE = -5.0
+MIN_CONTEXTUAL_SCORE = 1
 MAX_MEMORY_MESSAGES = 4  # Increased from 2 to provide better context
 MAX_MEMORY_TOKENS = 800  # Increased from 400 to allow more conversation history
 MAX_CONTEXT_TOKENS = 800  # Increased from 300 to allow more source context
 MAX_TOTAL_TOKENS = 3000  # Increased from 1000 to allow longer responses
 
-# Configurable main prompt for testing different prompt variations
+# Configurable main prompt for testing different prompt variations (reverted)
 MAIN_PROMPT = """You are an expert in sustainability education and engineering curriculum development. 
 Your role is to provide comprehensive, well-structured responses based on the provided sources.
 Always cite your sources clearly and provide detailed explanations.
@@ -658,9 +658,9 @@ Sources:
             filtered_candidates = self.contextual_filtering(query, reranked_candidates)
             logger.debug(f"Filtered to {len(filtered_candidates)} candidates")
             
-            # Use all filtered candidates instead of limiting to top 5
-            final_candidates = filtered_candidates
-            logger.debug(f"Using all {len(final_candidates)} filtered candidates")
+            # Limit to TOP_K_FINAL to control context size
+            final_candidates = filtered_candidates[:TOP_K_FINAL]
+            logger.debug(f"Using top {len(final_candidates)} filtered candidates")
             
             # Generate improved prompt
             improved_prompt = self.generate_improved_prompt(

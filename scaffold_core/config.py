@@ -202,8 +202,8 @@ TOP_K_FINAL = 3  # Increased from 3 to provide more context
 # -------------------
 LLM_TASK = "text-generation"
 LLM_DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-LLM_MAX_LENGTH = 4096  # Increased for Llama 3.1 to prevent truncation
-LLM_MAX_NEW_TOKENS = 2048  # Increased for Llama 3.1 to allow longer responses
+LLM_MAX_LENGTH = 4096  # Prevent truncation
+LLM_MAX_NEW_TOKENS = 2048  # Upper bound if dynamic settings are unavailable
 
 # Dynamic temperature and settings - will be loaded from config manager
 try:
@@ -226,7 +226,8 @@ CUDA_OPTIMIZATIONS = False
 # USE_ONNX is already set above based on model selection
 
 # Response quality settings
-ENABLE_TRUNCATION_DETECTION = True
+# Disabled to prevent repetitive continuations
+ENABLE_TRUNCATION_DETECTION = False
 MIN_RESPONSE_WORDS = 50  # Minimum expected response length
 MAX_RESPONSE_WORDS = 4000  # Increased for Llama 3.1 to allow longer responses
 
@@ -248,6 +249,16 @@ def get_dynamic_top_p() -> float:
         return config_manager.get_model_settings('llm').get('top_p', 0.9)
     except ImportError:
         return 0.9
+
+
+def get_dynamic_max_new_tokens() -> int:
+    """Get the current max_new_tokens from config manager with safe fallback."""
+    try:
+        from .config_manager import ConfigManager
+        config_manager = ConfigManager()
+        return int(config_manager.get_model_settings('llm').get('max_new_tokens', 512))
+    except ImportError:
+        return 512
 
 def ensure_directories():
     """Create all necessary directories if they don't exist."""

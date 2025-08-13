@@ -6,7 +6,7 @@
   "model_settings": {  
     "llm": {  
       "temperature": 0.3,  
-      "max_new_tokens": 256,  
+      "max_new_tokens": 2000,  
       "top_p": 0.9  
     },  
     "embedding": {  

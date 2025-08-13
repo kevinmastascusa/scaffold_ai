@@ -50,7 +50,9 @@ from scaffold_core.config import (
     HF_TOKEN,
     USE_ONNX,
     get_dynamic_temperature,
-    get_dynamic_top_p
+    get_dynamic_top_p,
+    ENABLE_TRUNCATION_DETECTION,
+    get_dynamic_max_new_tokens,
 )
 logger.debug("Configuration imported successfully")
 
@@ -206,7 +208,7 @@ You are an expert in sustainability education and engineering curriculum develop
             
             outputs = self.pipeline(
                 formatted_prompt,
-                max_new_tokens=max_new_tokens or LLM_MAX_NEW_TOKENS,
+                max_new_tokens=max_new_tokens or get_dynamic_max_new_tokens() or LLM_MAX_NEW_TOKENS,
                 temperature=current_temperature,
                 top_p=current_top_p,
                 do_sample=True
@@ -268,7 +270,7 @@ You are an expert in sustainability education and engineering curriculum develop
             if response_text and not response_text.endswith(('.', '!', '?', ':', ';')):
                 is_truncated = True
             
-            if is_truncated:
+            if is_truncated and ENABLE_TRUNCATION_DETECTION:
                 logger.warning("Response appears to be truncated - consider increasing max_new_tokens")
                 # Add a note about truncation
                 response_text += "\n\n[Note: Response may be incomplete due to length limits]"
@@ -307,7 +309,7 @@ You are an expert in sustainability education and engineering curriculum develop
             response_text = self.generate_response(prompt, max_new_tokens, temperature, top_p)
             
             # Check if continuation is needed
-            if self._is_response_truncated(response_text):
+            if ENABLE_TRUNCATION_DETECTION and self._is_response_truncated(response_text):
                 logger.info("Detected truncated response, generating continuation...")
                 continuation = self._generate_continuation(
                     prompt, response_text, max_new_tokens, temperature, top_p
