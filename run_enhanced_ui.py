@@ -62,6 +62,10 @@ def main() -> int:
     # Defaults for strict/correct answers and auto-clearing memory
     os.environ.setdefault("SC_STRICT_ANSWERS", "true")
     os.environ.setdefault("SC_AUTO_CLEAR_MEMORY", "false")
+    # Context/memory management defaults
+    os.environ.setdefault("SC_AUTO_CLEAR_ON_TOPIC_SHIFT", "true")
+    os.environ.setdefault("SC_TOPIC_SHIFT_THRESHOLD", "0.2")
+    os.environ.setdefault("SC_MEMORY_TTL_MIN", "60")
 
     # Allow forwarding host/port args to the UI
     parser = argparse.ArgumentParser(
