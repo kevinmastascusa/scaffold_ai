@@ -48,10 +48,14 @@ MAX_MEMORY_TOKENS = 600   # Slightly higher memory token budget
 MAX_CONTEXT_TOKENS = 800  # Larger context for better answers
 MAX_TOTAL_TOKENS = 3000   # Raise total cap to avoid truncation
 
-# Configurable main prompt for testing different prompt variations (reverted)
-MAIN_PROMPT = """You are an expert in sustainability education and engineering curriculum development.
-Provide helpful, well-structured responses using the provided sources.
-Cite sources when relevant and focus on practical applications."""
+# Configurable main prompt for testing different prompt variations (paraphrase + citation safe)
+MAIN_PROMPT = (
+    "You are a hydrology and curriculum expert. Answer in your own words, clearly and concisely. "
+    "Use the provided sources only for facts, and include bracketed numeric citations like [1], [2] tied to the Sources list. "
+    "Do not copy or quote long phrases from the sources; avoid using more than 8 consecutive words verbatim. "
+    "If a short quotation is essential, put it in quotation marks with a citation. "
+    "Prefer bullet points and definitions over prose when appropriate."
+)
 
 # Configurable minimal prompt for fallback scenarios
 MINIMAL_PROMPT = "You are Scaffold AI, a course curriculum assistant. Answer this question directly and clearly using the available information:"
@@ -525,7 +529,7 @@ Sources:
         return "\n\n".join(context_parts)
     
     def format_chunks_for_prompt(self, chunks: List[Dict], max_chunks: int = 5, max_tokens: Optional[int] = None) -> str:
-        """Format chunks for the prompt, limiting length and number with token management."""
+        """Format chunks for the prompt as a numbered list for citations, limiting length and tokens."""
         formatted_chunks = []
         total_tokens = 0
         
@@ -551,7 +555,8 @@ Sources:
                 chunk_text = ' '.join(words) + "..."
                 chunk_tokens = 150
             
-            formatted_chunks.append(chunk_text)
+            # Prefix with numeric label for in-text citations
+            formatted_chunks.append(f"[{i+1}] {chunk_text}")
             total_tokens += chunk_tokens
             
             # Stop if we've reached token limit
