@@ -59,6 +59,10 @@ def main() -> int:
     load_env_files()
     add_bundle_paths()
 
+    # Defaults for strict/correct answers and auto-clearing memory
+    os.environ.setdefault("SC_STRICT_ANSWERS", "true")
+    os.environ.setdefault("SC_AUTO_CLEAR_MEMORY", "true")
+
     # Allow forwarding host/port args to the UI
     parser = argparse.ArgumentParser(
         description="Run Scaffold AI Enhanced UI"
