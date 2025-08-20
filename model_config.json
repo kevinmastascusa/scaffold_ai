@@ -5,9 +5,9 @@
   },
   "model_settings": {
     "llm": {
-      "temperature": 0.3,
+      "temperature": 0.2,
       "max_new_tokens": 1000,
-      "top_p": 0.9
+      "top_p": 0.8
     },
     "embedding": {
       "chunk_size": 1000,
