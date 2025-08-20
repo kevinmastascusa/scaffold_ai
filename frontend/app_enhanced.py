@@ -175,6 +175,20 @@ def chat():
         if not message:
             return jsonify({'error': 'Message is required'}), 400
 
+        # Optional: clear model memory per request or via env toggle
+        auto_clear = str(os.getenv('SC_AUTO_CLEAR_MEMORY', '')).lower() in ('1', 'true', 'yes')
+        reset_memory = bool(data.get('reset_memory'))
+        reset_conversation = bool(data.get('reset_conversation'))
+        if auto_clear or reset_memory:
+            try:
+                improved_enhanced_query_system.clear_memory(session_id)
+            except Exception:
+                pass
+            if reset_conversation:
+                conversation_file = CONVERSATIONS_DIR / f"{session_id}.json"
+                if conversation_file.exists():
+                    conversation_file.unlink()
+
         # Get conversation history
         conversation = get_conversation_history(session_id)
         
