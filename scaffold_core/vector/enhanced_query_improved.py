@@ -42,17 +42,28 @@ from scaffold_core.llm import get_llm
 # Constants (balanced for quality and speed)
 TOP_K_INITIAL = 50  # Increase initial recall for better coverage
 TOP_K_FINAL = 5     # Use up to 5 sources in final context
-MIN_CROSS_SCORE = 0.0  # Drop very weak matches to reduce off-topic picks
+# Tunable via env to accommodate models whose cross-encoder returns negative logits
+try:
+    MIN_CROSS_SCORE = float(os.getenv("SC_MIN_CROSS_SCORE", "-5.0"))
+except Exception:
+    MIN_CROSS_SCORE = -5.0
 MIN_CONTEXTUAL_SCORE = 0  # Allow zero-overlap candidates (let cross-encoder decide)
 MAX_MEMORY_MESSAGES = 3   # Allow a bit more chat memory
 MAX_MEMORY_TOKENS = 600   # Slightly higher memory token budget
 MAX_CONTEXT_TOKENS = 800  # Larger context for better answers
 MAX_TOTAL_TOKENS = 3000   # Raise total cap to avoid truncation
 
+# Meta/template filtering policy (tunable via env)
+try:
+    META_FILTER_SCORE = float(os.getenv("SC_META_FILTER_SCORE", "-0.05"))
+except Exception:
+    META_FILTER_SCORE = -0.05
+
 # Configurable main prompt for testing different prompt variations (original)
 MAIN_PROMPT = """You are an expert in sustainability education and engineering curriculum development.
-Provide helpful, well-structured responses using the provided sources.
-Cite sources when relevant and focus on practical applications."""
+Answer the user's question directly and concisely. Do not restate the instructions, do not provide meta-guidance
+(e.g., "here's what you can do"), and do not discuss formatting. When sources are available, cite them succinctly.
+Focus on practical, technically accurate content."""
 
 # Configurable minimal prompt for fallback scenarios
 MINIMAL_PROMPT = "You are Scaffold AI, a course curriculum assistant. Answer this question directly and clearly using the available information:"
@@ -74,33 +85,13 @@ GLOSSARY = {
     ),
 }
 
-# Common misspellings/aliases mapped to canonical terms
-GLOSSARY_ALIASES = {
-    "hydorgpahs": "hydrographs",
-    "hydrogaph": "hydrograph",
-    "hydrogragh": "hydrograph",
-    "hydrograh": "hydrograph",
-    "hidrograph": "hydrograph",
-}
-
+# Simple glossary matcher without alias/typo mapping
 def _find_glossary_term(text: str) -> str:
-    """Return a matched glossary term for the given text, including aliases.
-
-    Performs simple substring checks and alias normalization. Also matches
-    generic stems like 'hydrogr'.
-    """
-    lowered = text.lower()
-    # Replace aliases first
-    for alias, canonical in GLOSSARY_ALIASES.items():
-        if alias in lowered:
-            lowered = lowered.replace(alias, canonical)
-    # Direct term matches
+    """Return a matched glossary term for the given text (direct match only)."""
+    lowered = (text or "").lower()
     for term in GLOSSARY.keys():
         if term in lowered:
             return term
-    # Heuristic stem check
-    if "hydrogr" in lowered:
-        return "hydrograph"
     return ""
 
 class ImprovedEnhancedQuerySystem:
@@ -586,15 +577,14 @@ class ImprovedEnhancedQuerySystem:
             cleaned_candidates = []
             for c in candidates:
                 text = c.get("text", "") or ""
-                # Filename-based hints to filter generic templates/guides
+                # Soften pre-filters: don't drop by filename only; mark as "meta_hint"
                 meta = c.get("metadata", {}) or {}
                 fname = str(meta.get("filename", "")).lower()
-                if any(tok in fname for tok in ("template", "rubric", "guide", "format", "prompt", "essay", "writing")):
-                    c["filtered_out"] = True
-                    continue
+                if any(tok in fname for tok in ("template", "rubric", "format", "prompt", "essay", "writing")):
+                    c["meta_hint"] = True
+                # Keep meta/instructional chunks for scoring; they may still be relevant
                 if self._is_meta_instruction(text):
-                    c["filtered_out"] = True
-                    continue
+                    c["meta_hint"] = True
                 cleaned_candidates.append(c)
 
             if not cleaned_candidates:
@@ -608,17 +598,29 @@ class ImprovedEnhancedQuerySystem:
             # Add cross-encoder scores to candidates
             for candidate, score in zip(cleaned_candidates, cross_scores):
                 candidate["cross_score"] = float(score)
-                
-                # Only filter out candidates with very low scores (relaxed threshold)
-                if candidate["cross_score"] < MIN_CROSS_SCORE:
+                # If looks like meta/template, only drop when score is below META_FILTER_SCORE
+                if candidate.get("meta_hint") and candidate["cross_score"] < META_FILTER_SCORE:
                     candidate["filtered_out"] = True
-                    logger.debug(f"Filtered out candidate with cross_score: {candidate['cross_score']}")
+                    logger.debug(
+                        f"Filtered meta-like candidate (score={candidate['cross_score']:.3f}, fname={candidate.get('metadata',{}).get('filename','')})"
+                    )
+                # For non-meta, still drop only if extremely low vs MIN_CROSS_SCORE
+                elif candidate["cross_score"] < MIN_CROSS_SCORE:
+                    candidate["filtered_out"] = True
+                    logger.debug(
+                        f"Filtered candidate with very low cross_score: {candidate['cross_score']:.3f}"
+                    )
             
-            # Remove filtered candidates
-            candidates = [c for c in cleaned_candidates if not c.get("filtered_out", False)]
+            # Remove filtered candidates, but ensure we always keep at least TOP_K_FINAL
+            kept = [c for c in cleaned_candidates if not c.get("filtered_out", False)]
+            if len(kept) < TOP_K_FINAL:
+                # Keep best of the rest to reach minimum
+                remainder = [c for c in cleaned_candidates if c.get("filtered_out", False)]
+                remainder.sort(key=lambda x: x.get("cross_score", -999), reverse=True)
+                kept.extend(remainder[: max(0, TOP_K_FINAL - len(kept))])
             
             # Sort by cross-encoder score
-            candidates.sort(key=lambda x: x["cross_score"], reverse=True)
+            candidates = sorted(kept, key=lambda x: x.get("cross_score", -999), reverse=True)
             
             logger.debug(f"Cross-encoder reranking: {len(candidates)} candidates remaining after filtering")
             return candidates
@@ -684,7 +686,7 @@ class ImprovedEnhancedQuerySystem:
         
         # Format chunks with strict token budget to prevent overflow
         # Use fewer chunks but ensure we stay within token limits
-        max_chunks_for_model = 3  # Keep context tighter to avoid copying templates
+        max_chunks_for_model = 2  # Tighter context to avoid overflow/garbling on small models
         formatted_chunks = self.format_chunks_for_prompt(chunks, max_chunks=max_chunks_for_model, max_tokens=available_tokens)
             
         # Build the prompt with model-specific chat formatting
@@ -706,6 +708,8 @@ class ImprovedEnhancedQuerySystem:
         # Log token usage for debugging
         total_tokens = len(prompt.split())
         logger.debug(f"Generated prompt with ~{total_tokens} tokens")
+        if total_tokens > 1200:
+            logger.warning("Prompt near or above safe length; consider reducing context/chunk sizes.")
         
         # Final validation to prevent token overflow
         if total_tokens > MAX_TOTAL_TOKENS:
@@ -868,15 +872,8 @@ class ImprovedEnhancedQuerySystem:
             logger.debug(f"Found {len(candidates)} initial candidates")
             
             if not candidates:
-                # If no retrieval coverage, attempt glossary fallback for foundational terms
-                term = _find_glossary_term(query)
-                if term:
-                    return {
-                        "response": f"{GLOSSARY[term]}\n\nNote: This is a general definition provided as background because no matching sources were found in the corpus.",
-                        "sources": []
-                    }
                 return {
-                    "response": "I couldn't find any relevant information to answer your question.",
+                    "response": "No matching sources were found in the corpus for this query.",
                     "sources": []
                 }
             
@@ -892,7 +889,7 @@ class ImprovedEnhancedQuerySystem:
             final_candidates = filtered_candidates[:TOP_K_FINAL]
             logger.debug(f"Using top {len(final_candidates)} filtered candidates")
             
-            # Generate improved prompt
+            # Generate improved prompt (cap context to reduce overflow/garbling)
             improved_prompt = self.generate_improved_prompt(
                 query, final_candidates, conversation_context
             )
@@ -906,11 +903,11 @@ class ImprovedEnhancedQuerySystem:
             try:
                 # First attempt with full context and continuation support
                 strict_env = str(os.getenv("SC_STRICT_ANSWERS", "")).lower() in ("1", "true", "yes")
-                first_temp = 0.25 if strict_env else temperature
+                first_temp = 0.15 if strict_env else min(0.2, float(temperature or 0.2))
                 llm_response = get_llm().generate_response_with_continuation(
                     improved_prompt,
                     temperature=first_temp,
-                    top_p=0.8 if strict_env else None,
+                    top_p=0.8,
                 )
                 
                 # Validate response quality
@@ -927,8 +924,8 @@ class ImprovedEnhancedQuerySystem:
                     minimal_prompt = self._generate_minimal_prompt(query, final_candidates[:1])
                     llm_response = get_llm().generate_response_with_continuation(
                         minimal_prompt,
-                        temperature=0.2,
-                        top_p=0.75,
+                        temperature=0.15,
+                        top_p=0.7,
                     )
                     
                     # Validate response again
