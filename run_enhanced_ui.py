@@ -61,7 +61,7 @@ def main() -> int:
 
     # Defaults for strict/correct answers and auto-clearing memory
     os.environ.setdefault("SC_STRICT_ANSWERS", "true")
-    os.environ.setdefault("SC_AUTO_CLEAR_MEMORY", "true")
+    os.environ.setdefault("SC_AUTO_CLEAR_MEMORY", "false")
 
     # Allow forwarding host/port args to the UI
     parser = argparse.ArgumentParser(
