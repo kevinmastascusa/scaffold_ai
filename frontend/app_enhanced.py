@@ -494,19 +494,17 @@ def get_model_performance():
 def clear_memory():
     """Clear the AI's memory while keeping chat history."""
     try:
-        session_id = request.cookies.get('session_id')
+        # Use Flask session (consistent with other endpoints)
+        session_id = session.get('session_id')
         if not session_id:
-            return jsonify({'success': False, 'error': 'No session found'})
-        
+            return jsonify({'success': False, 'error': 'No session found'}), 400
+
         # Clear memory in the enhanced query system
-        query_system = improved_enhanced_query_system # Assuming get_query_system() is not defined, using direct access
-        query_system.clear_memory(session_id)
-        
+        improved_enhanced_query_system.clear_memory(session_id)
+
         return jsonify({'success': True})
     except Exception as e:
-        # Assuming logger is defined elsewhere or needs to be imported
-        # logger.error(f"Error clearing memory: {e}") 
-        return jsonify({'success': False, 'error': str(e)})
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 
 @app.route('/feedback')
