@@ -359,6 +359,9 @@ You are an expert in sustainability education and engineering curriculum develop
                 max_new_tokens=max_new_tokens or get_dynamic_max_new_tokens() or LLM_MAX_NEW_TOKENS,
                 temperature=current_temperature,
                 top_p=current_top_p,
+                top_k=50,
+                repetition_penalty=1.15,
+                no_repeat_ngram_size=3,
                 do_sample=True
             )
             
