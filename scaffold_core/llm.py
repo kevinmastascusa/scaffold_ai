@@ -326,10 +326,17 @@ class LLMManager:
         Returns:
             The generated response text
         """
-        # Format prompt based on model type
-        if "mistral" in LLM_MODEL.lower():
-            formatted_prompt = f"[INST] {prompt} [/INST]"
-        elif "llama" in LLM_MODEL.lower():
+        # Format prompt based on model type, but avoid double-wrapping if already formatted
+        lower_model = LLM_MODEL.lower()
+        if "mistral" in lower_model or "mixtral" in lower_model:
+            if "[INST]" in prompt:
+                formatted_prompt = prompt
+            else:
+                formatted_prompt = f"<s>[INST] {prompt} [/INST]"
+        elif "llama" in lower_model:
+            if "<|user|>" in prompt or "<|system|>" in prompt:
+                formatted_prompt = prompt
+            else:
             # Use tokenizer chat template if available
             try:
                 messages = [
