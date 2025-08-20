@@ -283,7 +283,6 @@ class LLMManager:
                 pipeline_kwargs.update({
                     "torch_dtype": torch.float32,  # Use float32 for CPU
                     "device": "cpu",
-                    "low_cpu_mem_usage": True,  # Reduce memory usage
                 })
                 logger.info("💻 Using CPU-optimized pipeline settings")
             else:
@@ -291,7 +290,6 @@ class LLMManager:
                 pipeline_kwargs.update({
                     "torch_dtype": torch.float16,  # Use float16 for GPU memory efficiency
                     "device": "cuda:0",  # Explicitly use first GPU
-                    "low_cpu_mem_usage": False,  # Not needed for GPU
                 })
                 logger.info("🚀 Using GPU-optimized pipeline settings")
             
