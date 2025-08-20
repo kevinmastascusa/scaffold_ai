@@ -34,7 +34,8 @@ if project_root not in sys.path:
 # Import configuration and LLM
 from scaffold_core.config import (
     VECTOR_OUTPUTS_DIR, ITERATION, EMBEDDING_MODEL,
-    get_faiss_index_path, get_metadata_json_path
+    get_faiss_index_path, get_metadata_json_path,
+    LLM_MODEL,
 )
 from scaffold_core.llm import get_llm
 
@@ -42,20 +43,11 @@ from scaffold_core.llm import get_llm
 TOP_K_INITIAL = 50  # Increase initial recall for better coverage
 TOP_K_FINAL = 5     # Use up to 5 sources in final context
 MIN_CROSS_SCORE = 0.0  # Drop very weak matches to reduce off-topic picks
-MIN_CONTEXTUAL_SCORE = 1  # Require at least minimal keyword overlap
+MIN_CONTEXTUAL_SCORE = 0  # Allow zero-overlap candidates (let cross-encoder decide)
 MAX_MEMORY_MESSAGES = 3   # Allow a bit more chat memory
 MAX_MEMORY_TOKENS = 600   # Slightly higher memory token budget
 MAX_CONTEXT_TOKENS = 800  # Larger context for better answers
 MAX_TOTAL_TOKENS = 3000   # Raise total cap to avoid truncation
-
-# Optional terminology normalization (configurable via env)
-DEFAULT_TERMINOLOGY_MAP = {
-    # Common near-miss or variant terms; extend via SC_TERMINOLOGY_MAP env (JSON)
-    "unit hydrogram": "unit hydrograph",
-    "hydrogram": "hydrograph",
-    "hygrograph": "hydrograph",
-    "unit hydrology": "unit hydrograph",
-}
 
 # Configurable main prompt for testing different prompt variations (original)
 MAIN_PROMPT = """You are an expert in sustainability education and engineering curriculum development.
@@ -64,6 +56,52 @@ Cite sources when relevant and focus on practical applications."""
 
 # Configurable minimal prompt for fallback scenarios
 MINIMAL_PROMPT = "You are Scaffold AI, a course curriculum assistant. Answer this question directly and clearly using the available information:"
+
+# Domain glossary for foundational terms (used when retrieval has no coverage)
+GLOSSARY = {
+    "hydrograph": (
+        "A hydrograph is a plot of streamflow (discharge) versus time at a specific location in a river or "
+        "channel. In storm hydrology, the hydrograph shows how runoff responds to rainfall over a watershed."
+    ),
+    "hydrographs": (
+        "Hydrographs are plots of discharge versus time that describe how flow at a point in a river changes "
+        "during and after rainfall or snowmelt events."
+    ),
+    "unit hydrograph": (
+        "A unit hydrograph is the direct-runoff hydrograph resulting from one unit depth (e.g., 1 cm or 1 inch) "
+        "of effective rainfall distributed uniformly over a watershed for a specified duration. It is used to "
+        "predict storm runoff by convolution of rainfall excess with the unit response."
+    ),
+}
+
+# Common misspellings/aliases mapped to canonical terms
+GLOSSARY_ALIASES = {
+    "hydorgpahs": "hydrographs",
+    "hydrogaph": "hydrograph",
+    "hydrogragh": "hydrograph",
+    "hydrograh": "hydrograph",
+    "hidrograph": "hydrograph",
+}
+
+def _find_glossary_term(text: str) -> str:
+    """Return a matched glossary term for the given text, including aliases.
+
+    Performs simple substring checks and alias normalization. Also matches
+    generic stems like 'hydrogr'.
+    """
+    lowered = text.lower()
+    # Replace aliases first
+    for alias, canonical in GLOSSARY_ALIASES.items():
+        if alias in lowered:
+            lowered = lowered.replace(alias, canonical)
+    # Direct term matches
+    for term in GLOSSARY.keys():
+        if term in lowered:
+            return term
+    # Heuristic stem check
+    if "hydrogr" in lowered:
+        return "hydrograph"
+    return ""
 
 class ImprovedEnhancedQuerySystem:
     """Improved enhanced query system with better prompt engineering and chat memory."""
@@ -75,6 +113,16 @@ class ImprovedEnhancedQuerySystem:
         self.faiss_index = None
         self.metadata = []
         self.conversation_memory = {}  # Store conversation history by session_id
+        # Memory/context management settings via environment
+        try:
+            self.memory_ttl_minutes = int(os.getenv("SC_MEMORY_TTL_MIN", "60"))
+        except Exception:
+            self.memory_ttl_minutes = 60
+        self.auto_clear_on_topic_shift = str(os.getenv("SC_AUTO_CLEAR_ON_TOPIC_SHIFT", "")).lower() in ("1", "true", "yes")
+        try:
+            self.topic_shift_threshold = float(os.getenv("SC_TOPIC_SHIFT_THRESHOLD", "0.2"))  # 0..1 overlap
+        except Exception:
+            self.topic_shift_threshold = 0.2
         
     def initialize(self):
         """Initialize the enhanced query system."""
@@ -174,40 +222,7 @@ class ImprovedEnhancedQuerySystem:
                     return True
         return False
 
-    # --------------------
-    # Terminology normalization utilities
-    # --------------------
-    def _load_terminology_map(self) -> Dict[str, str]:
-        """Load custom terminology map from env, falling back to defaults.
-        Env variable SC_TERMINOLOGY_MAP may contain a JSON object {"from": "to", ...}.
-        """
-        try:
-            raw = os.getenv("SC_TERMINOLOGY_MAP", "").strip()
-            if not raw:
-                return DEFAULT_TERMINOLOGY_MAP
-            data = json.loads(raw)
-            if isinstance(data, dict):
-                # Merge with defaults, custom entries override
-                merged = DEFAULT_TERMINOLOGY_MAP.copy()
-                merged.update({str(k): str(v) for k, v in data.items()})
-                return merged
-        except Exception:
-            pass
-        return DEFAULT_TERMINOLOGY_MAP
-
-    def _normalize_terminology(self, text: str) -> str:
-        """Apply case-insensitive replacements for known mixed/variant terms.
-        Keeps it generic and configurable; avoids domain-specific logic in prompts.
-        """
-        if not text:
-            return text
-        term_map = self._load_terminology_map()
-        normalized = text
-        for src, dst in term_map.items():
-            # Replace whole words or phrases, case-insensitive
-            pattern = re.compile(r"\b" + re.escape(src) + r"\b", re.IGNORECASE)
-            normalized = pattern.sub(dst, normalized)
-        return normalized
+    # Removed terminology normalization to avoid domain-specific term mixing
     
     def load_metadata(self, path: str) -> List[Dict]:
         """Load metadata from JSON file."""
@@ -378,6 +393,76 @@ class ImprovedEnhancedQuerySystem:
         keywords = [word for word in words if len(word) > 2 and word not in stop_words]
         
         return keywords[:20]  # Limit to top 20 keywords
+
+    def _get_last_user_messages(self, session_id: str, limit: int = 2) -> List[Dict]:
+        """Fetch last N user messages from internal or external memory, newest last."""
+        messages: List[Dict] = []
+        try:
+            if session_id in self.conversation_memory:
+                for msg in reversed(self.conversation_memory[session_id]):
+                    if msg.get('type') == 'user' or msg.get('role') == 'user':
+                        messages.append(msg)
+                        if len(messages) >= limit:
+                            break
+                messages.reverse()
+                return messages
+        except Exception:
+            pass
+        # Fallback to external file
+        try:
+            from pathlib import Path
+            conversations_dir = Path('conversations')
+            conversation_file = conversations_dir / f"{session_id}.json"
+            if conversation_file.exists():
+                with open(conversation_file, 'r', encoding='utf-8') as f:
+                    external = json.load(f)
+                for msg in reversed(external):
+                    if msg.get('type') == 'user' or msg.get('role') == 'user':
+                        messages.append(msg)
+                        if len(messages) >= limit:
+                            break
+                messages.reverse()
+        except Exception:
+            pass
+        return messages
+
+    def _maybe_auto_clear_memory(self, session_id: str, incoming_query: str) -> None:
+        """Auto-clear memory based on TTL or topic shift rules."""
+        # TTL-based clear
+        try:
+            if session_id in self.conversation_memory and self.conversation_memory[session_id]:
+                last_ts = self.conversation_memory[session_id][-1].get('timestamp')
+                if last_ts:
+                    try:
+                        last_dt = datetime.datetime.fromisoformat(last_ts)
+                        age_min = (datetime.datetime.now() - last_dt).total_seconds() / 60.0
+                        if self.memory_ttl_minutes > 0 and age_min > self.memory_ttl_minutes:
+                            self.clear_memory(session_id)
+                            return
+                    except Exception:
+                        pass
+        except Exception:
+            pass
+        # Topic shift-based clear
+        if not self.auto_clear_on_topic_shift:
+            return
+        try:
+            prev_users = self._get_last_user_messages(session_id, limit=2)
+            if not prev_users:
+                return
+            current_kw = set(self.extract_keywords(incoming_query))
+            if not current_kw:
+                return
+            prev_kw = set()
+            for m in prev_users:
+                prev_kw.update(self.extract_keywords(m.get('content', '')))
+            if not prev_kw:
+                return
+            overlap = len(current_kw.intersection(prev_kw)) / max(1, len(current_kw))
+            if overlap < self.topic_shift_threshold:
+                self.clear_memory(session_id)
+        except Exception:
+            pass
     
     def semantic_search(self, query: str, k: int = TOP_K_INITIAL) -> List[Dict]:
         """Perform semantic search using sentence transformers."""
@@ -602,15 +687,21 @@ class ImprovedEnhancedQuerySystem:
         max_chunks_for_model = 3  # Keep context tighter to avoid copying templates
         formatted_chunks = self.format_chunks_for_prompt(chunks, max_chunks=max_chunks_for_model, max_tokens=available_tokens)
             
-        # Build the prompt with Llama 3.1 specific formatting
-        prompt = f"""<|system|>
-{MAIN_PROMPT}
-<|user|>
-{query}
-{context_section}
-Sources:
-{formatted_chunks}
-<|assistant|>"""
+        # Build the prompt with model-specific chat formatting
+        lower_model = (LLM_MODEL or "").lower()
+        user_block = f"{query}\n{context_section}\nSources:\n{formatted_chunks}".strip()
+        if ("mistral" in lower_model) or ("mixtral" in lower_model):
+            # Mistral/Mixtral Instruct format with optional system on first turn
+            prompt = (
+                f"<s>[INST] <<SYS>>\n{MAIN_PROMPT}\n<</SYS>>\n{user_block}\n[/INST]"
+            )
+        elif "llama" in lower_model:
+            prompt = (
+                f"<|system|>\n{MAIN_PROMPT}\n<|user|>\n{user_block}\n<|assistant|>"
+            )
+        else:
+            # Generic fallback: prepend instructions, then user content
+            prompt = f"{MAIN_PROMPT}\n\n{user_block}"
         
         # Log token usage for debugging
         total_tokens = len(prompt.split())
@@ -727,10 +818,18 @@ Sources:
         if chunks:
             chunk_text = chunks[0].get('text', '')[:300]  # Limit to 300 chars
             context = f"\nRelevant information: {chunk_text}"
-        
-        return f"""<s>[INST] {MINIMAL_PROMPT}
 
-{query}{context} [/INST]"""
+        lower_model = (LLM_MODEL or "").lower()
+        if ("mistral" in lower_model) or ("mixtral" in lower_model):
+            return (
+                f"<s>[INST] <<SYS>>\n{MAIN_PROMPT}\n<</SYS>>\n{MINIMAL_PROMPT}\n\n{query}{context} [/INST]"
+            )
+        elif "llama" in lower_model:
+            return (
+                f"<|system|>\n{MAIN_PROMPT}\n<|user|>\n{MINIMAL_PROMPT}\n\n{query}{context}\n<|assistant|>"
+            )
+        else:
+            return f"{MINIMAL_PROMPT}\n\n{query}{context}"
     
     def _generate_fallback_response(self, query: str) -> str:
         """Generate a fallback response when all else fails."""
@@ -769,6 +868,13 @@ Sources:
             logger.debug(f"Found {len(candidates)} initial candidates")
             
             if not candidates:
+                # If no retrieval coverage, attempt glossary fallback for foundational terms
+                term = _find_glossary_term(query)
+                if term:
+                    return {
+                        "response": f"{GLOSSARY[term]}\n\nNote: This is a general definition provided as background because no matching sources were found in the corpus.",
+                        "sources": []
+                    }
                 return {
                     "response": "I couldn't find any relevant information to answer your question.",
                     "sources": []
@@ -842,12 +948,10 @@ Sources:
             # Store query and response in memory if session_id provided
             if session_id:
                 self.add_to_memory(session_id, {"role": "user", "content": query})
-                # Normalize terminology before storing/presenting
-                llm_response = self._normalize_terminology(llm_response)
                 self.add_to_memory(session_id, {"role": "assistant", "content": llm_response})
             
             return {
-                "response": self._normalize_terminology(llm_response),
+                "response": llm_response,
                 "sources": [
                     {
                         "score": candidate.get("cross_score", 0),

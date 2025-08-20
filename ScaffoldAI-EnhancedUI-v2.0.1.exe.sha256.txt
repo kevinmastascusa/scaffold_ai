@@ -1,0 +1,3 @@
+SHA256 hash of ScaffoldAI-EnhancedUI-v2.0.1.exe:
+7c1afa99d81dd6aa0af9e2b86c95eaa111d67435ace9a4059e22c30b704574c6
+CertUtil: -hashfile command completed successfully.

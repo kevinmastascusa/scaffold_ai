@@ -2,8 +2,8 @@
 echo 🚀 Starting Scaffold AI with GPU Optimization...
 echo.
 
-REM Set environment variables for GPU optimization
-set SC_LLM_KEY=tinyllama-onnx
+REM Set environment variables for GPU optimization (LLM selection is read from model_config.json by default)
+set SC_LLM_KEY=
 set PYTHONPATH=%cd%
 
 REM Activate virtual environment and start the server

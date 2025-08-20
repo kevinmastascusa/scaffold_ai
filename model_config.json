@@ -5,7 +5,7 @@
   },
   "model_settings": {
     "llm": {
-      "temperature": 0.2,
+      "temperature": 0.3,
       "max_new_tokens": 1000,
       "top_p": 0.8
     },

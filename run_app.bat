@@ -2,8 +2,8 @@
 echo Starting Scaffold AI Enhanced UI...
 echo.
 
-REM Set environment variables
-set SC_LLM_KEY=tinyllama-onnx
+REM Set environment variables (LLM selection now comes from model_config.json; env var optional override)
+set SC_LLM_KEY=
 set PYTHONPATH=%cd%
 
 REM Activate virtual environment and start the server

@@ -11,6 +11,10 @@ import os
 from pathlib import Path
 
 import torch
+from .config_manager import (
+    ConfigManager,
+    config_manager as global_config_manager,
+)
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -131,21 +135,36 @@ LLM_MODELS = {
         "requires_token": True
     },
     "llama3.1-8b": {
-        "name": os.getenv("LLAMA3_8B_PATH") or "meta-llama/Llama-3.1-8B-Instruct",
+        "name": (
+            os.getenv("LLAMA3_8B_PATH")
+            or "meta-llama/Llama-3.1-8B-Instruct"
+        ),
         "desc": "Meta's latest 8B model, requires token and approval.",
         "requires_token": True
     },
     "llama3.1-70b": {
-        "name": os.getenv("LLAMA3_70B_PATH") or "meta-llama/Llama-3.1-70B-Instruct",
+        "name": (
+            os.getenv("LLAMA3_70B_PATH")
+            or "meta-llama/Llama-3.1-70B-Instruct"
+        ),
         "desc": "Meta's flagship 70B model, requires token and approval.",
         "requires_token": True
     },
 }
-_selected_key = os.getenv("SC_LLM_KEY")  # e.g., "distilgpt2", "gpt2", "tinyllama"
-if _selected_key and _selected_key in LLM_MODELS:
-    SELECTED_LLM_MODEL = LLM_MODELS[_selected_key]["name"]
-else:
-    SELECTED_LLM_MODEL = LLM_MODELS["tinyllama"]["name"]
+_selected_key = os.getenv("SC_LLM_KEY")  # override via env if set
+if not _selected_key:
+    try:
+        # Prefer selection from model_config.json via ConfigManager
+        _selected_key = (
+            global_config_manager or ConfigManager()
+        ).get_selected_model('llm')
+    except Exception:
+        _selected_key = None
+
+if not _selected_key or _selected_key not in LLM_MODELS:
+    _selected_key = "tinyllama"
+
+SELECTED_LLM_MODEL = LLM_MODELS[_selected_key]["name"]
 
 # Model registry for tracking status/compatibility
 MODEL_REGISTRY = {
@@ -164,11 +183,14 @@ LLM_MODEL = SELECTED_LLM_MODEL
 # Check if selected model has ONNX flag
 USE_ONNX = False
 # Check if the selected model key has ONNX flag
-if _selected_key in LLM_MODELS and LLM_MODELS[_selected_key].get("use_onnx", False):
+if (
+    _selected_key in LLM_MODELS
+    and LLM_MODELS[_selected_key].get("use_onnx", False)
+):
     USE_ONNX = True
-    logger.info(f"ONNX optimization enabled for model key: {_selected_key}")
+    logger.info("ONNX optimization enabled for model key: %s", _selected_key)
 else:
-    logger.info(f"Using standard model (no ONNX): {SELECTED_LLM_MODEL}")
+    logger.info("Using standard model (no ONNX): %s", SELECTED_LLM_MODEL)
 
 # -------------------
 # Model API Keys
@@ -176,7 +198,10 @@ else:
 HF_TOKEN = os.getenv("HUGGINGFACE_TOKEN") or os.getenv("HF_TOKEN")
 MIXTRAL_API_KEY = os.getenv(
     "MIXTRAL_API_KEY",
-    os.getenv("HUGGINGFACE_TOKEN", "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")
+    os.getenv(
+        "HUGGINGFACE_TOKEN",
+        "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",
+    ),
 )
 
 # Use Mixtral key if Mixtral model is selected
@@ -205,10 +230,14 @@ LLM_TASK = "text-generation"
 # Auto-detect and configure GPU settings
 if torch.cuda.is_available():
     LLM_DEVICE = "cuda"
-    logger.info(f"🚀 GPU detected: {torch.cuda.get_device_name(0)} with {torch.cuda.get_device_properties(0).total_memory / 1e9:.1f}GB VRAM")
+    logger.info(
+        "🚀 GPU detected: %s with %.1fGB VRAM",
+        torch.cuda.get_device_name(0),
+        torch.cuda.get_device_properties(0).total_memory / 1e9,
+    )
     # GPU-optimized settings
     LLM_MAX_LENGTH = 8192  # Higher context for GPU
-    LLM_MAX_NEW_TOKENS = 2048  # Upper bound if dynamic settings are unavailable
+    LLM_MAX_NEW_TOKENS = 2048  # Upper bound if dynamic settings unavailable
     LLM_BATCH_SIZE = 1
     LLM_LOAD_IN_8BIT = False
     LLM_LOAD_IN_4BIT = False  # Disable quantization for GPU speed
@@ -227,15 +256,9 @@ else:
     CUDA_OPTIMIZATIONS = False
 
 # Dynamic temperature and settings - will be loaded from config manager
-try:
-    from .config_manager import ConfigManager
-    config_manager = ConfigManager()
-    LLM_TEMPERATURE = config_manager.get_model_settings('llm').get('temperature', 0.3)
-    LLM_TOP_P = config_manager.get_model_settings('llm').get('top_p', 0.9)
-except ImportError:
-    # Fallback to default values
-    LLM_TEMPERATURE = 0.3
-    LLM_TOP_P = 0.9
+_cmgr = global_config_manager or ConfigManager()
+LLM_TEMPERATURE = _cmgr.get_model_settings('llm').get('temperature', 0.3)
+LLM_TOP_P = _cmgr.get_model_settings('llm').get('top_p', 0.9)
 
 LLM_BATCH_SIZE = 1
 LLM_LOAD_IN_8BIT = False
@@ -246,40 +269,29 @@ TORCH_COMPILE = True
 CUDA_OPTIMIZATIONS = False
 # USE_ONNX is already set above based on model selection
 
-# Response quality settings
-# Disabled to prevent repetitive continuations
+"""Response quality settings.
+Disabled to prevent repetitive continuations.
+"""
 ENABLE_TRUNCATION_DETECTION = False
 MIN_RESPONSE_WORDS = 50  # Minimum expected response length
 MAX_RESPONSE_WORDS = 4000  # Increased for Llama 3.1 to allow longer responses
 
 
+
 def get_dynamic_temperature() -> float:
     """Get the current temperature setting from config manager."""
-    try:
-        from .config_manager import ConfigManager
-        config_manager = ConfigManager()
-        return config_manager.get_model_settings('llm').get('temperature', 0.3)
-    except ImportError:
-        return 0.3
+    _cmgr = global_config_manager or ConfigManager()
+    return _cmgr.get_model_settings('llm').get('temperature', 0.3)
 
 def get_dynamic_top_p() -> float:
     """Get the current top_p setting from config manager."""
-    try:
-        from .config_manager import ConfigManager
-        config_manager = ConfigManager()
-        return config_manager.get_model_settings('llm').get('top_p', 0.9)
-    except ImportError:
-        return 0.9
-
+    _cmgr = global_config_manager or ConfigManager()
+    return _cmgr.get_model_settings('llm').get('top_p', 0.9)
 
 def get_dynamic_max_new_tokens() -> int:
     """Get the current max_new_tokens from config manager with safe fallback."""
-    try:
-        from .config_manager import ConfigManager
-        config_manager = ConfigManager()
-        return int(config_manager.get_model_settings('llm').get('max_new_tokens', 512))
-    except ImportError:
-        return 512
+    _cmgr = global_config_manager or ConfigManager()
+    return int(_cmgr.get_model_settings('llm').get('max_new_tokens', 512))
 
 def ensure_directories():
     """Create all necessary directories if they don't exist."""
@@ -287,12 +299,11 @@ def ensure_directories():
         DATA_DIR,
         OUTPUTS_DIR,
         VECTOR_OUTPUTS_DIR,
-        MATH_OUTPUTS_DIR
+        MATH_OUTPUTS_DIR,
     ]
     for directory in directories:
         directory.mkdir(parents=True, exist_ok=True)
         print(f"✓ Ensured directory exists: {directory}")
-
 
 # Legacy path compatibility
 PDF_INPUT_DIR = str(DATA_DIR)
