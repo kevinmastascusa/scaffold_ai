@@ -337,15 +337,15 @@ class LLMManager:
             if "<|user|>" in prompt or "<|system|>" in prompt:
                 formatted_prompt = prompt
             else:
-            # Use tokenizer chat template if available
-            try:
-                messages = [
-                    {"role": "system", "content": "You are an expert in sustainability education and engineering curriculum development. Provide clear, detailed answers with citations."},
-                    {"role": "user", "content": prompt}
-                ]
-                formatted_prompt = self.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-            except Exception:
-                formatted_prompt = f"""<|system|>
+                # Use tokenizer chat template if available
+                try:
+                    messages = [
+                        {"role": "system", "content": "You are an expert in sustainability education and engineering curriculum development. Provide clear, detailed answers with citations."},
+                        {"role": "user", "content": prompt}
+                    ]
+                    formatted_prompt = self.tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+                except Exception:
+                    formatted_prompt = f"""<|system|>
 You are an expert in sustainability education and engineering curriculum development. Provide clear, detailed answers with citations.
 <|user|>
 {prompt}
