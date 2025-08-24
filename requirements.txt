@@ -56,7 +56,7 @@ pdfplumber==0.11.7
 pefile==2023.2.7
 pillow==10.3.0
 propcache==0.3.2
-protobuf==5.27.4
+protobuf==5.29.5
 psutil==7.0.0
 pyarrow==21.0.0
 pycparser==2.22
