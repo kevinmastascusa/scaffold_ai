@@ -2,14 +2,15 @@
 LLM integration module using Hugging Face Transformers.
 """
 
+import logging
+import os
+import sys
+import time
 from typing import List, Dict, Any, Optional
+
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from transformers.pipelines import pipeline
-import os
-import sys
-import logging
-import time
 
 # Import ONNX Runtime components if available
 try:
@@ -18,7 +19,8 @@ try:
 except ImportError:
     ONNX_AVAILABLE = False
     logging.warning(
-        "ONNX Runtime not available. Install with: pip install optimum[onnxruntime]"
+        "ONNX Runtime not available. Install with: "
+        "pip install optimum[onnxruntime]"
     )
 
 # Detect available ORT providers (CUDA vs CPU)
@@ -85,7 +87,7 @@ class LLMManager:
         """Initialize the LLM pipeline."""
         logger.debug(f"Initializing LLM Manager with model: {LLM_MODEL}")
         logger.debug(f"Using device: {LLM_DEVICE}")
-        
+
         # Check if we already have a cached instance
         global _llm_manager_instance
         if _llm_manager_instance is not None:
@@ -95,7 +97,7 @@ class LLMManager:
             self.pipeline = _llm_manager_instance.pipeline
             self.hf_token = _llm_manager_instance.hf_token
             return
-        
+
         # Try to get token from environment or use a fallback
         self.hf_token = HF_TOKEN or os.getenv("HUGGINGFACE_TOKEN")
         if not self.hf_token:
@@ -141,7 +143,7 @@ class LLMManager:
                 cache_dir=cache_dir,
                 use_fast=False,
                 legacy=True,  # Use legacy mode for better compatibility
-                
+
             )
         if not self.tokenizer.pad_token:
             self.tokenizer.pad_token = self.tokenizer.eos_token
@@ -152,7 +154,7 @@ class LLMManager:
             logger.debug("Loading model with ONNX Runtime optimization...")
             try:
                 start_time = time.time()
-                
+
                 # Configure ONNX Runtime session options for optimal threading
                 session_options = ort.SessionOptions()
                 use_cuda = (
@@ -168,12 +170,14 @@ class LLMManager:
                     )
                     session_options.enable_mem_pattern = True
                     session_options.enable_cpu_mem_arena = False  # Disable for GPU
-                    providers = ["CUDAExecutionProvider", "CPUExecutionProvider"]
+                    providers = [
+                        "CUDAExecutionProvider", "CPUExecutionProvider"
+                    ]
                     provider_options = [
                         {
                             "device_id": 0,
                             "arena_extend_strategy": "kNextPowerOfTwo",
-                            "gpu_mem_limit": 10 * 1024 * 1024 * 1024,  # 10GB limit
+                            "gpu_mem_limit": 10 * 1024 * 1024 * 1024,  # 10GB
                             "cudnn_conv_use_max_workspace": "1",
                             "do_copy_in_default_stream": "1"
                         },
@@ -192,7 +196,7 @@ class LLMManager:
                     )
                     providers = ["CPUExecutionProvider"]
                     provider_options = [{}]
-                
+
                 # Prepare persistent ONNX cache to avoid re-export on every start
                 onnx_cache_dir = os.path.join(
                     project_root, "outputs", "onnx_models", LLM_MODEL.replace("/", "__")
@@ -241,7 +245,7 @@ class LLMManager:
                             )
                     except Exception as save_err:
                         logger.warning(f"Could not save ONNX model cache: {save_err}")
-                
+
                 # Create pipeline with ONNX model
                 self.pipeline = pipeline(
                     "text-generation",
@@ -250,7 +254,7 @@ class LLMManager:
                     pad_token_id=self.tokenizer.pad_token_id,
                     return_full_text=False  # Only return generated completion
                 )
-                
+
                 load_time = time.time() - start_time
                 logger.debug(f"ONNX optimized model loaded in {load_time:.2f} seconds")
             except Exception as e:
@@ -260,11 +264,11 @@ class LLMManager:
         else:
             # Standard model loading
             self._load_standard_model()
-    
+
     def _load_standard_model(self):
         """Load model using standard Hugging Face pipeline."""
         logger.debug("Loading model using standard pipeline approach...")
-        
+
         # Use pipeline for better memory management and compatibility
         try:
             # CPU-optimized pipeline configuration
@@ -277,7 +281,7 @@ class LLMManager:
                 "pad_token_id": self.tokenizer.pad_token_id,
                 "return_full_text": False,  # Only return generated completion
             }
-            
+
             # Device-specific optimizations
             if LLM_DEVICE == "cpu":
                 pipeline_kwargs.update({
@@ -292,23 +296,23 @@ class LLMManager:
                     "device": "cuda:0",  # Explicitly use first GPU
                 })
                 logger.info("🚀 Using GPU-optimized pipeline settings")
-            
+
             self.pipeline = pipeline(**pipeline_kwargs)
             logger.debug("Pipeline loaded successfully")
         except Exception as e:
             logger.error(f"Failed to load pipeline: {e}")
             raise
-        
+
         # Pipeline is already created above
         logger.debug("Pipeline setup complete")
-        
+
         # Cache this instance globally
         global _llm_manager_instance
         _llm_manager_instance = self
         logger.debug("LLM Manager instance cached for reuse")
-    
+
     def generate_response(
-        self, 
+        self,
         prompt: str,
         max_new_tokens: Optional[int] = None,
         temperature: Optional[float] = None,
@@ -316,13 +320,13 @@ class LLMManager:
     ) -> str:
         """
         Generate a response for the given prompt.
-        
+
         Args:
             prompt: The input prompt
             max_new_tokens: Optional override for max response length
             temperature: Optional override for temperature
             top_p: Optional override for top-p sampling
-            
+
         Returns:
             The generated response text
         """
@@ -355,12 +359,12 @@ You are an expert in sustainability education and engineering curriculum develop
             formatted_prompt = f"""<|system|>You are a helpful AI assistant.<|endoftext|>
 <|user|>{prompt}<|endoftext|>
 <|assistant|>"""
-        
+
         try:
             # Generate response with dynamic temperature
             current_temperature = temperature or get_dynamic_temperature()
             current_top_p = top_p or get_dynamic_top_p()
-            
+
             outputs = self.pipeline(
                 formatted_prompt,
                 max_new_tokens=max_new_tokens or get_dynamic_max_new_tokens() or LLM_MAX_NEW_TOKENS,
@@ -371,7 +375,7 @@ You are an expert in sustainability education and engineering curriculum develop
                 no_repeat_ngram_size=3,
                 do_sample=True
             )
-            
+
             # Extract response text
             if isinstance(outputs, list) and len(outputs) > 0:
                 response = outputs[0]
@@ -381,7 +385,7 @@ You are an expert in sustainability education and engineering curriculum develop
                     response_text = str(response)
             else:
                 response_text = str(outputs)
-                
+
             # Extract just the assistant's response
             if "mistral" in LLM_MODEL.lower():
                 # For Mistral, extract response after [/INST]
@@ -395,56 +399,56 @@ You are an expert in sustainability education and engineering curriculum develop
                     response_text = response_text.split("<|assistant|>")[-1].strip()
                 if "<|endoftext|>" in response_text:
                     response_text = response_text.split("<|endoftext|>")[0].strip()
-            
+
             # Clean up response formatting
             response_text = response_text.strip()
-            
+
             # Remove common formatting artifacts
             artifacts_to_remove = [
-                "Response:", "Answer:", "Assistant:", "AI:", 
+                "Response:", "Answer:", "Assistant:", "AI:",
                 "<|assistant|>", "<|user|>", "<|system|>",
                 "[/INST]", "</s>", "<|endoftext|>"
             ]
-            
+
             for artifact in artifacts_to_remove:
                 response_text = response_text.replace(artifact, "").strip()
-            
+
             # Ensure proper bullet point formatting
             response_text = response_text.replace("•", "•").replace("·", "•")
-            
+
             # Check for truncation indicators
             truncation_indicators = [
-                "...", "etc.", "and so on", "continues", "more", 
+                "...", "etc.", "and so on", "continues", "more",
                 "further", "additionally", "moreover", "furthermore"
             ]
-            
+
             is_truncated = False
             for indicator in truncation_indicators:
                 if response_text.lower().endswith(indicator.lower()):
                     is_truncated = True
                     break
-            
+
             # Check if response seems incomplete (ends mid-sentence)
             if response_text and not response_text.endswith(('.', '!', '?', ':', ';')):
                 is_truncated = True
-            
+
             if is_truncated and ENABLE_TRUNCATION_DETECTION:
                 logger.warning("Response appears to be truncated - consider increasing max_new_tokens")
                 # Add a note about truncation
                 response_text += "\n\n[Note: Response may be incomplete due to length limits]"
-            
+
             # Log response statistics
             response_tokens = len(response_text.split())
             logger.info(f"Generated response with {response_tokens} words")
-            
+
             return response_text
-            
+
         except Exception as e:
             logger.error(f"Error during generation: {str(e)}")
             return f"Error generating response: {str(e)}"
 
     def generate_response_with_continuation(
-        self, 
+        self,
         prompt: str,
         max_new_tokens: Optional[int] = None,
         temperature: Optional[float] = None,
@@ -452,20 +456,20 @@ You are an expert in sustainability education and engineering curriculum develop
     ) -> str:
         """
         Generate a response with automatic continuation if truncated.
-        
+
         Args:
             prompt: The input prompt
             max_new_tokens: Optional override for max response length
             temperature: Optional override for temperature
             top_p: Optional override for top-p sampling
-            
+
         Returns:
             Complete response text (potentially with continuation)
         """
         try:
             # Generate initial response
             response_text = self.generate_response(prompt, max_new_tokens, temperature, top_p)
-            
+
             # Check if continuation is needed
             if ENABLE_TRUNCATION_DETECTION and self._is_response_truncated(response_text):
                 logger.info("Detected truncated response, generating continuation...")
@@ -476,17 +480,17 @@ You are an expert in sustainability education and engineering curriculum develop
                     # Remove the truncation note if it exists
                     if "[Note: Response may be incomplete due to length limits]" in response_text:
                         response_text = response_text.replace("\n\n[Note: Response may be incomplete due to length limits]", "")
-                    
+
                     # Combine responses with better formatting
                     response_text = response_text.rstrip() + " " + continuation.strip()
                     logger.info("Successfully generated continuation")
-            
+
             # Log final response statistics
             response_tokens = len(response_text.split())
             logger.info(f"Generated complete response with {response_tokens} words")
-            
+
             return response_text
-            
+
         except Exception as e:
             logger.error(f"Error during enhanced generation: {str(e)}")
             return f"Error generating response: {str(e)}"
@@ -495,19 +499,19 @@ You are an expert in sustainability education and engineering curriculum develop
         """Check if a response appears to be truncated."""
         # Check for truncation indicators
         truncation_indicators = [
-            "...", "etc.", "and so on", "continues", "more", 
+            "...", "etc.", "and so on", "continues", "more",
             "further", "additionally", "moreover", "furthermore",
             "[Note: Response may be incomplete due to length limits]"
         ]
-        
+
         for indicator in truncation_indicators:
             if indicator.lower() in response_text.lower():
                 return True
-        
+
         # Check if response seems incomplete (ends mid-sentence)
         if response_text and not response_text.strip().endswith(('.', '!', '?', ':', ';')):
             return True
-        
+
         return False
 
     def _generate_continuation(
@@ -522,26 +526,26 @@ You are an expert in sustainability education and engineering curriculum develop
         try:
             # Clean up partial response for continuation prompt
             clean_partial = partial_response.replace("\n\n[Note: Response may be incomplete due to length limits]", "").strip()
-            
+
             # Get the last few sentences to provide context
             sentences = clean_partial.split('.')
             if len(sentences) > 3:
                 context = '. '.join(sentences[-3:]).strip()
             else:
                 context = clean_partial
-            
+
             # Create continuation prompt
             continuation_prompt = f"""Please continue and complete this response about: "{original_prompt}"
 
 The response so far ends with: "{context}"
 
 Continue from where it left off and provide a complete conclusion:"""
-            
+
             logger.debug("Generating continuation with context")
-            
+
             # Generate continuation with shorter length to avoid infinite recursion
             continuation_tokens = min(max_new_tokens or LLM_MAX_NEW_TOKENS, 500)
-            
+
             # Use original generate_response to avoid recursion
             continuation = self.generate_response(
                 continuation_prompt,
@@ -549,15 +553,15 @@ Continue from where it left off and provide a complete conclusion:"""
                 temperature=temperature,
                 top_p=top_p
             )
-            
+
             # Clean up continuation (remove any repetition of context)
             if continuation and len(continuation.strip()) > 20:
                 # Remove the truncation note from continuation if present
                 continuation = continuation.replace("\n\n[Note: Response may be incomplete due to length limits]", "")
                 return continuation.strip()
-            
+
             return ""
-            
+
         except Exception as e:
             logger.error(f"Error generating continuation: {str(e)}")
             return ""
@@ -571,13 +575,13 @@ Continue from where it left off and provide a complete conclusion:"""
     ) -> List[str]:
         """
         Generate responses for multiple prompts in batch.
-        
+
         Args:
             prompts: List of input prompts
             max_new_tokens: Optional override for max new tokens to generate
             temperature: Optional override for temperature
             top_p: Optional override for top-p sampling
-            
+
         Returns:
             List of generated response texts
         """
@@ -590,6 +594,82 @@ Continue from where it left off and provide a complete conclusion:"""
             )
             for prompt in prompts
         ]
+
+    def tot_generate(
+        self,
+        prompt: str,
+        breadth: int = 3,
+        depth: int = 2,
+        temperature: Optional[float] = None,
+        top_p: Optional[float] = None,
+        max_new_tokens: Optional[int] = None,
+    ) -> str:
+        """Tree-of-Thought generation with simple heuristic scoring.
+
+        - breadth: number of candidate branches per level
+        - depth: tree depth (>=1)
+        """
+        breadth = max(1, int(breadth or 1))
+        depth = max(1, int(depth or 1))
+
+        def score_response(text: str) -> float:
+            if not text:
+                return 0.0
+            lowered = text.lower()
+            keywords = (
+                "sustainab", "building", "envelope", "thermal", "energy",
+                "moisture", "airtight", "ventilation", "carbon", "embodied",
+                "operational", "lca", "daylight", "glazing", "u-value",
+                "ashrae", "leed", "commissioning", "retrofit"
+            )
+            hits = sum(1 for k in keywords if k in lowered)
+            length_bonus = min(len(text) / 800.0, 2.0)
+            return hits * 1.0 + length_bonus
+
+        def expand(node_prompt: str, d: int) -> Dict[str, Any]:
+            # Base case
+            if d <= 0:
+                out = self.generate_response(
+                    node_prompt,
+                    max_new_tokens=max_new_tokens,
+                    temperature=temperature or get_dynamic_temperature(),
+                    top_p=top_p or get_dynamic_top_p(),
+                )
+                return {"text": out, "score": score_response(out)}
+
+            candidates: List[Dict[str, Any]] = []
+            for i in range(breadth):
+                thought_prompt = (
+                    f"{node_prompt}\n\n"
+                    f"Think step-by-step and propose candidate solution variant #{i+1} "
+                    f"focused on precise, actionable guidance."
+                )
+                out = self.generate_response(
+                    thought_prompt,
+                    max_new_tokens=max_new_tokens,
+                    temperature=(temperature or get_dynamic_temperature()) * 1.05,
+                    top_p=top_p or get_dynamic_top_p(),
+                )
+                candidates.append({"text": out, "score": score_response(out)})
+
+            # Keep top-k (here equal to breadth) and optionally refine next level
+            candidates.sort(key=lambda x: x["score"], reverse=True)
+            best = candidates[0]
+
+            if d > 1:
+                refined_prompt = (
+                    f"Improve on the following candidate by making it more concrete, "
+                    f"succinct, and technically grounded. Keep citations short.\n\n"
+                    f"Candidate to refine:\n{best['text']}\n\nRefined answer:"
+                )
+                refined = expand(refined_prompt, d - 1)
+                # Choose the better of best and refined
+                return refined if refined["score"] >= best["score"] else best
+
+            return best
+
+        result = expand(prompt, depth)
+        return result.get("text", "")
 
 # Global instance - lazy loaded
 _llm_instance = None
@@ -607,9 +687,9 @@ def get_llm():
                     if line and not line.startswith('#') and '=' in line:
                         key, value = line.split('=', 1)
                         os.environ[key] = value
-        
+
         _llm_instance = LLMManager()
     return _llm_instance
 
 # For backward compatibility - don't initialize at import time
-llm = None 
+llm = None

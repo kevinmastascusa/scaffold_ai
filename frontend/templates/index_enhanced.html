@@ -741,10 +741,72 @@
                         <button class="model-btn secondary" onclick="clearMemory()">
                             <i class="fas fa-eraser"></i> Clear Memory
                         </button>
+                        <label style="display:flex;align-items:center;gap:8px;margin-top:8px;font-size:12px;color:#a0aec0;">
+                            <input type="checkbox" id="explainToggle" /> Explain mode
+                        </label>
                     </div>
                     
                     <div class="model-status">
                         <span class="status-badge active" id="modelStatus">Active</span>
+                    </div>
+                </div>
+                
+                <div class="model-control-section">
+                    <div class="section-title">
+                        <i class="fas fa-sliders-h"></i> Runtime Flags
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:8px;color:#e2e8f0;font-size:12px;">
+                        <label style="display:flex;align-items:center;gap:8px;">
+                            <input type="checkbox" id="flagStrict" /> Strict answers (precise)
+                        </label>
+                        <label style="display:flex;align-items:center;gap:8px;">
+                            <input type="checkbox" id="flagTruncation" /> Enable truncation detection
+                        </label>
+                        <label style="display:flex;align-items:center;gap:8px;">
+                            <input type="checkbox" id="flagQuality" /> Quality mode (blueprint)
+                        </label>
+                        <label style="display:flex;align-items:center;gap:8px;">
+                            <input type="checkbox" id="flagGPU" /> Use GPU (if available)
+                        </label>
+                        <label style="display:flex;align-items:center;gap:8px;">
+                            <input type="checkbox" id="flagForceCPU" /> Force CPU only
+                        </label>
+                    </div>
+                    <div class="model-actions" style="margin-top:10px;">
+                        <button class="model-btn primary" onclick="applyFlagChanges()">
+                            <i class="fas fa-toggle-on"></i> Apply Flags
+                        </button>
+                        <button class="model-btn secondary" onclick="reloadFlags()">
+                            <i class="fas fa-sync"></i> Refresh
+                        </button>
+                    </div>
+                    <div class="model-status" style="margin-top:6px;">
+                        <span class="status-badge" id="flagsStatus">Flags</span>
+                    </div>
+                </div>
+                
+                <div class="model-control-section">
+                    <div class="section-title">
+                        <i class="fas fa-project-diagram"></i> Tree-of-Thought
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:8px;color:#e2e8f0;font-size:12px;">
+                        <label style="display:flex;align-items:center;gap:8px;">
+                            <input type="checkbox" id="flagToT" /> Enable ToT
+                        </label>
+                        <div style="display:flex;gap:8px;align-items:center;">
+                            <span>Breadth</span>
+                            <input type="number" id="totBreadth" min="1" max="6" step="1" value="3" style="width:60px;" />
+                            <span>Depth</span>
+                            <input type="number" id="totDepth" min="1" max="4" step="1" value="2" style="width:60px;" />
+                        </div>
+                    </div>
+                    <div class="model-actions" style="margin-top:10px;">
+                        <button class="model-btn primary" onclick="applyFlagChanges()">
+                            <i class="fas fa-toggle-on"></i> Apply ToT
+                        </button>
+                        <button class="model-btn secondary" onclick="reloadFlags()">
+                            <i class="fas fa-sync"></i> Refresh
+                        </button>
                     </div>
                 </div>
                 
@@ -823,6 +885,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             loadConversationHistory();
             initializeModelControls();
+            reloadFlags();
         });
 
         // Auto-resize textarea
@@ -926,7 +989,8 @@
                     },
                     body: JSON.stringify({ 
                         message: message,
-                        temperature: temperature
+                        temperature: temperature,
+                        explain: document.getElementById('explainToggle')?.checked || false
                     })
                 })
                 .then(response => {
@@ -940,6 +1004,9 @@
                     if (data.success) {
                         console.log('Adding AI response to chat');
                         addMessage('ai', data.response.content, data.response.sources);
+                        if (data.explain) {
+                            addMessage('system', `\n<b>Reasoning summary</b>: ${data.explain.reasoning || 'n/a'}\n\n<b>Prompt</b>:<br><code>${(data.explain.prompt||'').replace(/</g,'&lt;')}</code>\n\n<b>Context trace</b>: ${(data.explain.context||[]).map(s=>s.source?.name||'').join(', ')}`);
+                        }
                     } else {
                         console.error('API error:', data.error);
                         addMessage('system', `Error: ${data.error}`);
@@ -1379,6 +1446,73 @@
             localStorage.removeItem('modelSettings');
             
             showNotification('Settings reset to defaults', 'info');
+        }
+
+        function reloadFlags() {
+            fetch('/api/flags')
+                .then(r => r.json())
+                .then(flags => {
+                    document.getElementById('flagStrict').checked = ['1','true','yes','on'].includes(String(flags.SC_STRICT_ANSWERS||'').toLowerCase());
+                    document.getElementById('flagTruncation').checked = ['1','true','yes','on'].includes(String(flags.SC_ENABLE_TRUNCATION_DETECTION||'').toLowerCase());
+                    document.getElementById('flagQuality').checked = ['1','true','yes','on'].includes(String(flags.SC_QUALITY_MODE||'').toLowerCase());
+                    document.getElementById('flagGPU').checked = ['1','true','yes','on'].includes(String(flags.SC_INCLUDE_CUDA||'').toLowerCase());
+                    document.getElementById('flagForceCPU').checked = ['1','true','yes','on'].includes(String(flags.SC_FORCE_CPU||'').toLowerCase());
+                    document.getElementById('flagToT').checked = ['1','true','yes','on'].includes(String(flags.SC_ENABLE_TOT||'').toLowerCase());
+                    if (flags.SC_TOT_BREADTH) document.getElementById('totBreadth').value = parseInt(flags.SC_TOT_BREADTH) || 3;
+                    if (flags.SC_TOT_DEPTH) document.getElementById('totDepth').value = parseInt(flags.SC_TOT_DEPTH) || 2;
+                    const badge = document.getElementById('flagsStatus');
+                    if (badge) { badge.className = 'status-badge active'; badge.textContent = 'Loaded'; }
+                })
+                .catch(err => {
+                    const badge = document.getElementById('flagsStatus');
+                    if (badge) { badge.className = 'status-badge error'; badge.textContent = 'Error'; }
+                    console.error('Error loading flags:', err);
+                });
+        }
+
+        function applyFlagChanges() {
+            const strict = document.getElementById('flagStrict').checked;
+            const trunc = document.getElementById('flagTruncation').checked;
+            const quality = document.getElementById('flagQuality').checked;
+            const gpu = document.getElementById('flagGPU').checked;
+            const forceCpu = document.getElementById('flagForceCPU').checked;
+            const tot = document.getElementById('flagToT').checked;
+            const breadth = parseInt(document.getElementById('totBreadth').value) || 3;
+            const depth = parseInt(document.getElementById('totDepth').value) || 2;
+
+            const payload = {
+                SC_STRICT_ANSWERS: strict,
+                SC_ENABLE_TRUNCATION_DETECTION: trunc,
+                SC_QUALITY_MODE: quality,
+                SC_INCLUDE_CUDA: gpu,
+                SC_FORCE_CPU: forceCpu && !gpu,
+                SC_ENABLE_TOT: tot,
+                SC_TOT_BREADTH: String(breadth),
+                SC_TOT_DEPTH: String(depth)
+            };
+
+            fetch('/api/flags', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(r => r.json())
+            .then(res => {
+                if (res.success) {
+                    showNotification('Flags applied. Some changes may require restart to fully take effect.', 'success');
+                    const badge = document.getElementById('flagsStatus');
+                    if (badge) { badge.className = 'status-badge active'; badge.textContent = 'Applied'; }
+                } else {
+                    showNotification('Failed to apply flags: ' + (res.error||'unknown error'), 'error');
+                    const badge = document.getElementById('flagsStatus');
+                    if (badge) { badge.className = 'status-badge error'; badge.textContent = 'Error'; }
+                }
+            })
+            .catch(err => {
+                showNotification('Failed to apply flags: ' + err.message, 'error');
+                const badge = document.getElementById('flagsStatus');
+                if (badge) { badge.className = 'status-badge error'; badge.textContent = 'Error'; }
+            });
         }
         
         function updateModelStatus(status) {
