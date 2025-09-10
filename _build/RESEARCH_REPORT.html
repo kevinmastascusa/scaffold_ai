@@ -1,0 +1,72 @@
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <base href="file:///C:/Users/dlaev/scaffold/scaffold_ai/" />
+    <style>
+    body { font-family: -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 2rem; }
+    pre, code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    img { max-width: 100%; height: auto; }
+    h1, h2, h3 { page-break-after: avoid; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ddd; padding: 6px; }
+    .page-break { page-break-before: always; }
+    </style>
+    <title>RESEARCH_REPORT.md</title>
+  </head>
+  <body>
+    <h3 id="scaffoldai-research-report-academic-style">ScaffoldAI — Research Report (Academic Style)</h3>
+<h4 id="abstract">Abstract</h4>
+<p>ScaffoldAI is a retrieval‑augmented system designed to assist STEM educators in incorporating sustainability and climate resilience concepts into existing curricula. The system ingests course documents, retrieves supporting passages, and synthesizes context‑aware responses with explicit citation hooks. This report summarizes the objectives, system design, methodology, and evaluation approach without enumerating results, emphasizing reproducible methods suitable for instructional settings.</p>
+<h4 id="1-introduction">1. Introduction</h4>
+<p>Integrating sustainability and climate resilience into STEM courses presents recurring challenges: limited instructor time, heterogeneous source materials, and the need for transparent grounding in scholarly texts. ScaffoldAI addresses these challenges by pairing document preprocessing and vector search with a compact language model that prioritizes factual grounding and citation readiness in classroom contexts.</p>
+<h4 id="2-related-context">2. Related Context</h4>
+<p>Contemporary educational tools increasingly combine information retrieval with generative modeling to improve transparency and control. Within this context, ScaffoldAI focuses on: (i) document normalization and chunking for robust retrieval, (ii) compact embeddings for efficient search, and (iii) a conservative synthesis step that privileges cited evidence over open‑ended generation.</p>
+<h4 id="3-methods">3. Methods</h4>
+<p>The methodology consists of five coordinated phases: data preparation, indexing, retrieval, synthesis, and presentation.</p>
+<ul>
+<li>Data preparation: normalize course documents, remove non‑content boilerplate, and extract structural cues that support later citation mapping.</li>
+<li>Indexing: produce dense vector representations and maintain a FAISS index alongside structured metadata for traceability.</li>
+<li>Retrieval: given a user query, return a small set of salient passages; optional light re‑ranking can be applied while preserving diversity.</li>
+<li>Synthesis: generate a concise answer constrained by retrieved context and attach citation handles to the originating passages.</li>
+<li>Presentation: return the answer and sources to the user interface in a format optimized for quick inspection in classroom settings.</li>
+</ul>
+<p>Figure 1 depicts the method at a glance.</p>
+<p><img alt="Figure 1. Methods overview" src="diagrams/methods_diagram_poster.png"></p>
+<h4 id="4-system-design">4. System Design</h4>
+<p>The implementation separates concerns across three layers:</p>
+<ul>
+<li>Ingestion and preprocessing: PDF parsing, text normalization, chunking, and metadata extraction.</li>
+<li>Retrieval: embedding generation, FAISS similarity search, and optional re‑ranking for relevance and coverage.</li>
+<li>Answering and citation: prompt assembly, controlled generation, and source mapping for explainability.</li>
+</ul>
+<p>The user interface is a lightweight web application that exposes upload, query, and feedback flows appropriate for instructional use. A Windows folder‑based build is provided to facilitate classroom deployment without requiring a local Python installation.</p>
+<h4 id="5-evaluation-approach-design-only">5. Evaluation Approach (Design Only)</h4>
+<p>Evaluation emphasizes transparency and curricular usefulness rather than raw language modeling capability. The protocol involves: (i) a compact set of representative classroom queries, (ii) manual inspection of answer faithfulness to retrieved passages, and (iii) brief written justifications regarding suitability for lesson planning. Quantitative metrics can be recorded where appropriate, but the emphasis remains on groundedness and clarity.</p>
+<h4 id="6-limitations">6. Limitations</h4>
+<p>ScaffoldAI inherits limitations typical of retrieval‑augmented systems: sensitivity to the quality and coverage of the indexed corpus, occasional retrieval omissions, and dependence on token and model access policies. In addition, classroom bandwidth constraints and workstation policies may influence first‑time model startup and asset caching.</p>
+<h4 id="7-deployment-notes">7. Deployment Notes</h4>
+<p>For instructors, a folder‑based executable is provided to avoid toolchain setup. Where model access requires authentication, a local environment file may be placed adjacent to the application. For developers, a standard Python workflow is available for experimentation and extension.</p>
+<h4 id="8-future-directions-concise">8. Future Directions (Concise)</h4>
+<ul>
+<li>Corpus stewardship and periodic re‑indexing to preserve coverage and provenance.</li>
+<li>Lightweight re‑ranking to balance relevance and diversity of retrieved passages.</li>
+<li>Usability refinements to streamline citation review and export during lesson design.</li>
+<li>Basic observability to monitor latency and capture anonymized usage patterns for iterative improvement.</li>
+</ul>
+<h4 id="appendix-graphrag-next-steps-concise">Appendix: Graph‑RAG next steps (concise)</h4>
+<ul>
+<li>Define schema: course → topic → concept → source, with relation types (cites, exemplifies, prerequisite_of).</li>
+<li>Entity/edge extraction: lightweight NER + pattern rules to derive candidate nodes/edges from PDFs; store provenance per edge.</li>
+<li>Storage: begin with a small embedded graph (e.g., NetworkX + persisted JSON/SQLite) co‑located with <code>vector_outputs/</code>.</li>
+<li>Hybrid retrieval: (1) vector top‑k; (2) expand via graph neighborhoods (1–2 hops) to include connected evidence; (3) deduplicate by DOI/URL.</li>
+<li>Scoring: combine vector similarity with graph centrality/edge confidence; expose a single relevance score to the synthesizer.</li>
+<li>Prompt assembly: segment context by graph communities (concept clusters) to reduce redundancy and improve coverage.</li>
+<li>Guardrails: cap hops/nodes, prefer edges with strong provenance, and log selected subgraphs for auditability.</li>
+</ul>
+<h4 id="9-conclusion">9. Conclusion</h4>
+<p>ScaffoldAI provides an instructional aid that foregrounds evidence‑based responses, making it practical to incorporate sustainability and climate resilience into STEM courses. The method and design emphasize transparency, reproducibility, and minimal friction for classroom adoption.</p>
+  </body>
+</html>

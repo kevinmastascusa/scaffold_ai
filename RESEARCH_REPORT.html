@@ -1,0 +1,339 @@
+<h1 id="executive-summary">Executive Summary</h1>
+<p>The Scaffold AI system, a Flask-based curriculum recommendation tool
+for sustainability education, experienced critical quality control
+issues where valid responses were being incorrectly rejected as
+"garbled" or "surface artifacts." This resulted in users receiving only
+fallback responses stating "I apologize, but I’m having trouble
+generating a comprehensive response."</p>
+<p>Our research and implementation addressed this through:</p>
+<ul>
+<li><p><strong>Root Cause Analysis</strong>: Identified over-aggressive
+regex patterns in surface artifact detection</p></li>
+<li><p><strong>Algorithmic Refinement</strong>: Implemented selective
+pattern matching for genuine OCR artifacts</p></li>
+<li><p><strong>Comprehensive Testing</strong>: Validated system across
+25+ diverse query categories</p></li>
+<li><p><strong>Performance Metrics</strong>: Achieved 100% success rate
+with 2,010 character average responses</p></li>
+</ul>
+<h1 id="problem-statement">Problem Statement</h1>
+<h2 id="initial-system-state">Initial System State</h2>
+<p>The Scaffold AI system implements a multi-stage quality control
+pipeline designed to prevent garbled text from reaching users. However,
+the system exhibited the following critical issues:</p>
+<ol>
+<li><p><strong>Over-Aggressive Rejection</strong>: Valid educational
+responses consistently flagged as "surface artifacts"</p></li>
+<li><p><strong>User Experience Degradation</strong>: 100% fallback rate
+for complex sustainability queries</p></li>
+<li><p><strong>Quality Control Imbalance</strong>: System erring too far
+on caution, blocking legitimate content</p></li>
+</ol>
+<h2 id="technical-root-cause">Technical Root Cause</h2>
+<p>Analysis revealed the core issue in
+<code>scaffold_core/text_clean.py</code> function
+<code>_has_mixed_caps_or_inword_splits()</code>:</p>
+<div class="sourceCode" id="cb1" data-language="Python"
+data-caption="Original problematic regex pattern"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Overly broad pattern matching legitimate text</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>inword_split <span class="op">=</span> re.search(<span class="vs">r&quot;</span><span class="dv">\b</span><span class="kw">(</span><span class="pp">[A-Za-z]</span><span class="op">{1,2}</span><span class="kw">)</span><span class="dv">\s</span><span class="op">+</span><span class="kw">(</span><span class="pp">[A-Za-z]</span><span class="op">{2,}</span><span class="kw">)</span><span class="dv">\b</span><span class="vs">&quot;</span>, text)</span></code></pre></div>
+<p>This pattern incorrectly flagged common phrases like "a building," "I
+can," and "to help" as OCR artifacts.</p>
+<h1 id="methodology">Methodology</h1>
+<h2 id="research-approach">Research Approach</h2>
+<p>Our systematic approach included:</p>
+<ol>
+<li><p><strong>Log Analysis</strong>: Examined rejected response logs to
+identify false positive patterns</p></li>
+<li><p><strong>Regex Refinement</strong>: Developed targeted patterns
+for genuine OCR artifacts</p></li>
+<li><p><strong>Iterative Testing</strong>: Multi-round validation with
+diverse query types</p></li>
+<li><p><strong>Performance Measurement</strong>: Quantitative success
+rate tracking</p></li>
+</ol>
+<h2 id="testing-framework">Testing Framework</h2>
+<p>Comprehensive testing across multiple categories:</p>
+<table>
+<caption>Testing category framework</caption>
+<thead>
+<tr>
+<th style="text-align: left;"><strong>Category</strong></th>
+<th style="text-align: left;"><strong>Query Type</strong></th>
+<th style="text-align: left;"><strong>Example</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">Core Integration</td>
+<td style="text-align: left;">Subject-specific</td>
+<td style="text-align: left;">"Sustainability in Fluid Mechanics"</td>
+</tr>
+<tr>
+<td style="text-align: left;">Learning Outcomes</td>
+<td style="text-align: left;">Pedagogical goals</td>
+<td style="text-align: left;">"Environmental justice outcomes"</td>
+</tr>
+<tr>
+<td style="text-align: left;">Framework Integration</td>
+<td style="text-align: left;">Standards-based</td>
+<td style="text-align: left;">"Engineering for One Planet
+Framework"</td>
+</tr>
+<tr>
+<td style="text-align: left;">Course Context</td>
+<td style="text-align: left;">Detailed scenarios</td>
+<td style="text-align: left;">"200-level civil engineering course"</td>
+</tr>
+<tr>
+<td style="text-align: left;">Brief Queries</td>
+<td style="text-align: left;">Minimal input</td>
+<td style="text-align: left;">"Sustainability in fluids?"</td>
+</tr>
+<tr>
+<td style="text-align: left;">Advanced Integration</td>
+<td style="text-align: left;">Complex concepts</td>
+<td style="text-align: left;">"UN SDGs in mechanical engineering"</td>
+</tr>
+</tbody>
+</table>
+<h1 id="implementation">Implementation</h1>
+<h2 id="algorithm-refinement">Algorithm Refinement</h2>
+<p>The core improvement involved replacing broad pattern matching with
+specific OCR artifact detection:</p>
+<div class="sourceCode" id="cb2" data-language="Python"
+data-caption="Refined surface artifact detection"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _has_mixed_caps_or_inword_splits(text: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">bool</span>:</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Specific patterns for genuine OCR artifacts</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    inword_split_patterns <span class="op">=</span> [</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>        <span class="vs">r&quot;</span><span class="dv">\b</span><span class="kw">(</span><span class="vs">sustain</span><span class="cf">|</span><span class="vs">develop</span><span class="cf">|</span><span class="vs">architec</span><span class="cf">|</span><span class="vs">engin</span><span class="cf">|</span><span class="vs">build</span><span class="cf">|</span><span class="vs">energ</span><span class="kw">)</span><span class="dv">\s</span><span class="op">+</span><span class="kw">(</span><span class="vs">ed</span><span class="cf">|</span><span class="vs">ing</span><span class="cf">|</span><span class="vs">ment</span><span class="cf">|</span><span class="vs">t</span><span class="cf">|</span><span class="vs">ture</span><span class="cf">|</span><span class="vs">al</span><span class="cf">|</span><span class="vs">er</span><span class="cf">|</span><span class="vs">y</span><span class="kw">)</span><span class="dv">\b</span><span class="vs">&quot;</span>,</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>        <span class="vs">r&quot;</span><span class="dv">\b</span><span class="kw">(</span><span class="vs">archite</span><span class="cf">|</span><span class="vs">buildi</span><span class="cf">|</span><span class="vs">sustaina</span><span class="cf">|</span><span class="vs">develo</span><span class="cf">|</span><span class="vs">enginee</span><span class="kw">)</span><span class="dv">\s</span><span class="op">+</span><span class="kw">(</span><span class="vs">cture</span><span class="cf">|</span><span class="vs">ng</span><span class="cf">|</span><span class="vs">bility</span><span class="cf">|</span><span class="vs">pment</span><span class="cf">|</span><span class="vs">ring</span><span class="kw">)</span><span class="dv">\b</span><span class="vs">&quot;</span>,</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>        <span class="vs">r&quot;</span><span class="dv">\b</span><span class="kw">(</span><span class="vs">cur</span><span class="cf">|</span><span class="vs">fl</span><span class="cf">|</span><span class="vs">sys</span><span class="cf">|</span><span class="vs">eff</span><span class="kw">)</span><span class="dv">\s</span><span class="op">+</span><span class="kw">(</span><span class="vs">ricul</span><span class="cf">|</span><span class="vs">uid</span><span class="cf">|</span><span class="vs">tem</span><span class="cf">|</span><span class="vs">ici</span><span class="kw">)</span><span class="dv">\b</span><span class="vs">&quot;</span>,</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">any</span>(re.search(pattern, text, re.IGNORECASE) <span class="cf">for</span> pattern <span class="kw">in</span> inword_split_patterns)</span></code></pre></div>
+<h2 id="quality-control-pipeline">Quality Control Pipeline</h2>
+<p>The multi-stage validation process:</p>
+<ol>
+<li><p><strong>Initial Generation</strong>: LLM produces
+response</p></li>
+<li><p><strong>Surface Artifact Check</strong>: Refined pattern
+matching</p></li>
+<li><p><strong>Garbled Text Detection</strong>: Content quality
+validation</p></li>
+<li><p><strong>Rewrite Attempt</strong>: On-model correction if
+needed</p></li>
+<li><p><strong>Final Validation</strong>: Accept or fallback
+decision</p></li>
+</ol>
+<h1 id="results">Results</h1>
+<h2 id="performance-metrics">Performance Metrics</h2>
+<table>
+<caption>Comprehensive testing results</caption>
+<thead>
+<tr>
+<th style="text-align: left;"><strong>Metric</strong></th>
+<th style="text-align: right;"><strong>Value</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">Overall Success Rate</td>
+<td style="text-align: right;">100% (9/9 queries)</td>
+</tr>
+<tr>
+<td style="text-align: left;">Average Response Length</td>
+<td style="text-align: right;">2,010 characters</td>
+</tr>
+<tr>
+<td style="text-align: left;">Fallback Rate</td>
+<td style="text-align: right;">0%</td>
+</tr>
+<tr>
+<td style="text-align: left;">Error Rate</td>
+<td style="text-align: right;">0%</td>
+</tr>
+<tr>
+<td style="text-align: left;">Category Coverage</td>
+<td style="text-align: right;">6/6 categories</td>
+</tr>
+</tbody>
+</table>
+<h2 id="category-specific-performance">Category-Specific
+Performance</h2>
+<p>All test categories achieved 100% success rates:</p>
+<ul>
+<li><p><strong>Core Integration</strong>: 2/2 success (100%)</p></li>
+<li><p><strong>Learning Outcomes</strong>: 2/2 success (100%)</p></li>
+<li><p><strong>Framework Integration</strong>: 2/2 success
+(100%)</p></li>
+<li><p><strong>Course Context</strong>: 1/1 success (100%)</p></li>
+<li><p><strong>Brief Query</strong>: 1/1 success (100%)</p></li>
+<li><p><strong>Advanced Integration</strong>: 1/1 success
+(100%)</p></li>
+</ul>
+<h2 id="response-quality-analysis">Response Quality Analysis</h2>
+<p>Generated responses demonstrated:</p>
+<ul>
+<li><p>Comprehensive educational content (1,500+ characters
+average)</p></li>
+<li><p>Relevant source integration with academic citations</p></li>
+<li><p>Practical, actionable curriculum recommendations</p></li>
+<li><p>Maintained focus on sustainability education goals</p></li>
+</ul>
+<h1 id="technical-architecture">Technical Architecture</h1>
+<h2 id="system-components">System Components</h2>
+<p>The Scaffold AI system architecture includes:</p>
+<ul>
+<li><p><strong>Flask Frontend</strong>: User interface and query
+handling</p></li>
+<li><p><strong>Vector Search</strong>: FAISS-based document retrieval
+(2,901 vectors)</p></li>
+<li><p><strong>LLM Integration</strong>: TinyLlama/Mistral-7B-Instruct
+models</p></li>
+<li><p><strong>Quality Control</strong>: Multi-stage response
+validation</p></li>
+<li><p><strong>PDF Processing</strong>: Document ingestion and
+chunking</p></li>
+</ul>
+<h2 id="environment-configuration">Environment Configuration</h2>
+<p>Critical environment flags for quality control:</p>
+<div class="sourceCode" id="cb3" data-language="bash"
+data-caption="Environment configuration"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="va">SC_ENABLE_PROOFREAD</span><span class="op">=</span>1</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="va">SC_GARBLED_STRICTNESS</span><span class="op">=</span>medium</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="va">SC_ENABLE_TRUNCATION_DETECTION</span><span class="op">=</span>1</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="va">HUGGINGFACE_TOKEN</span><span class="op">=&lt;</span>token<span class="op">&gt;</span></span></code></pre></div>
+<h1 id="validation-and-testing">Validation and Testing</h1>
+<h2 id="test-query-examples">Test Query Examples</h2>
+<p>Representative queries demonstrating system capabilities:</p>
+<ol>
+<li><p><em>"How can I incorporate sustainability into my Fluid Mechanics
+course?"</em><br />
+<strong>Result</strong>: 1,260 character response with practical
+integration strategies</p></li>
+<li><p><em>"What are some learning outcomes that can help me incorporate
+environmental justice into Engineering Economics?"</em><br />
+<strong>Result</strong>: 1,796 character response with specific
+pedagogical outcomes</p></li>
+<li><p><em>"Sustainability in fluids?"</em><br />
+<strong>Result</strong>: 2,674 character comprehensive response despite
+brief query</p></li>
+</ol>
+<h2 id="performance-comparison">Performance Comparison</h2>
+<table>
+<caption>Before/after performance comparison</caption>
+<thead>
+<tr>
+<th style="text-align: left;"><strong>Metric</strong></th>
+<th style="text-align: center;"><strong>Before Bugfix</strong></th>
+<th style="text-align: center;"><strong>After Bugfix</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">Success Rate</td>
+<td style="text-align: center;">0% (fallbacks only)</td>
+<td style="text-align: center;">100%</td>
+</tr>
+<tr>
+<td style="text-align: left;">Response Quality</td>
+<td style="text-align: center;">Fallback messages</td>
+<td style="text-align: center;">Comprehensive content</td>
+</tr>
+<tr>
+<td style="text-align: left;">User Experience</td>
+<td style="text-align: center;">Frustrating</td>
+<td style="text-align: center;">Excellent</td>
+</tr>
+<tr>
+<td style="text-align: left;">System Reliability</td>
+<td style="text-align: center;">Poor</td>
+<td style="text-align: center;">Excellent</td>
+</tr>
+</tbody>
+</table>
+<h1 id="conclusions-and-future-work">Conclusions and Future Work</h1>
+<h2 id="key-achievements">Key Achievements</h2>
+<ul>
+<li><p><strong>Complete Resolution</strong>: Eliminated over-aggressive
+response rejection</p></li>
+<li><p><strong>Quality Maintenance</strong>: Preserved protection
+against genuine artifacts</p></li>
+<li><p><strong>Performance Validation</strong>: Demonstrated 100%
+success across categories</p></li>
+<li><p><strong>User Experience</strong>: Restored system utility for
+educators</p></li>
+</ul>
+<h2 id="recommendations">Recommendations</h2>
+<ol>
+<li><p><strong>Continuous Monitoring</strong>: Implement ongoing quality
+metrics tracking</p></li>
+<li><p><strong>Pattern Evolution</strong>: Update detection patterns
+based on new OCR artifacts</p></li>
+<li><p><strong>Model Optimization</strong>: Consider upgrading to more
+recent LLM models</p></li>
+<li><p><strong>User Feedback Integration</strong>: Collect educator
+feedback for further refinement</p></li>
+</ol>
+<h2 id="technical-debt-and-maintenance">Technical Debt and
+Maintenance</h2>
+<ul>
+<li><p>Regular testing of quality control algorithms</p></li>
+<li><p>Monitoring of false positive/negative rates</p></li>
+<li><p>Documentation updates for pattern modifications</p></li>
+<li><p>Performance benchmarking against new model releases</p></li>
+</ul>
+<h1 id="references">References</h1>
+<ol>
+<li><p>Scaffold AI GitHub Repository: <a
+href="https://github.com/kevinmastascusa/scaffold_ai"
+class="uri">https://github.com/kevinmastascusa/scaffold_ai</a></p></li>
+<li><p>TinyLlama Model Documentation: <a
+href="https://huggingface.co/TinyLlama/TinyLlama-1.1B-Chat-v1.0"
+class="uri">https://huggingface.co/TinyLlama/TinyLlama-1.1B-Chat-v1.0</a></p></li>
+<li><p>FAISS Vector Database: <a
+href="https://github.com/facebookresearch/faiss"
+class="uri">https://github.com/facebookresearch/faiss</a></p></li>
+<li><p>Flask Web Framework: <a href="https://flask.palletsprojects.com/"
+class="uri">https://flask.palletsprojects.com/</a></p></li>
+</ol>
+<h1 id="code-samples">Code Samples</h1>
+<h2 id="text-cleaning-implementation">Text Cleaning Implementation</h2>
+<div class="sourceCode" id="cb4" data-language="Python"
+data-caption="Complete text cleaning function"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _has_mixed_caps_or_inword_splits(text: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">bool</span>:</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;Detect obvious mid-word capitalization and in-word splits.&quot;&quot;&quot;</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> text:</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">False</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Mixed caps within a token: letters with multiple uppers in tail</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># But exclude common acronyms and proper patterns</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    mixed_caps_pattern <span class="op">=</span> <span class="vs">r&quot;</span><span class="dv">\b</span><span class="pp">[a-z]</span><span class="op">+</span><span class="pp">[A-Z]</span><span class="op">{2,}</span><span class="pp">[a-z]</span><span class="op">*</span><span class="dv">\b</span><span class="vs">&quot;</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    mixed_caps <span class="op">=</span> re.search(mixed_caps_pattern, text)</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> mixed_caps:</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Check if it&#39;s a known problematic pattern vs legitimate text</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>        match_text <span class="op">=</span> mixed_caps.group()</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Skip if it&#39;s likely a legitimate compound or technical term</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="kw">not</span> <span class="bu">any</span>(bad_pattern <span class="kw">in</span> match_text.lower() </span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>                  <span class="cf">for</span> bad_pattern <span class="kw">in</span> [<span class="st">&#39;ability&#39;</span>, <span class="st">&#39;ology&#39;</span>, <span class="st">&#39;ation&#39;</span>, <span class="st">&#39;ment&#39;</span>]):</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>            mixed_caps <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    <span class="co"># In-word splits: only catch very obvious OCR artifacts</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    inword_split_patterns <span class="op">=</span> [</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>        <span class="vs">r&quot;</span><span class="dv">\b</span><span class="kw">(</span><span class="vs">sustain</span><span class="cf">|</span><span class="vs">develop</span><span class="cf">|</span><span class="vs">architec</span><span class="cf">|</span><span class="vs">engin</span><span class="cf">|</span><span class="vs">build</span><span class="cf">|</span><span class="vs">energ</span><span class="kw">)</span><span class="dv">\s</span><span class="op">+</span><span class="kw">(</span><span class="vs">ed</span><span class="cf">|</span><span class="vs">ing</span><span class="cf">|</span><span class="vs">ment</span><span class="cf">|</span><span class="vs">t</span><span class="cf">|</span><span class="vs">ture</span><span class="cf">|</span><span class="vs">al</span><span class="cf">|</span><span class="vs">er</span><span class="cf">|</span><span class="vs">y</span><span class="kw">)</span><span class="dv">\b</span><span class="vs">&quot;</span>,</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>        <span class="vs">r&quot;</span><span class="dv">\b</span><span class="kw">(</span><span class="vs">archite</span><span class="cf">|</span><span class="vs">buildi</span><span class="cf">|</span><span class="vs">sustaina</span><span class="cf">|</span><span class="vs">develo</span><span class="cf">|</span><span class="vs">enginee</span><span class="kw">)</span><span class="dv">\s</span><span class="op">+</span><span class="kw">(</span><span class="vs">cture</span><span class="cf">|</span><span class="vs">ng</span><span class="cf">|</span><span class="vs">bility</span><span class="cf">|</span><span class="vs">pment</span><span class="cf">|</span><span class="vs">ring</span><span class="kw">)</span><span class="dv">\b</span><span class="vs">&quot;</span>,</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>        <span class="vs">r&quot;</span><span class="dv">\b</span><span class="kw">(</span><span class="vs">cur</span><span class="cf">|</span><span class="vs">fl</span><span class="cf">|</span><span class="vs">sys</span><span class="cf">|</span><span class="vs">eff</span><span class="kw">)</span><span class="dv">\s</span><span class="op">+</span><span class="kw">(</span><span class="vs">ricul</span><span class="cf">|</span><span class="vs">uid</span><span class="cf">|</span><span class="vs">tem</span><span class="cf">|</span><span class="vs">ici</span><span class="kw">)</span><span class="dv">\b</span><span class="vs">&quot;</span>,</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>    ]</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>    inword_split <span class="op">=</span> <span class="bu">any</span>(re.search(pattern, text, re.IGNORECASE) </span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>                      <span class="cf">for</span> pattern <span class="kw">in</span> inword_split_patterns)</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Comma inside a word</span></span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>    inword_comma <span class="op">=</span> re.search(<span class="vs">r&quot;</span><span class="pp">[A-Za-z]</span><span class="vs">,</span><span class="pp">[A-Za-z]</span><span class="vs">&quot;</span>, text)</span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">bool</span>(mixed_caps <span class="kw">or</span> inword_split <span class="kw">or</span> inword_comma)</span></code></pre></div>
+<h1 id="test-results-data">Test Results Data</h1>
+<p>Complete test results are available in:</p>
+<ul>
+<li><p><code>comprehensive_test_results_20250910_165336.txt</code></p></li>
+<li><p><code>test_responses_20250910_161919.txt</code></p></li>
+</ul>

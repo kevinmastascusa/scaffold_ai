@@ -1,0 +1,381 @@
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <base href="file:///C:/Users/dlaev/scaffold/scaffold_ai/" />
+    <style>
+    body { font-family: -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 2rem; }
+    pre, code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    img { max-width: 100%; height: auto; }
+    h1, h2, h3 { page-break-after: avoid; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ddd; padding: 6px; }
+    .page-break { page-break-before: always; }
+    </style>
+    <title>RESEARCH_AND_HANDOFF_GUIDE.md</title>
+  </head>
+  <body>
+    <h3 id="scaffold-ai-research-report-and-handoff-guide">Scaffold AI — Research Report and Handoff Guide</h3>
+<p>This single document serves both as a research summary and a comprehensive handoff for future contributors.</p>
+<h2 id="executive-summary">Executive summary</h2>
+<ul>
+<li><strong>Purpose</strong>: AI-assisted curriculum recommendations for sustainability/climate resilience.</li>
+<li><strong>Interface</strong>: Modern Flask web app with chat and syllabus PDF upload.</li>
+<li><strong>Core techniques</strong>: RAG over a curated corpus (FAISS), LLM inference via Hugging Face, robust citation layer.</li>
+<li><strong>Where to run</strong>: Windows EXE for teachers; Python workflow for developers. Teacher quick start: see <code>TEACHER_ZIP_RUN.md</code>.</li>
+<li><strong>Status (updated 2025-08-26)</strong>:</li>
+<li>Quick tests: 15/15 success, avg 1.48s per prompt (see <code>quick_llm_test_summary_20250803_001740.txt</code>).</li>
+<li>Existing model suite: 15/15 success, avg 2.44s (<code>existing_model_test_summary_20250803_002413.txt</code>).</li>
+<li>ONNX benchmark: first-query latency improved (~30.35s → ~16.98s) on TinyLlama; overall average comparable (see <code>benchmark_results.json</code>).</li>
+</ul>
+<h2 id="system-overview">System overview</h2>
+<ul>
+<li><strong>Frontend/UI</strong>: <code>frontend/app_enhanced.py</code>, templates in <code>frontend/templates/</code>, static assets in <code>frontend/static/</code>.</li>
+<li><strong>Core processing</strong>: <code>scaffold_core/</code> modules for PDF processing, vector search, LLM, and citation handling.</li>
+<li><strong>Indexes and outputs</strong>: <code>vector_outputs/</code> for FAISS + metadata, <code>outputs/</code> for extracts, <code>conversations/</code> for chat logs.</li>
+</ul>
+<h2 id="architecture-diagram-highlevel">Architecture diagram (high‑level)</h2>
+<pre><code class="language-mermaid">graph TD
+  User[&quot;Teacher Browser&quot;] --&gt;|HTTP| Flask[&quot;Flask Enhanced UI\n(frontend/app_enhanced.py)&quot;]
+  Flask --&gt;|Upload PDF| PDF[&quot;PDF Processor\n(scaffold_core/pdf_processor.py)&quot;]
+  Flask --&gt;|Query| Query[&quot;Enhanced Query\n(scaffold_core/vector/enhanced_query_improved.py)&quot;]
+  Query --&gt; RAG[&quot;Retrieval + Reranking&quot;]
+  RAG --&gt; FAISS[(&quot;FAISS Index\nvector_outputs/scaffold_index_1.faiss&quot;)]
+  RAG --&gt; Meta[(&quot;Metadata\nvector_outputs/scaffold_metadata_1.json&quot;)]
+  Query --&gt; LLM[&quot;LLM Inference\n(scaffold_core/llm.py)&quot;]
+  LLM --&gt; HF[&quot;Hugging Face Models&quot;]
+  Query --&gt; Cite[&quot;Citation Handler\n(scaffold_core/citation_handler.py)&quot;]
+  Cite --&gt; Flask
+  PDF --&gt; Outputs[(&quot;outputs/*.json&quot;)]
+  Flask --&gt; Feedback[&quot;Feedback UI (/feedback)&quot;]
+  subgraph Storage
+    FAISS
+    Meta
+    Outputs
+    Conversations[(&quot;conversations/&quot;)]
+  end
+</code></pre>
+<p>If the diagram above does not render, refer to this image:</p>
+<p><img alt="High-level Architecture" src="diagrams/complete_pipeline_architecture.png"></p>
+<h2 id="endtoend-data-flow">End‑to‑end data flow</h2>
+<pre><code class="language-mermaid">flowchart LR
+  A[Teacher] --&gt; B[Browser UI]
+  B --&gt; C[/Upload Syllabus/]
+  C --&gt; D[PDF Processor: extract text, sections, objectives]
+  D --&gt; E[Chunk + Embed (if not already built)]
+  E --&gt; F[(FAISS Index)]
+  B --&gt; G[/Ask Question/]
+  G --&gt; H[Retrieve top‑k candidates from FAISS]
+  H --&gt; I[Cross‑encoder reranking (optional)]
+  I --&gt; J[LLM with prompt + retrieved context]
+  J --&gt; K[Citation assembly]
+  K --&gt; L[Response + citations to UI]
+</code></pre>
+<p>If the diagram above does not render, refer to this image:</p>
+<p><img alt="End-to-end Data Flow" src="diagrams/data_flow_diagram.png"></p>
+<h2 id="reproducible-setup">Reproducible setup</h2>
+<h3 id="option-a-windows-exe-no-install">Option A: Windows EXE (no install)</h3>
+<ul>
+<li>Download from releases, unzip, and run <code>dist\ScaffoldAI-EnhancedUI\ScaffoldAI-EnhancedUI.exe</code>.</li>
+<li>Optional: in the same folder, create <code>.env.local</code> with <code>HUGGINGFACE_TOKEN=...</code>.</li>
+<li>Ensure <code>vector_outputs/scaffold_index_1.faiss</code> and <code>vector_outputs/scaffold_metadata_1.json</code> are present.</li>
+</ul>
+<h3 id="option-b-developer-setup-python-312">Option B: Developer setup (Python 3.12+)</h3>
+<pre><code class="language-bat">python -m venv scaffold_env_312
+scaffold_env_312\Scripts\activate
+pip install -r requirements.txt
+set HUGGINGFACE_TOKEN=hf_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+python frontend\start_enhanced_ui.py --port 5002
+</code></pre>
+<ul>
+<li>Open <code>http://localhost:5002</code>.</li>
+</ul>
+<h2 id="data-preparation-pipeline">Data preparation pipeline</h2>
+<ol>
+<li>Place PDFs in <code>data/</code> (and subfolders).</li>
+<li>Extract + chunk:
+   <code>bat
+   python scaffold_core\scripts\chunk\ChunkTest.py</code></li>
+<li>Build embeddings + FAISS index:
+   <code>bat
+   python scaffold_core\vector\main.py</code></li>
+<li>Outputs:</li>
+<li>Extracts: <code>outputs/</code></li>
+<li>Index + metadata: <code>vector_outputs/</code></li>
+</ol>
+<h2 id="model-and-configuration">Model and configuration</h2>
+<ul>
+<li>Central config: <code>scaffold_core/config.py</code></li>
+<li>LLM logic: <code>scaffold_core/llm.py</code> (uses Hugging Face; set <code>HUGGINGFACE_TOKEN</code>).</li>
+<li>Query/RAG: <code>scaffold_core/vector/enhanced_query_improved.py</code></li>
+<li>Model selection and parameters: see <code>model_config.json</code> and UI controls (if enabled).</li>
+</ul>
+<h2 id="running-the-enhanced-ui">Running the Enhanced UI</h2>
+<ul>
+<li>Direct app: <code>frontend/app_enhanced.py</code> (served via <code>frontend/start_enhanced_ui.py</code>).</li>
+<li>Endpoints: <code>/api/chat</code>, <code>/api/upload-syllabus</code>, <code>/api/feedback</code>, <code>/api/health</code>.</li>
+<li>Templates: <code>frontend/templates/index_enhanced.html</code>.</li>
+</ul>
+<h2 id="evaluation-and-benchmarks">Evaluation and benchmarks</h2>
+<ul>
+<li>Quick tests: <code>quick_llama_eval.py</code>, <code>simple_llama_test.py</code>, <code>pipeline_llama_test.py</code>.</li>
+<li>Comprehensive: <code>full_test_suite.py</code>, <code>scaffold_core/scripts/run_tests.py</code>.</li>
+<li>Results snapshots: <code>existing_model_test_results_*.json</code>, <code>quick_llm_test_summary_*.txt</code>, <code>Full Test Results*.txt</code>.</li>
+<li>GPU/ONNX logs: <code>benchmark_gpu_log.txt</code>, <code>benchmark_onnx_log.txt</code>.</li>
+</ul>
+<h3 id="latest-results-snapshot">Latest results snapshot</h3>
+<ul>
+<li>Quick LLM test (2025‑08‑03 00:17): 15/15 passed; average response time 1.48s; average response length 135 chars. File: <code>quick_llm_test_summary_20250803_001740.txt</code>.</li>
+<li>Existing model test (2025‑08‑03 00:23): 15/15 passed; average response time 2.44s; average response length 226 chars. File: <code>existing_model_test_summary_20250803_002413.txt</code>.</li>
+<li>TinyLlama benchmark (2025‑08‑04):</li>
+<li>Baseline first‑query: 30.35s → ONNX first‑query: 16.98s (≈44% faster cold start).</li>
+<li>Baseline avg across 3 prompts: 23.91s; ONNX avg: 24.46s (comparable overall). File: <code>benchmark_results.json</code>.</li>
+</ul>
+<h2 id="packaging-and-releases">Packaging and releases</h2>
+<ul>
+<li>Build EXE (Windows):
+  <code>bat
+  scaffold_env_312\Scripts\activate
+  build_exe.bat</code></li>
+<li>Output: <code>dist/ScaffoldAI-EnhancedUI/ScaffoldAI-EnhancedUI.exe</code></li>
+<li>Provide checksums (e.g., <code>*.exe.sha256.txt</code>) and a zipped folder including <code>vector_outputs</code>.</li>
+</ul>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<ul>
+<li>Defender warning: “More info” → “Run anyway”.</li>
+<li>Port busy: start with <code>--port 5003</code> and open <code>http://localhost:5003</code>.</li>
+<li>Missing data files: ensure FAISS index + metadata in <code>vector_outputs/</code>.</li>
+<li>Token/model access: set <code>HUGGINGFACE_TOKEN</code> in <code>.env.local</code> or environment.</li>
+<li>Missing modules in packaged EXE: add <code>--collect-all &lt;module&gt;</code> to <code>build_exe.bat</code>.</li>
+</ul>
+<h2 id="repo-orientation-handoff">Repo orientation (handoff)</h2>
+<ul>
+<li>Key dirs:</li>
+<li><code>frontend/</code>: Flask app + UI</li>
+<li><code>scaffold_core/</code>: processing, LLM, vector, citations</li>
+<li><code>outputs/</code>, <code>vector_outputs/</code>, <code>conversations/</code>: run artifacts</li>
+<li><code>documentation/</code>: additional docs and reports</li>
+<li>High‑value files:</li>
+<li><code>frontend/start_enhanced_ui.py</code>: startup checks and run</li>
+<li><code>scaffold_core/pdf_processor.py</code>: syllabus/PDF handling</li>
+<li><code>scaffold_core/vector/enhanced_query_improved.py</code>: retrieval + LLM glue</li>
+<li><code>scaffold_core/citation_handler.py</code>: citation assembly</li>
+<li><code>scaffold_core/llm.py</code>: model loading and invocation</li>
+</ul>
+<h2 id="maintenance-future-work">Maintenance &amp; future work</h2>
+<ul>
+<li>Data: refresh corpus and re‑embed when adding PDFs.</li>
+<li>Models: evaluate larger/smarter models as resources allow.</li>
+<li>UI: multi‑file upload, analytics, export, and collaboration features.</li>
+<li>Infra: optional GPU acceleration, ONNX optimization, and caching.</li>
+</ul>
+<h2 id="next-steps-detailed-implementation-plan">Next steps (detailed implementation plan)</h2>
+<h3 id="1-host-the-web-app-on-tux-linux-server">1) Host the web app on "tux" (Linux server)</h3>
+<ul>
+<li><strong>Prereqs (once)</strong></li>
+<li>System packages:
+    <code>bash
+    sudo apt update &amp;&amp; sudo apt install -y python3-venv python3-pip build-essential nginx</code></li>
+<li>
+<p>Optional TLS (if using a domain): <code>sudo apt install -y certbot python3-certbot-nginx</code></p>
+</li>
+<li>
+<p><strong>App install (as deploy user)</strong>
+  <code>bash
+  cd /opt
+  sudo mkdir -p /opt/scaffold_ai &amp;&amp; sudo chown "$USER" /opt/scaffold_ai
+  git clone https://github.com/kevinmastascusa/scaffold_ai.git /opt/scaffold_ai
+  cd /opt/scaffold_ai
+  python3 -m venv venv
+  source venv/bin/activate
+  pip install --upgrade pip
+  pip install -r requirements.txt gunicorn</code></p>
+</li>
+<li>
+<p><strong>Environment</strong> (secrets not in git)
+  <code>bash
+  cat &gt; /opt/scaffold_ai/.env &lt;&lt; 'EOF'
+  FLASK_ENV=production
+  SC_HOST=127.0.0.1
+  SC_PORT=8000
+  HUGGINGFACE_TOKEN=hf_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+  # Optional: increase workers/threads based on CPU cores
+  GUNICORN_WORKERS=3
+  GUNICORN_THREADS=2
+  EOF</code></p>
+</li>
+<li>
+<p><strong>Gunicorn systemd unit</strong>
+  ```ini
+  # /etc/systemd/system/scaffoldai.service
+  [Unit]
+  Description=Scaffold AI (Flask + Gunicorn)
+  After=network.target</p>
+</li>
+</ul>
+<p>[Service]
+  Type=simple
+  User=%i
+  WorkingDirectory=/opt/scaffold_ai
+  EnvironmentFile=/opt/scaffold_ai/.env
+  ExecStart=/opt/scaffold_ai/venv/bin/gunicorn \
+    --workers ${GUNICORN_WORKERS:-3} --threads ${GUNICORN_THREADS:-2} \
+    --timeout 180 --bind ${SC_HOST:-127.0.0.1}:${SC_PORT:-8000} \
+    frontend.app_enhanced:app
+  Restart=always
+  RestartSec=5</p>
+<p>[Install]
+  WantedBy=multi-user.target
+  <code>Enable + start:</code>bash
+  sudo systemctl daemon-reload
+  sudo systemctl enable scaffoldai.service
+  sudo systemctl start scaffoldai.service
+  sudo systemctl status scaffoldai.service --no-pager
+  ```</p>
+<ul>
+<li>
+<p><strong>Nginx reverse proxy</strong>
+  ```nginx
+  # /etc/nginx/sites-available/scaffoldai
+  server {
+    listen 80;
+    server_name your.domain.example; # or _ for IP access</p>
+<p>client_max_body_size 32M; # allow PDF uploads</p>
+<p>location / {
+  proxy_pass http://127.0.0.1:8000;
+  proxy_set_header Host $host;
+  proxy_set_header X-Real-IP $remote_addr;
+  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+  proxy_set_header X-Forwarded-Proto $scheme;
+  proxy_read_timeout 300;
+}
+  }
+  <code>Activate and reload:</code>bash
+  sudo ln -s /etc/nginx/sites-available/scaffoldai /etc/nginx/sites-enabled/scaffoldai
+  sudo nginx -t &amp;&amp; sudo systemctl reload nginx
+  <code>``
+  TLS (optional):</code>sudo certbot --nginx -d your.domain.example`</p>
+</li>
+<li>
+<p><strong>Data/index deployment</strong></p>
+</li>
+<li>Place <code>vector_outputs/scaffold_index_1.faiss</code> and <code>vector_outputs/scaffold_metadata_1.json</code> under <code>/opt/scaffold_ai/vector_outputs/</code>.</li>
+<li>
+<p>For updates, rsync only changed files. Reload Gunicorn if needed.</p>
+</li>
+<li>
+<p><strong>Alternative quick hosting</strong></p>
+</li>
+<li>Cloudflare Tunnel (see <code>CLOUDFLARE_SETUP.md</code>) to expose <code>http://127.0.0.1:8000</code> without opening ports.</li>
+</ul>
+<h3 id="2-implement-robust-context-management">2) Implement robust context management</h3>
+<ul>
+<li>
+<p><strong>Goals</strong>: persistent conversations, controllable context window, summarization to keep prompts small, privacy.</p>
+</li>
+<li>
+<p><strong>Storage</strong></p>
+</li>
+<li>Start with SQLite (zero‑ops), upgrade to Postgres when multi‑user is needed.</li>
+<li>
+<p>Optional Redis for ephemeral context cache.</p>
+</li>
+<li>
+<p><strong>Schema (suggested)</strong>
+  <code>sql
+  -- conversations(id PK, user_id, title, created_at, updated_at)
+  -- messages(id PK, conversation_id FK, role ENUM('user','assistant','system'), content TEXT, tokens INT, created_at)
+  -- memory_summaries(id PK, conversation_id FK, summary TEXT, last_message_id INT, created_at)
+  -- citations(id PK, message_id FK, doi TEXT, source_id TEXT, score REAL, span_start INT, span_end INT)</code></p>
+</li>
+<li>
+<p><strong>API additions</strong></p>
+</li>
+<li><code>POST /api/session/start</code> → returns <code>conversation_id</code></li>
+<li><code>POST /api/session/end</code> → archive</li>
+<li><code>GET /api/session/:id</code> → messages + summary</li>
+<li>
+<p>Existing <code>/api/chat</code> accepts <code>conversation_id</code> and returns <code>message_id</code>, updated <code>summary</code> when rolled</p>
+</li>
+<li>
+<p><strong>Frontend</strong></p>
+</li>
+<li>Persist <code>conversationId</code> in <code>localStorage</code>.</li>
+<li>
+<p>Add simple session selector and “New chat”.</p>
+</li>
+<li>
+<p><strong>Context selection algorithm</strong></p>
+</li>
+<li>Load <code>summary</code> if exists; start prompt with it.</li>
+<li>From latest <code>N</code> messages, include until token budget reached.</li>
+<li>If budget exceeded, run summarization on the oldest half and store/update <code>memory_summaries</code>.</li>
+<li>
+<p>Optionally retrieve top‑k session snippets via mini‑embedding for relevance to current query.</p>
+</li>
+<li>
+<p><strong>Summarization trigger</strong></p>
+</li>
+<li>Trigger when total tokens in window &gt; threshold (e.g., 2k).</li>
+<li>Use a small instruct model for speed; store version/hash for reproducibility.</li>
+</ul>
+<h3 id="3-improve-citations-and-claim-traceability">3) Improve citations and claim traceability</h3>
+<ul>
+<li><strong>Retrieval hygiene</strong></li>
+<li>Deduplicate by DOI/URL; prefer canonical DOI.</li>
+<li>
+<p>Track page ranges/paragraph IDs.</p>
+</li>
+<li>
+<p><strong>Inline references</strong></p>
+</li>
+<li>Use bracketed indices like <code>[1]</code>, <code>[2]</code> in the generated text, each mapping to a Source list with title, authors, year, DOI/URL.</li>
+<li>
+<p>Attach citation spans (start/end char offsets) to messages for UI highlighting.</p>
+</li>
+<li>
+<p><strong>Metadata enrichment</strong></p>
+</li>
+<li>Resolve DOIs via Crossref with caching and rate limiting.</li>
+<li>
+<p>Normalize titles/authors; store in <code>vector_outputs</code> metadata when rebuilding.</p>
+</li>
+<li>
+<p><strong>Scoring &amp; filtering</strong></p>
+</li>
+<li>Combine retriever score + reranker score; show confidence in UI.</li>
+<li>
+<p>Drop low‑confidence citations or flag them as tentative.</p>
+</li>
+<li>
+<p><strong>UI enhancements</strong></p>
+</li>
+<li>Clickable citations scroll to the Sources section; hover to preview.</li>
+<li>
+<p>Toggle “Show citation spans” for auditors.</p>
+</li>
+<li>
+<p><strong>Evaluation</strong></p>
+</li>
+<li>Manual spot checks with <code>CITATION_DEBUG_REPORT.md</code>.</li>
+<li>Metrics: citation precision@k, missing‑citation rate, hallucination flag rate.</li>
+</ul>
+<h3 id="4-monitoring-security-and-performance">4) Monitoring, security, and performance</h3>
+<ul>
+<li><strong>Monitoring</strong>: request IDs, structured JSON logs, time‑to‑first‑token, retriever latency, LLM latency; redact PII.</li>
+<li><strong>Security</strong>: CORS restrict to your domain, basic auth or SSO in front of Nginx, rate limiting (Nginx <code>limit_req</code>).</li>
+<li><strong>Performance</strong>: preload models, tune Gunicorn workers/threads, enable HTTP keep‑alive, cache frequent queries, consider quantized models.</li>
+</ul>
+<h2 id="ethics-privacy-and-licensing">Ethics, privacy, and licensing</h2>
+<ul>
+<li>Avoid uploading sensitive PDFs.</li>
+<li>Cite sources transparently.</li>
+</ul>
+<h2 id="contacts">Contacts</h2>
+<ul>
+<li>See repo README for collaborators and contact info.</li>
+</ul>
+  </body>
+</html>

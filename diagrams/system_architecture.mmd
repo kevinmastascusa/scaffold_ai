@@ -1,0 +1,10 @@
+graph TD
+  UI["Enhanced Flask UI\n(frontend/app_enhanced.py)"] --> API[/HTTP endpoints/]
+  API --> PDF["PDF Processor\n(scaffold_core/pdf_processor.py)"]
+  API --> RAG["Query + Retrieval\n(scaffold_core/vector/enhanced_query_improved.py)"]
+  RAG --> IDX[("FAISS index\nvector_outputs/*.faiss")]
+  RAG --> META[("Metadata\nvector_outputs/*.json")]
+  RAG --> LLM["LLM Interface\n(scaffold_core/llm.py)"]
+  LLM --> HF["Hugging Face Models"]
+  RAG --> CITE["Citation Handling\n(scaffold_core/citation_handler.py)"]
+  CITE --> UI

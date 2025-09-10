@@ -1,9 +1,15 @@
 # -*- mode: python ; coding: utf-8 -*-
 from PyInstaller.utils.hooks import collect_all
 
-datas = [('frontend', 'frontend'), ('scaffold_core', 'scaffold_core'), ('vector_outputs\\scaffold_index_1.faiss', 'vector_outputs'), ('vector_outputs\\scaffold_metadata_1.json', 'vector_outputs')]
+datas = [('frontend', 'frontend'), ('scaffold_core', 'scaffold_core'), ('model_config.json', '.'), ('outputs\\onnx_models', 'outputs\\onnx_models'), ('vector_outputs\\scaffold_index_1.faiss', 'vector_outputs'), ('vector_outputs\\scaffold_metadata_1.json', 'vector_outputs')]
 binaries = []
-hiddenimports = []
+hiddenimports = ['encodings', 'codecs', 'scipy.special._cdflib']
+tmp_ret = collect_all('torch')
+datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
+tmp_ret = collect_all('torchvision')
+datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
+tmp_ret = collect_all('torchaudio')
+datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
 tmp_ret = collect_all('sentence_transformers')
 datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
 tmp_ret = collect_all('transformers')
@@ -47,7 +53,7 @@ a = Analysis(
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=[],
+    excludes=['torch.cuda', 'torch.backends.cudnn', 'torch.backends.cuda', 'torch.backends.cublas'],
     noarchive=False,
     optimize=0,
 )

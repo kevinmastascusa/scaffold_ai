@@ -1,0 +1,145 @@
+2025-09-10 16:07:07 - DEBUG - Starting query module initialization...
+2025-09-10 16:07:07 - DEBUG - Added project root to Python path: C:\Users\dlaev\scaffold\scaffold_ai
+2025-09-10 16:07:07 - DEBUG - Importing configuration...
+2025-09-10 16:07:07 - INFO - Using standard model (no ONNX): mistralai/Mistral-7B-Instruct-v0.2
+2025-09-10 16:07:07 - INFO - \U0001f680 GPU detected: NVIDIA GeForce RTX 2080 Ti with 11.8GB VRAM
+2025-09-10 16:07:07 - DEBUG - Configuration imported successfully
+2025-09-10 16:07:07 - DEBUG - Importing LLM manager...
+C:\Users\dlaev\scaffold\scaffold_ai\scaffold_env_312_py31210\Lib\site-packages\torch\onnx\_internal\registration.py:168: OnnxExporterWarning: Symbolic function 'aten::scaled_dot_product_attention' already registered for opset 14. Replacing the existing function with new function. This is unexpected. Please report it on https://github.com/pytorch/pytorch/issues.
+  warnings.warn(
+2025-09-10 16:07:08 - DEBUG - CUDA available - using GPU optimizations
+2025-09-10 16:07:08 - DEBUG - Starting LLM module initialization...
+2025-09-10 16:07:08 - DEBUG - Added project root to Python path: C:\Users\dlaev\scaffold\scaffold_ai
+2025-09-10 16:07:08 - DEBUG - Importing configuration...
+2025-09-10 16:07:08 - DEBUG - Configuration imported successfully
+2025-09-10 16:07:08 - DEBUG - LLM manager imported successfully
+2025-09-10 16:07:08 - INFO - Initializing improved enhanced query system...
+2025-09-10 16:07:08 - INFO - Use pytorch device_name: cuda:0
+2025-09-10 16:07:08 - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-09-10 16:07:08 - DEBUG - Starting new HTTPS connection (1): huggingface.co:443
+2025-09-10 16:07:08 - DEBUG - https://huggingface.co:443 "HEAD /sentence-transformers/all-MiniLM-L6-v2/resolve/main/modules.json HTTP/1.1" 307 0
+2025-09-10 16:07:08 - DEBUG - https://huggingface.co:443 "HEAD /api/resolve-cache/models/sentence-transformers/all-MiniLM-L6-v2/c9745ed1d9f207416be6d2e6f8de32d1f16199bf/modules.json HTTP/1.1" 200 0
+2025-09-10 16:07:08 - DEBUG - https://huggingface.co:443 "HEAD /sentence-transformers/all-MiniLM-L6-v2/resolve/main/config_sentence_transformers.json HTTP/1.1" 307 0
+2025-09-10 16:07:08 - DEBUG - https://huggingface.co:443 "HEAD /api/resolve-cache/models/sentence-transformers/all-MiniLM-L6-v2/c9745ed1d9f207416be6d2e6f8de32d1f16199bf/config_sentence_transformers.json HTTP/1.1" 200 0
+2025-09-10 16:07:08 - DEBUG - https://huggingface.co:443 "HEAD /sentence-transformers/all-MiniLM-L6-v2/resolve/main/config_sentence_transformers.json HTTP/1.1" 307 0
+2025-09-10 16:07:08 - DEBUG - https://huggingface.co:443 "HEAD /api/resolve-cache/models/sentence-transformers/all-MiniLM-L6-v2/c9745ed1d9f207416be6d2e6f8de32d1f16199bf/config_sentence_transformers.json HTTP/1.1" 200 0
+2025-09-10 16:07:08 - DEBUG - https://huggingface.co:443 "HEAD /sentence-transformers/all-MiniLM-L6-v2/resolve/main/README.md HTTP/1.1" 307 0
+2025-09-10 16:07:08 - DEBUG - https://huggingface.co:443 "HEAD /api/resolve-cache/models/sentence-transformers/all-MiniLM-L6-v2/c9745ed1d9f207416be6d2e6f8de32d1f16199bf/README.md HTTP/1.1" 200 0
+2025-09-10 16:07:08 - DEBUG - https://huggingface.co:443 "HEAD /sentence-transformers/all-MiniLM-L6-v2/resolve/main/modules.json HTTP/1.1" 307 0
+2025-09-10 16:07:08 - DEBUG - https://huggingface.co:443 "HEAD /api/resolve-cache/models/sentence-transformers/all-MiniLM-L6-v2/c9745ed1d9f207416be6d2e6f8de32d1f16199bf/modules.json HTTP/1.1" 200 0
+2025-09-10 16:07:08 - DEBUG - https://huggingface.co:443 "HEAD /sentence-transformers/all-MiniLM-L6-v2/resolve/main/sentence_bert_config.json HTTP/1.1" 307 0
+2025-09-10 16:07:09 - DEBUG - https://huggingface.co:443 "HEAD /api/resolve-cache/models/sentence-transformers/all-MiniLM-L6-v2/c9745ed1d9f207416be6d2e6f8de32d1f16199bf/sentence_bert_config.json HTTP/1.1" 200 0
+2025-09-10 16:07:09 - DEBUG - https://huggingface.co:443 "HEAD /sentence-transformers/all-MiniLM-L6-v2/resolve/main/adapter_config.json HTTP/1.1" 404 0
+2025-09-10 16:07:09 - DEBUG - https://huggingface.co:443 "HEAD /sentence-transformers/all-MiniLM-L6-v2/resolve/main/config.json HTTP/1.1" 307 0
+2025-09-10 16:07:09 - DEBUG - https://huggingface.co:443 "HEAD /api/resolve-cache/models/sentence-transformers/all-MiniLM-L6-v2/c9745ed1d9f207416be6d2e6f8de32d1f16199bf/config.json HTTP/1.1" 200 0
+2025-09-10 16:07:10 - DEBUG - https://huggingface.co:443 "HEAD /sentence-transformers/all-MiniLM-L6-v2/resolve/main/tokenizer_config.json HTTP/1.1" 307 0
+2025-09-10 16:07:10 - DEBUG - https://huggingface.co:443 "HEAD /api/resolve-cache/models/sentence-transformers/all-MiniLM-L6-v2/c9745ed1d9f207416be6d2e6f8de32d1f16199bf/tokenizer_config.json HTTP/1.1" 200 0
+2025-09-10 16:07:10 - DEBUG - https://huggingface.co:443 "GET /api/models/sentence-transformers/all-MiniLM-L6-v2/tree/main/additional_chat_templates?recursive=False&expand=False HTTP/1.1" 404 64
+2025-09-10 16:07:10 - DEBUG - https://huggingface.co:443 "HEAD /sentence-transformers/all-MiniLM-L6-v2/resolve/main/1_Pooling/config.json HTTP/1.1" 307 0
+2025-09-10 16:07:10 - DEBUG - https://huggingface.co:443 "HEAD /api/resolve-cache/models/sentence-transformers/all-MiniLM-L6-v2/c9745ed1d9f207416be6d2e6f8de32d1f16199bf/1_Pooling%2Fconfig.json HTTP/1.1" 200 0
+2025-09-10 16:07:10 - DEBUG - https://huggingface.co:443 "GET /api/models/sentence-transformers/all-MiniLM-L6-v2 HTTP/1.1" 200 6861
+2025-09-10 16:07:10 - DEBUG - https://huggingface.co:443 "HEAD /cross-encoder/ms-marco-MiniLM-L-6-v2/resolve/main/config.json HTTP/1.1" 307 0
+2025-09-10 16:07:10 - DEBUG - https://huggingface.co:443 "HEAD /cross-encoder/ms-marco-MiniLM-L6-v2/resolve/main/config.json HTTP/1.1" 307 0
+2025-09-10 16:07:10 - DEBUG - https://huggingface.co:443 "HEAD /api/resolve-cache/models/cross-encoder/ms-marco-MiniLM-L6-v2/c5ee24cb16019beea0893ab7796b1df96625c6b8/config.json HTTP/1.1" 200 0
+2025-09-10 16:07:10 - DEBUG - https://huggingface.co:443 "HEAD /cross-encoder/ms-marco-MiniLM-L-6-v2/resolve/main/tokenizer_config.json HTTP/1.1" 307 0
+2025-09-10 16:07:10 - DEBUG - https://huggingface.co:443 "HEAD /cross-encoder/ms-marco-MiniLM-L6-v2/resolve/main/tokenizer_config.json HTTP/1.1" 307 0
+2025-09-10 16:07:11 - DEBUG - https://huggingface.co:443 "HEAD /api/resolve-cache/models/cross-encoder/ms-marco-MiniLM-L6-v2/c5ee24cb16019beea0893ab7796b1df96625c6b8/tokenizer_config.json HTTP/1.1" 200 0
+2025-09-10 16:07:11 - DEBUG - https://huggingface.co:443 "GET /api/models/cross-encoder/ms-marco-MiniLM-L-6-v2/tree/main/additional_chat_templates?recursive=False&expand=False HTTP/1.1" 307 147
+2025-09-10 16:07:11 - DEBUG - https://huggingface.co:443 "GET /api/models/cross-encoder/ms-marco-MiniLM-L6-v2/tree/main/additional_chat_templates?recursive=False&expand=False HTTP/1.1" 404 64
+2025-09-10 16:07:11 - DEBUG - https://huggingface.co:443 "HEAD /cross-encoder/ms-marco-MiniLM-L-6-v2/resolve/main/README.md HTTP/1.1" 307 0
+2025-09-10 16:07:11 - DEBUG - https://huggingface.co:443 "HEAD /cross-encoder/ms-marco-MiniLM-L6-v2/resolve/main/README.md HTTP/1.1" 307 0
+2025-09-10 16:07:11 - DEBUG - https://huggingface.co:443 "HEAD /api/resolve-cache/models/cross-encoder/ms-marco-MiniLM-L6-v2/c5ee24cb16019beea0893ab7796b1df96625c6b8/README.md HTTP/1.1" 200 0
+2025-09-10 16:07:11 - INFO - Use pytorch device: cuda:0
+2025-09-10 16:07:11 - DEBUG - https://huggingface.co:443 "GET /api/models/cross-encoder/ms-marco-MiniLM-L-6-v2 HTTP/1.1" 307 82
+2025-09-10 16:07:11 - DEBUG - https://huggingface.co:443 "GET /api/models/cross-encoder/ms-marco-MiniLM-L6-v2 HTTP/1.1" 200 5261
+2025-09-10 16:07:11 - INFO - Loaded 2901 metadata entries from C:\Users\dlaev\scaffold\scaffold_ai\vector_outputs\scaffold_metadata_1.json
+2025-09-10 16:07:11 - INFO - \u2705 Enhanced query system initialized successfully
+2025-09-10 16:07:11 - INFO -    - FAISS index: 2901 vectors
+2025-09-10 16:07:11 - INFO -    - Metadata: 2901 entries
+2025-09-10 16:07:11 - INFO - Processing query: What is green building design?
+=== TESTING WITH RELAXED QUALITY SETTINGS ===
+
+Query: What is green building design?
+==================================================
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|##########| 1/1 [00:00<00:00,  6.43it/s]Batches: 100%|##########| 1/1 [00:00<00:00,  6.35it/s]
+2025-09-10 16:07:12 - DEBUG - Found 50 initial candidates
+Batches:   0%|          | 0/2 [00:00<?, ?it/s]Batches:  50%|#####     | 1/2 [00:00<00:00,  9.76it/s]Batches: 100%|##########| 2/2 [00:00<00:00, 16.39it/s]
+2025-09-10 16:07:12 - DEBUG - Filtered candidate with very low cross_score: -11.037
+2025-09-10 16:07:12 - DEBUG - Filtered candidate with very low cross_score: -10.395
+2025-09-10 16:07:12 - DEBUG - Filtered candidate with very low cross_score: -9.717
+2025-09-10 16:07:12 - DEBUG - Filtered meta-like candidate (score=-9.134, fname=SU6388~1.PDF)
+2025-09-10 16:07:12 - DEBUG - Filtered candidate with very low cross_score: -10.696
+2025-09-10 16:07:12 - DEBUG - Filtered candidate with very low cross_score: -10.696
+2025-09-10 16:07:12 - DEBUG - Filtered candidate with very low cross_score: -8.756
+2025-09-10 16:07:12 - DEBUG - Filtered candidate with very low cross_score: -10.235
+2025-09-10 16:07:12 - DEBUG - Filtered candidate with very low cross_score: -9.453
+2025-09-10 16:07:12 - DEBUG - Filtered candidate with very low cross_score: -10.240
+2025-09-10 16:07:12 - DEBUG - Filtered meta-like candidate (score=-10.118, fname=SUSTAI~4.PDF)
+2025-09-10 16:07:12 - DEBUG - Filtered candidate with very low cross_score: -8.320
+2025-09-10 16:07:12 - DEBUG - Filtered meta-like candidate (score=-10.073, fname=SU6388~1.PDF)
+2025-09-10 16:07:12 - DEBUG - Filtered candidate with very low cross_score: -9.641
+2025-09-10 16:07:12 - DEBUG - Filtered candidate with very low cross_score: -9.641
+2025-09-10 16:07:12 - DEBUG - Filtered meta-like candidate (score=-8.264, fname=Datadriven-design-as-a-vehicle-for-BIM-and-sustainability-educationBuildings.pdf)
+2025-09-10 16:07:12 - DEBUG - Filtered candidate with very low cross_score: -8.007
+2025-09-10 16:07:12 - DEBUG - Filtered candidate with very low cross_score: -8.016
+2025-09-10 16:07:12 - DEBUG - Filtered candidate with very low cross_score: -8.016
+2025-09-10 16:07:12 - DEBUG - Filtered meta-like candidate (score=-9.202, fname=MULTIP~1.PDF)
+2025-09-10 16:07:12 - DEBUG - Filtered candidate with very low cross_score: -7.114
+2025-09-10 16:07:12 - DEBUG - Filtered candidate with very low cross_score: -9.238
+2025-09-10 16:07:12 - DEBUG - Filtered meta-like candidate (score=-2.487, fname=Datadriven-design-as-a-vehicle-for-BIM-and-sustainability-educationBuildings.pdf)
+2025-09-10 16:07:12 - DEBUG - Filtered meta-like candidate (score=-9.839, fname=EOP-17-Engineering-Course-Activities-20250611.pdf)
+2025-09-10 16:07:12 - DEBUG - Filtered meta-like candidate (score=-9.226, fname=EOP-17-Engineering-Course-Activities-20250611.pdf)
+2025-09-10 16:07:12 - DEBUG - Filtered meta-like candidate (score=-9.383, fname=192_Matthiasdottir-EXAMINING BEST PRACTICES IN CURRICULUM DESIGN-409_paper.pdf.pdf)
+2025-09-10 16:07:12 - DEBUG - Filtered candidate with very low cross_score: -10.999
+2025-09-10 16:07:12 - DEBUG - Filtered candidate with very low cross_score: -5.441
+2025-09-10 16:07:12 - DEBUG - Filtered meta-like candidate (score=-1.106, fname=AN-ASS~1.PDF)
+2025-09-10 16:07:12 - DEBUG - Filtered candidate with very low cross_score: -6.438
+2025-09-10 16:07:12 - DEBUG - Filtered candidate with very low cross_score: -9.614
+2025-09-10 16:07:12 - DEBUG - Filtered candidate with very low cross_score: -6.575
+2025-09-10 16:07:12 - DEBUG - Cross-encoder reranking: 18 candidates remaining after filtering
+2025-09-10 16:07:12 - DEBUG - Reranked to 18 candidates
+2025-09-10 16:07:12 - DEBUG - Contextual filtering: 18 candidates remaining after filtering
+2025-09-10 16:07:12 - DEBUG - Filtered to 18 candidates
+2025-09-10 16:07:12 - DEBUG - Using top 3 filtered candidates
+2025-09-10 16:07:12 - DEBUG - Generated prompt with ~357 tokens
+2025-09-10 16:07:12 - DEBUG - Initializing LLM Manager with model: mistralai/Mistral-7B-Instruct-v0.2
+2025-09-10 16:07:12 - DEBUG - Using device: cuda
+2025-09-10 16:07:12 - DEBUG - Using cache directory: C:\Users\dlaev/.cache/huggingface/hub
+2025-09-10 16:07:12 - DEBUG - Loading tokenizer...
+2025-09-10 16:07:12 - DEBUG - https://huggingface.co:443 "HEAD /mistralai/Mistral-7B-Instruct-v0.2/resolve/main/tokenizer_config.json HTTP/1.1" 401 0
+2025-09-10 16:07:12 - DEBUG - https://huggingface.co:443 "GET /api/models/mistralai/Mistral-7B-Instruct-v0.2/tree/main/additional_chat_templates?recursive=False&expand=False HTTP/1.1" 404 64
+2025-09-10 16:07:13 - DEBUG - Tokenizer loaded successfully
+2025-09-10 16:07:13 - DEBUG - Loading model using standard pipeline approach...
+2025-09-10 16:07:13 - INFO - \U0001f680 Using GPU-optimized pipeline settings (no quantization)
+2025-09-10 16:07:13 - DEBUG - https://huggingface.co:443 "HEAD /mistralai/Mistral-7B-Instruct-v0.2/resolve/main/config.json HTTP/1.1" 401 0
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]Loading checkpoint shards:  33%|###3      | 1/3 [00:03<00:06,  3.43s/it]Loading checkpoint shards:  67%|######6   | 2/3 [00:07<00:03,  3.52s/it]Loading checkpoint shards: 100%|##########| 3/3 [00:16<00:00,  6.12s/it]Loading checkpoint shards: 100%|##########| 3/3 [00:16<00:00,  5.41s/it]
+2025-09-10 16:07:30 - DEBUG - https://huggingface.co:443 "HEAD /mistralai/Mistral-7B-Instruct-v0.2/resolve/main/generation_config.json HTTP/1.1" 401 0
+2025-09-10 16:07:30 - DEBUG - https://huggingface.co:443 "HEAD /mistralai/Mistral-7B-Instruct-v0.2/resolve/main/custom_generate/generate.py HTTP/1.1" 404 0
+Device set to use cuda:0
+2025-09-10 16:07:43 - DEBUG - Pipeline loaded successfully
+2025-09-10 16:07:43 - DEBUG - Pipeline setup complete
+2025-09-10 16:07:43 - DEBUG - LLM Manager instance cached for reuse
+2025-09-10 16:09:36 - WARNING - Response appears to be truncated - consider increasing max_new_tokens
+2025-09-10 16:09:36 - INFO - Generated response with 64 words
+2025-09-10 16:09:36 - INFO - Generated complete response with 64 words
+2025-09-10 16:09:36 - WARNING - Rejected response at stage=first_attempt; reasons=['surface_artifacts']; preview="Green building design refers to the practice of creating structures using processes that minimize negative environmental impacts and promote resource efficiency throughout a building's life cycle. It encompasses energy efficiency, water conservation, use of renewable materials, indoor air quality, waste reduction, and consideration of the entire building lifecycle, including construction, operation, maintenance, and disposal. [1][2]\n\n[Note: Response may be incomplete due to length limits]"
+2025-09-10 16:10:27 - INFO - Generated response with 62 words
+2025-09-10 16:10:27 - ERROR - Error in LLM response generation: Garbled/Surface/Offtopic response detected
+2025-09-10 16:10:27 - WARNING - Retrying with minimal context
+2025-09-10 16:11:08 - WARNING - Response appears to be truncated - consider increasing max_new_tokens
+2025-09-10 16:11:08 - INFO - Generated response with 73 words
+2025-09-10 16:11:08 - INFO - Generated complete response with 73 words
+2025-09-10 16:11:08 - WARNING - Rejected response at stage=second_attempt; reasons=['surface_artifacts']; preview='Green building design refers to the practice of creating structures that use resources efficiently and minimize negative environmental impacts throughout their life cycle. It encompasses strategies such as energy efficiency, water conservation, use of renewable materials, and consideration of indoor environmental quality. The case study mentioned suggests integrating sustainability principles into civil engineering education through a new green building course. (Kevern & ASCE, 2015)\n\n[Note: Resp'
+2025-09-10 16:11:51 - INFO - Generated response with 61 words
+2025-09-10 16:11:51 - ERROR - Rewrite after second attempt still invalid, using fallback
+SUCCESS: Query processed
+
+RESPONSE:
+I apologize, but I'm having trouble generating a comprehensive response for your question about 'What is green building design?'. This could be due to limited relevant information in the available sources or technical issues. Please try rephrasing your question, asking about a different topic, or contact support if the issue persists.
+
+SOURCES USED:
+  [1] Score: 1.400 - GREEN-~1.PDF
+  [2] Score: -1.337 - GREEN-~1.PDF
+  [3] Score: -0.085 - GREEN-~1.PDF
+
+Response length: 336 characters

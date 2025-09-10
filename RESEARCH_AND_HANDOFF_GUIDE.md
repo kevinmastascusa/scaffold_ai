@@ -6,7 +6,11 @@ This single document serves both as a research summary and a comprehensive hando
 - **Purpose**: AI-assisted curriculum recommendations for sustainability/climate resilience.
 - **Interface**: Modern Flask web app with chat and syllabus PDF upload.
 - **Core techniques**: RAG over a curated corpus (FAISS), LLM inference via Hugging Face, robust citation layer.
-- **Where to run**: Windows EXE for teachers; Python workflow for developers.
+- **Where to run**: Windows EXE for teachers; Python workflow for developers. Teacher quick start: see `TEACHER_ZIP_RUN.md`.
+- **Status (updated 2025-08-26)**:
+  - Quick tests: 15/15 success, avg 1.48s per prompt (see `quick_llm_test_summary_20250803_001740.txt`).
+  - Existing model suite: 15/15 success, avg 2.44s (`existing_model_test_summary_20250803_002413.txt`).
+  - ONNX benchmark: first-query latency improved (~30.35s → ~16.98s) on TinyLlama; overall average comparable (see `benchmark_results.json`).
 
 ## System overview
 - **Frontend/UI**: `frontend/app_enhanced.py`, templates in `frontend/templates/`, static assets in `frontend/static/`.
@@ -106,6 +110,14 @@ python frontend\start_enhanced_ui.py --port 5002
 - Comprehensive: `full_test_suite.py`, `scaffold_core/scripts/run_tests.py`.
 - Results snapshots: `existing_model_test_results_*.json`, `quick_llm_test_summary_*.txt`, `Full Test Results*.txt`.
 - GPU/ONNX logs: `benchmark_gpu_log.txt`, `benchmark_onnx_log.txt`.
+
+### Latest results snapshot
+- Quick LLM test (2025‑08‑03 00:17): 15/15 passed; average response time 1.48s; average response length 135 chars. File: `quick_llm_test_summary_20250803_001740.txt`.
+- Existing model test (2025‑08‑03 00:23): 15/15 passed; average response time 2.44s; average response length 226 chars. File: `existing_model_test_summary_20250803_002413.txt`.
+- TinyLlama benchmark (2025‑08‑04):
+  - Baseline first‑query: 30.35s → ONNX first‑query: 16.98s (≈44% faster cold start).
+  - Baseline avg across 3 prompts: 23.91s; ONNX avg: 24.46s (comparable overall). File: `benchmark_results.json`.
+
 
 ## Packaging and releases
 - Build EXE (Windows):
@@ -312,7 +324,6 @@ python frontend\start_enhanced_ui.py --port 5002
 ## Ethics, privacy, and licensing
 - Avoid uploading sensitive PDFs.
 - Cite sources transparently.
-- License: MIT (see `LICENSE`).
 
 ## Contacts
 - See repo README for collaborators and contact info.

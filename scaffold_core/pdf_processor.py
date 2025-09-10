@@ -60,8 +60,14 @@ class SyllabusProcessor:
                         text_content += page.extract_text() + "\n"
             else:
                 raise ImportError("No PDF processing library available")
-            
-            return text_content.strip()
+            # Normalize at source to reduce OCR artifacts
+            try:
+                from scaffold_core.text_clean import normalize_extracted_text
+                text_content = normalize_extracted_text(text_content)
+            except Exception:
+                text_content = text_content.strip()
+
+            return text_content
             
         except Exception as e:
             logger.error(f"Error extracting text from PDF {pdf_path}: {e}")

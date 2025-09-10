@@ -1,0 +1,7 @@
+flowchart LR
+  Q[User query] --> P[Prompt assembly]
+  D[Indexed chunks\nFAISS + metadata] --> RET[Top‑k retrieval]
+  RET --> P
+  P --> G[Constrained generation\n(scaffold_core/llm.py)]
+  G --> CIT[Citation mapping]
+  CIT --> RESP[Answer + Sources]

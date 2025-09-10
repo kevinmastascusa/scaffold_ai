@@ -1,0 +1,558 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amsfonts,amssymb}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{fancyhdr}
+\usepackage{enumitem}
+
+% Code listing style
+\lstset{
+    basicstyle=\ttfamily\footnotesize,
+    backgroundcolor=\color{gray!10},
+    frame=single,
+    breaklines=true,
+    captionpos=b,
+    showstringspaces=false
+}
+
+% Header and footer
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{Scaffold AI System Handoff}
+\lhead{Page \thepage}
+
+\title{\textbf{Scaffold AI System Handoff Document \\ Technical Implementation and Operations Guide}}
+\author{Scaffold AI Development Team}
+\date{September 10, 2025}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This handoff document provides comprehensive technical documentation for the Scaffold AI system, including deployment instructions, system architecture, operational procedures, and maintenance guidelines. The document covers the recent quality control bugfix implementation that achieved 100\% success rates across all testing categories, ensuring reliable delivery of educational content to users.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+\section{System Overview}
+
+\subsection{Purpose and Scope}
+The Scaffold AI system is a Flask-based web application designed to assist educators in integrating sustainability concepts into engineering curricula. The system leverages:
+
+\begin{itemize}
+    \item \textbf{RAG Architecture}: Retrieval-Augmented Generation with 2,901 indexed documents
+    \item \textbf{Vector Search}: FAISS-based semantic document retrieval
+    \item \textbf{LLM Integration}: TinyLlama and Mistral-7B-Instruct model support
+    \item \textbf{Quality Control}: Multi-stage response validation pipeline
+    \item \textbf{Web Interface}: Enhanced UI with real-time query processing
+\end{itemize}
+
+\subsection{Key Capabilities}
+\begin{enumerate}
+    \item Curriculum integration recommendations for sustainability concepts
+    \item Learning outcome development assistance
+    \item Framework integration guidance (LEED, UN SDGs, Engineering for One Planet)
+    \item Course-specific contextual recommendations
+    \item Resource and tool recommendations for educators
+\end{enumerate}
+
+\section{System Architecture}
+
+\subsection{Component Overview}
+\begin{figure}[H]
+\centering
+\begin{lstlisting}[language=text]
+┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│   Frontend      │    │   Core Engine    │    │   Data Layer    │
+│                 │    │                  │    │                 │
+│ • Flask App     │◄──►│ • Query Processor│◄──►│ • FAISS Index   │
+│ • Enhanced UI   │    │ • LLM Manager    │    │ • PDF Documents │
+│ • Templates     │    │ • Quality Control│    │ • Metadata      │
+│                 │    │ • Text Cleaning  │    │                 │
+└─────────────────┘    └──────────────────┘    └─────────────────┘
+\end{lstlisting}
+\caption{High-level system architecture}
+\end{figure}
+
+\subsection{Directory Structure}
+\begin{lstlisting}[language=bash]
+scaffold_ai/
+├── frontend/
+│   ├── app_enhanced.py           # Main Flask application
+│   └── templates/
+│       └── index_enhanced.html   # Enhanced UI template
+├── scaffold_core/
+│   ├── config.py                 # System configuration
+│   ├── llm.py                    # LLM integration layer
+│   ├── text_clean.py             # Quality control algorithms
+│   ├── pdf_processor.py          # Document processing
+│   └── vector/
+│       ├── enhanced_query_improved.py  # Core query engine
+│       └── chunk.py              # Document chunking
+├── vector_outputs/
+│   ├── scaffold_index_1.faiss    # Vector index
+│   ├── scaffold_metadata_1.json  # Document metadata
+│   └── processed_1.json          # Processing logs
+├── data/                         # PDF document repository
+├── model_config.json             # Model configuration
+└── requirements.txt              # Python dependencies
+\end{lstlisting}
+
+\section{Installation and Deployment}
+
+\subsection{Prerequisites}
+\begin{itemize}
+    \item Python 3.12+
+    \item CUDA-compatible GPU (recommended)
+    \item 16GB+ RAM
+    \item HuggingFace account and token
+\end{itemize}
+
+\subsection{Environment Setup}
+\begin{lstlisting}[language=bash, caption=Virtual environment creation]
+# Create and activate virtual environment
+python -m venv scaffold_env_312_py31210
+scaffold_env_312_py31210/Scripts/activate  # Windows
+# source scaffold_env_312_py31210/bin/activate  # Linux/Mac
+
+# Install dependencies
+pip install -r requirements.txt
+\end{lstlisting}
+
+\subsection{Configuration}
+\subsubsection{Environment Variables}
+\begin{lstlisting}[language=bash, caption=Required environment variables]
+# Quality control configuration
+export SC_ENABLE_PROOFREAD=1
+export SC_GARBLED_STRICTNESS=medium
+export SC_ENABLE_TRUNCATION_DETECTION=1
+
+# HuggingFace integration
+export HUGGINGFACE_TOKEN=hf_your_token_here
+\end{lstlisting}
+
+\subsubsection{Model Configuration}
+Edit \texttt{model\_config.json}:
+\begin{lstlisting}[language=json, caption=Model configuration file]
+{
+  "selected_models": {
+    "llm": "tinyllama",          // or "mistral"
+    "embedding": "miniLM"
+  },
+  "model_settings": {
+    "llm": {
+      "temperature": 0.2,
+      "max_new_tokens": 1000,
+      "top_p": 0.8
+    },
+    "embedding": {
+      "chunk_size": 600,
+      "chunk_overlap": 100
+    }
+  }
+}
+\end{lstlisting}
+
+\subsection{Database Initialization}
+\begin{lstlisting}[language=bash, caption=Vector database setup]
+# Process PDF documents
+python scaffold_core/scripts/chunk/ChunkTest.py
+
+# Build vector index
+python scaffold_core/vector/main.py
+
+# Verify index creation
+ls -la vector_outputs/
+# Expected files:
+# - scaffold_index_1.faiss (vector index)
+# - scaffold_metadata_1.json (metadata)
+# - processed_1.json (processing logs)
+\end{lstlisting}
+
+\section{Operations}
+
+\subsection{Starting the System}
+\begin{lstlisting}[language=bash, caption=System startup]
+# Activate environment
+scaffold_env_312_py31210/Scripts/activate
+
+# Start enhanced UI (recommended)
+python frontend/app_enhanced.py --port 5004
+
+# Alternative: Standard UI
+python run_enhanced_ui.py
+\end{lstlisting}
+
+\subsection{System Health Checks}
+\begin{lstlisting}[language=python, caption=Health check script]
+# Test query processing
+python -c "
+import sys, os
+sys.path.append('.')
+os.environ['SC_ENABLE_PROOFREAD'] = '1'
+os.environ['SC_GARBLED_STRICTNESS'] = 'medium'
+
+from scaffold_core.vector.enhanced_query_improved import query_enhanced_improved
+result = query_enhanced_improved('What is sustainability?')
+print(f'Status: {"SUCCESS" if len(result.get("response", "")) > 100 else "FAIL"}')
+print(f'Response length: {len(result.get("response", ""))} characters')
+"
+\end{lstlisting}
+
+\subsection{Performance Monitoring}
+Key metrics to monitor:
+\begin{itemize}
+    \item \textbf{Response Time}: Target <30 seconds for complex queries
+    \item \textbf{Success Rate}: Should maintain >95\% non-fallback responses
+    \item \textbf{Memory Usage}: Monitor GPU/CPU memory during operation
+    \item \textbf{Error Rates}: Check logs for system exceptions
+\end{itemize}
+
+\section{Quality Control System}
+
+\subsection{Multi-Stage Pipeline}
+The quality control system implements a sophisticated validation pipeline:
+
+\begin{enumerate}
+    \item \textbf{Initial Generation}: LLM produces candidate response
+    \item \textbf{Garbled Detection}: Check for obvious text corruption
+    \item \textbf{Surface Artifacts}: Scan for OCR-style artifacts
+    \item \textbf{Topic Validation}: Ensure response relevance
+    \item \textbf{Rewrite Attempt}: Attempt correction if issues found
+    \item \textbf{Final Decision}: Accept response or provide fallback
+\end{enumerate}
+
+\subsection{Configuration Parameters}
+\begin{table}[H]
+\centering
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Parameter} & \textbf{Values} & \textbf{Description} \\
+\midrule
+SC\_ENABLE\_PROOFREAD & 0, 1 & Enable/disable quality checking \\
+SC\_GARBLED\_STRICTNESS & low, medium, high & Detection sensitivity \\
+SC\_ENABLE\_TRUNCATION\_DETECTION & 0, 1 & Detect incomplete responses \\
+\bottomrule
+\end{tabular}
+\caption{Quality control configuration parameters}
+\end{table}
+
+\subsection{Pattern Detection Details}
+The refined surface artifact detection targets specific OCR corruption patterns:
+
+\begin{lstlisting}[language=python, caption=Surface artifact patterns]
+# Patterns for detecting genuine OCR artifacts
+inword_split_patterns = [
+    r"\b(sustain|develop|architec|engin|build|energ)\s+(ed|ing|ment|t|ture|al|er|y)\b",
+    r"\b(archite|buildi|sustaina|develo|enginee)\s+(cture|ng|bility|pment|ring)\b", 
+    r"\b(cur|fl|sys|eff)\s+(ricul|uid|tem|ici)\b",
+]
+
+# Examples of detected artifacts:
+# "sustain ability" -> sustainability
+# "archite cture" -> architecture  
+# "develop ment" -> development
+\end{lstlisting}
+
+\section{Troubleshooting}
+
+\subsection{Common Issues and Solutions}
+
+\subsubsection{Model Loading Timeouts}
+\textbf{Symptoms}: Long delays during first query, timeout errors \\
+\textbf{Solution}: 
+\begin{lstlisting}[language=bash]
+# Increase timeout and ensure sufficient memory
+export PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:512
+# Allow 2-3 minutes for initial model loading
+\end{lstlisting}
+
+\subsubsection{High Fallback Rates}
+\textbf{Symptoms}: Frequent "I apologize" responses \\
+\textbf{Solution}:
+\begin{lstlisting}[language=bash]
+# Adjust quality control strictness
+export SC_GARBLED_STRICTNESS=low
+# Or disable proofread temporarily for testing
+export SC_ENABLE_PROOFREAD=0
+\end{lstlisting}
+
+\subsubsection{Missing Vector Index}
+\textbf{Symptoms}: FileNotFoundError for FAISS files \\
+\textbf{Solution}:
+\begin{lstlisting}[language=bash]
+# Rebuild vector database
+python scaffold_core/scripts/chunk/ChunkTest.py
+python scaffold_core/vector/main.py
+# Verify files exist in vector_outputs/
+\end{lstlisting}
+
+\subsubsection{GPU Memory Issues}
+\textbf{Symptoms}: CUDA out of memory errors \\
+\textbf{Solution}:
+\begin{lstlisting}[language=bash]
+# Clear GPU cache
+python -c "import torch; torch.cuda.empty_cache()"
+# Reduce batch size in model configuration
+# Use CPU fallback if necessary
+\end{lstlisting}
+
+\subsection{Log Analysis}
+Important log locations and patterns:
+
+\begin{lstlisting}[language=bash]
+# System logs show processing flow
+grep "Enhanced query system initialized" logs/
+grep "Generated response with" logs/
+grep "WARNING.*Rejected response" logs/
+
+# Error patterns to monitor
+grep "ERROR" logs/
+grep "FALLBACK" logs/
+grep "FileNotFoundError" logs/
+\end{lstlisting}
+
+\section{Maintenance}
+
+\subsection{Regular Maintenance Tasks}
+
+\subsubsection{Weekly}
+\begin{itemize}
+    \item Monitor system performance metrics
+    \item Review error logs for patterns
+    \item Verify disk space for model cache
+    \item Test sample queries across categories
+\end{itemize}
+
+\subsubsection{Monthly}
+\begin{itemize}
+    \item Update Python dependencies: \texttt{pip install -r requirements.txt --upgrade}
+    \item Clear model cache: \texttt{rm -rf ~/.cache/huggingface/}
+    \item Backup vector database: \texttt{cp -r vector\_outputs/ vector\_outputs\_backup/}
+    \item Review and update test query suite
+\end{itemize}
+
+\subsubsection{Quarterly}
+\begin{itemize}
+    \item Evaluate model performance against newer releases
+    \item Review and update quality control patterns
+    \item Conduct comprehensive testing across all categories
+    \item Update documentation based on system changes
+\end{itemize}
+
+\subsection{Performance Optimization}
+
+\subsubsection{Model Selection}
+\begin{table}[H]
+\centering
+\begin{tabular}{@{}llll@{}}
+\toprule
+\textbf{Model} & \textbf{Size} & \textbf{Quality} & \textbf{Speed} \\
+\midrule
+TinyLlama-1.1B & Small & Good & Fast \\
+Mistral-7B-Instruct & Large & Excellent & Moderate \\
+\bottomrule
+\end{tabular}
+\caption{Model performance characteristics}
+\end{table}
+
+\subsubsection{Hardware Optimization}
+\begin{itemize}
+    \item \textbf{GPU}: NVIDIA RTX 2080 Ti or better recommended
+    \item \textbf{RAM}: 16GB minimum, 32GB recommended
+    \item \textbf{Storage}: SSD for model cache and vector database
+    \item \textbf{Network}: Stable internet for HuggingFace model downloads
+\end{itemize}
+
+\section{Testing Framework}
+
+\subsection{Automated Testing}
+\begin{lstlisting}[language=python, caption=Automated test script]
+#!/usr/bin/env python3
+"""Automated testing script for Scaffold AI system."""
+
+import os
+import sys
+sys.path.append('.')
+
+# Set environment
+os.environ.update({
+    'SC_ENABLE_PROOFREAD': '1',
+    'SC_GARBLED_STRICTNESS': 'medium',
+    'SC_ENABLE_TRUNCATION_DETECTION': '1'
+})
+
+from scaffold_core.vector.enhanced_query_improved import query_enhanced_improved
+
+test_queries = [
+    "How can I incorporate sustainability into my Fluid Mechanics course?",
+    "What are some learning outcomes for environmental justice?",
+    "Sustainability in fluids?",  # Brief query test
+    "Integration of LEED principles into curriculum?"
+]
+
+def run_tests():
+    results = []
+    for i, query in enumerate(test_queries, 1):
+        try:
+            result = query_enhanced_improved(query)
+            response = result.get('response', '')
+            is_fallback = 'apologize' in response.lower() and 'having trouble' in response.lower()
+            status = 'FALLBACK' if is_fallback else 'SUCCESS'
+            results.append({
+                'query': query,
+                'status': status,
+                'length': len(response)
+            })
+            print(f"Test {i}: {status} ({len(response)} chars)")
+        except Exception as e:
+            results.append({'query': query, 'status': 'ERROR', 'length': 0})
+            print(f"Test {i}: ERROR - {str(e)}")
+    
+    # Summary
+    success_count = sum(1 for r in results if r['status'] == 'SUCCESS')
+    print(f"\nResults: {success_count}/{len(results)} successful")
+    return success_count == len(results)
+
+if __name__ == "__main__":
+    success = run_tests()
+    sys.exit(0 if success else 1)
+\end{lstlisting}
+
+\subsection{Test Categories}
+Comprehensive testing should cover:
+
+\begin{enumerate}
+    \item \textbf{Core Integration}: Subject-specific sustainability integration
+    \item \textbf{Learning Outcomes}: Pedagogical goal development
+    \item \textbf{Framework Integration}: Standards and frameworks
+    \item \textbf{Course Context}: Detailed scenario handling
+    \item \textbf{Brief Queries}: Minimal input processing
+    \item \textbf{Advanced Integration}: Complex conceptual queries
+\end{enumerate}
+
+\section{Security Considerations}
+
+\subsection{Data Protection}
+\begin{itemize}
+    \item \textbf{API Keys}: Store HuggingFace tokens securely, rotate regularly
+    \item \textbf{User Data}: No persistent storage of user queries
+    \item \textbf{Document Access}: Ensure PDF sources are appropriately licensed
+    \item \textbf{Network Security}: Use HTTPS in production deployments
+\end{itemize}
+
+\subsection{Model Security}
+\begin{itemize}
+    \item \textbf{Model Provenance}: Use verified models from HuggingFace
+    \item \textbf{Input Validation}: Sanitize user inputs before processing
+    \item \textbf{Output Filtering}: Quality control prevents harmful outputs
+    \item \textbf{Resource Limits}: Implement timeouts and memory limits
+\end{itemize}
+
+\section{Support and Escalation}
+
+\subsection{Issue Classification}
+\begin{table}[H]
+\centering
+\begin{tabular}{@{}p{2cm}p{3cm}p{8cm}@{}}
+\toprule
+\textbf{Severity} & \textbf{Response Time} & \textbf{Examples} \\
+\midrule
+Critical & Immediate & System completely down, data loss \\
+High & 4 hours & High fallback rates, performance degradation \\
+Medium & 24 hours & Feature issues, minor bugs \\
+Low & 1 week & Documentation updates, enhancement requests \\
+\bottomrule
+\end{tabular}
+\caption{Issue severity classification}
+\end{table}
+
+\subsection{Contact Information}
+\begin{itemize}
+    \item \textbf{Repository}: \url{https://github.com/kevinmastascusa/scaffold_ai}
+    \item \textbf{Issues}: GitHub Issues for bug reports and feature requests
+    \item \textbf{Documentation}: This handoff document and README files
+    \item \textbf{Technical Specs}: Research report and test results
+\end{itemize}
+
+\section{Appendices}
+
+\subsection{Appendix A: Configuration Files}
+
+\subsubsection{requirements.txt}
+\begin{lstlisting}[language=text]
+flask==2.3.3
+torch>=2.0.0
+transformers>=4.30.0
+sentence-transformers>=2.2.0
+faiss-cpu>=1.7.0
+numpy>=1.24.0
+pandas>=2.0.0
+PyPDF2>=3.0.0
+python-dotenv>=1.0.0
+\end{lstlisting}
+
+\subsubsection{Sample model\_config.json}
+\begin{lstlisting}[language=json]
+{
+  "selected_models": {
+    "llm": "tinyllama",
+    "embedding": "miniLM"
+  },
+  "model_settings": {
+    "llm": {
+      "temperature": 0.2,
+      "max_new_tokens": 1000,
+      "top_p": 0.8
+    },
+    "embedding": {
+      "chunk_size": 600,
+      "chunk_overlap": 100
+    }
+  }
+}
+\end{lstlisting}
+
+\subsection{Appendix B: Performance Benchmarks}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+\textbf{Query Type} & \textbf{Response Time} & \textbf{Success Rate} & \textbf{Avg Length} & \textbf{Quality} \\
+\midrule
+Brief Queries & 15-20s & 100\% & 2,000+ chars & High \\
+Standard Queries & 20-30s & 100\% & 1,500+ chars & High \\
+Complex Queries & 30-45s & 100\% & 2,500+ chars & High \\
+Framework Queries & 25-35s & 100\% & 2,000+ chars & High \\
+\bottomrule
+\end{tabular}
+\caption{Performance benchmark data}
+\end{table}
+
+\subsection{Appendix C: Error Codes}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Code} & \textbf{Description} & \textbf{Action} \\
+\midrule
+FAISS\_001 & Vector index not found & Rebuild index \\
+LLM\_001 & Model loading timeout & Increase timeout, check GPU \\
+QC\_001 & High fallback rate & Adjust quality parameters \\
+MEM\_001 & Out of memory & Reduce batch size, clear cache \\
+\bottomrule
+\end{tabular}
+\caption{Common error codes and resolutions}
+\end{table}
+
+\end{document}

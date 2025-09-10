@@ -10,8 +10,39 @@ import logging
 import os
 from pathlib import Path
 
-import torch
-from .config_manager import (
+# ----- CPU portability & threading (set before importing torch/numpy) -----
+# If SC_INCLUDE_CUDA=1, we always disable SC_FORCE_CPU to prefer GPU
+_include_cuda_flag = str(os.getenv("SC_INCLUDE_CUDA", "")).lower() in (
+    "1",
+    "true",
+    "yes",
+)
+if _include_cuda_flag:
+    os.environ["SC_FORCE_CPU"] = "0"
+
+_default_force_cpu = "0"
+_force_cpu_env = str(
+    os.getenv("SC_FORCE_CPU", _default_force_cpu)
+).lower() in (
+    "1",
+    "true",
+    "yes",
+)
+if _force_cpu_env and not _include_cuda_flag:
+    os.environ.setdefault("CUDA_VISIBLE_DEVICES", "-1")
+    os.environ.setdefault(
+        "ORT_DISABLE_GPU",
+        "1",
+    )
+
+# Threading defaults for CPU backends; can be overridden via env
+_default_threads = min(6, (os.cpu_count() or 6))
+_cpu_threads = str(os.getenv("SC_CPU_THREADS", str(_default_threads)))
+os.environ.setdefault("OMP_NUM_THREADS", _cpu_threads)
+os.environ.setdefault("MKL_NUM_THREADS", _cpu_threads)
+
+import torch  # noqa: E402
+from .config_manager import (  # noqa: E402
     ConfigManager,
     config_manager as global_config_manager,
 )
@@ -81,7 +112,11 @@ EMBEDDING_MODELS = {
         "desc": "Multilingual support."
     },
 }
-SELECTED_EMBEDDING_MODEL = EMBEDDING_MODELS["miniLM"]["name"]
+_embedding_key = os.getenv("SC_EMBEDDING_KEY")
+if _embedding_key and _embedding_key in EMBEDDING_MODELS:
+    SELECTED_EMBEDDING_MODEL = EMBEDDING_MODELS[_embedding_key]["name"]
+else:
+    SELECTED_EMBEDDING_MODEL = EMBEDDING_MODELS["miniLM"]["name"]
 
 # Cross-Encoder Models Registry
 CROSS_ENCODER_MODELS = {
@@ -131,7 +166,10 @@ LLM_MODELS = {
     },
     "mixtral": {
         "name": "mistralai/Mixtral-8x7B-Instruct-v0.1",
-        "desc": "Large Mixture-of-Experts model, high quality, requires token.",
+        "desc": (
+            "Large Mixture-of-Experts model; high quality; "
+            "requires token."
+        ),
         "requires_token": True
     },
     "llama3.1-8b": {
@@ -151,17 +189,67 @@ LLM_MODELS = {
         "requires_token": True
     },
 }
-_selected_key = os.getenv("SC_LLM_KEY")  # override via env if set
-if not _selected_key:
-    try:
-        # Prefer selection from model_config.json via ConfigManager
-        _selected_key = (
-            global_config_manager or ConfigManager()
-        ).get_selected_model('llm')
-    except Exception:
-        _selected_key = None
 
-if not _selected_key or _selected_key not in LLM_MODELS:
+
+def _resolve_llm_key(raw_key: str | None) -> str | None:
+    """Resolve an LLM key from env/config in a robust way.
+
+    Accepts either a registry key (e.g., "mistral") or a full model name
+    (e.g., "mistralai/Mistral-7B-Instruct-v0.2") in any casing, and maps
+    it to the correct registry key when possible.
+    """
+    if not raw_key:
+        return None
+
+    key = str(raw_key).strip()
+    if not key:
+        return None
+
+    # Exact registry key
+    if key in LLM_MODELS:
+        return key
+
+    lower_key = key.lower()
+
+    # Match by known substrings
+    if "mixtral" in lower_key:
+        return "mixtral" if "mixtral" in LLM_MODELS else None
+    if "mistral" in lower_key:
+        return "mistral" if "mistral" in LLM_MODELS else None
+    if "tinyllama" in lower_key:
+        return "tinyllama" if "tinyllama" in LLM_MODELS else None
+    if "llama-3.1-70b" in lower_key or "llama3.1-70b" in lower_key:
+        return "llama3.1-70b" if "llama3.1-70b" in LLM_MODELS else None
+    if "llama-3.1-8b" in lower_key or "llama3.1-8b" in lower_key:
+        return "llama3.1-8b" if "llama3.1-8b" in LLM_MODELS else None
+
+    # Match against registry values by full model name
+    for reg_key, meta in LLM_MODELS.items():
+        try:
+            model_name = str(meta.get("name", "")).lower()
+        except Exception:
+            model_name = ""
+        if model_name == lower_key:
+            return reg_key
+
+    return None
+
+
+# Determine selected key: ENV has priority, then model_config.json
+_raw_env_key = os.getenv("SC_LLM_KEY")
+_raw_cfg_key = None
+try:
+    _raw_cfg_key = (
+        global_config_manager or ConfigManager()
+    ).get_selected_model('llm')
+except (OSError, ValueError, KeyError):
+    _raw_cfg_key = None
+
+_selected_key = _resolve_llm_key(_raw_env_key) or _resolve_llm_key(
+    _raw_cfg_key
+)
+
+if not _selected_key:
     _selected_key = "tinyllama"
 
 SELECTED_LLM_MODEL = LLM_MODELS[_selected_key]["name"]
@@ -220,15 +308,19 @@ FAISS_INDEX_TYPE = "IndexFlatL2"
 
 # Search configuration
 TOP_K_INITIAL = 30
-TOP_K_FINAL = 3  # Increased from 3 to provide more context
+TOP_K_FINAL = 5  # Provide more context for grounding
 
 # -------------------
 # LLM pipeline/task configuration
 # -------------------
 LLM_TASK = "text-generation"
 
-# Auto-detect and configure GPU settings
-if torch.cuda.is_available():
+# Auto-detect and configure GPU settings (honor SC_FORCE_CPU / SC_INCLUDE_CUDA)
+_include_cuda_env = str(os.getenv("SC_INCLUDE_CUDA", "")).lower() in (
+    "1", "true", "yes"
+)
+_can_use_cuda = (not _force_cpu_env) and torch.cuda.is_available()
+if (_include_cuda_env and _can_use_cuda) or _can_use_cuda:
     LLM_DEVICE = "cuda"
     logger.info(
         "🚀 GPU detected: %s with %.1fGB VRAM",
@@ -237,7 +329,7 @@ if torch.cuda.is_available():
     )
     # GPU-optimized settings
     LLM_MAX_LENGTH = 8192  # Higher context for GPU
-    LLM_MAX_NEW_TOKENS = 2048  # Upper bound if dynamic settings unavailable
+    LLM_MAX_NEW_TOKENS = 1000  # Upper bound if dynamic settings unavailable
     LLM_BATCH_SIZE = 1
     LLM_LOAD_IN_8BIT = False
     LLM_LOAD_IN_4BIT = False  # Disable quantization for GPU speed
@@ -248,7 +340,7 @@ else:
     logger.info("💻 Using CPU - enabling optimizations for better performance")
     # CPU-optimized settings
     LLM_MAX_LENGTH = 4096  # Lower context for CPU memory
-    LLM_MAX_NEW_TOKENS = 1024  # Lower for CPU
+    LLM_MAX_NEW_TOKENS = 1000  # Align with global cap
     LLM_BATCH_SIZE = 1
     LLM_LOAD_IN_8BIT = False
     LLM_LOAD_IN_4BIT = True  # Enable quantization for CPU memory
@@ -270,12 +362,13 @@ CUDA_OPTIMIZATIONS = False
 # USE_ONNX is already set above based on model selection
 
 """Response quality settings.
-Disabled to prevent repetitive continuations.
+Enabled to catch accidental cutoffs or incomplete endings.
 """
-ENABLE_TRUNCATION_DETECTION = False
+# Allow override via environment for UI toggling
+_env_trunc = str(os.getenv("SC_ENABLE_TRUNCATION_DETECTION", "0")).lower()
+ENABLE_TRUNCATION_DETECTION = _env_trunc in ("1", "true", "yes")
 MIN_RESPONSE_WORDS = 50  # Minimum expected response length
 MAX_RESPONSE_WORDS = 4000  # Increased for Llama 3.1 to allow longer responses
-
 
 
 def get_dynamic_temperature() -> float:
@@ -283,15 +376,19 @@ def get_dynamic_temperature() -> float:
     _cmgr = global_config_manager or ConfigManager()
     return _cmgr.get_model_settings('llm').get('temperature', 0.3)
 
+
 def get_dynamic_top_p() -> float:
     """Get the current top_p setting from config manager."""
     _cmgr = global_config_manager or ConfigManager()
     return _cmgr.get_model_settings('llm').get('top_p', 0.9)
 
+
 def get_dynamic_max_new_tokens() -> int:
-    """Get the current max_new_tokens from config manager with safe fallback."""
+    """Get the current max_new_tokens from the config manager
+    with a safe fallback."""
     _cmgr = global_config_manager or ConfigManager()
-    return int(_cmgr.get_model_settings('llm').get('max_new_tokens', 512))
+    return int(_cmgr.get_model_settings('llm').get('max_new_tokens', 1000))
+
 
 def ensure_directories():
     """Create all necessary directories if they don't exist."""
@@ -303,7 +400,10 @@ def ensure_directories():
     ]
     for directory in directories:
         directory.mkdir(parents=True, exist_ok=True)
-        print(f"✓ Ensured directory exists: {directory}")
+        print(
+            f"✓ Ensured directory exists: {directory}"
+        )
+
 
 # Legacy path compatibility
 PDF_INPUT_DIR = str(DATA_DIR)

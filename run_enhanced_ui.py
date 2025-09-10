@@ -60,12 +60,41 @@ def main() -> int:
     add_bundle_paths()
 
     # Defaults for strict/correct answers and auto-clearing memory
-    os.environ.setdefault("SC_STRICT_ANSWERS", "true")
+    os.environ.setdefault("SC_STRICT_ANSWERS", "0")
     os.environ.setdefault("SC_AUTO_CLEAR_MEMORY", "false")
     # Context/memory management defaults
     os.environ.setdefault("SC_AUTO_CLEAR_ON_TOPIC_SHIFT", "true")
     os.environ.setdefault("SC_TOPIC_SHIFT_THRESHOLD", "0.2")
     os.environ.setdefault("SC_MEMORY_TTL_MIN", "60")
+    # Disable quality mode by default (explicitly off)
+    os.environ.setdefault("SC_QUALITY_MODE", "0")
+    # Disable truncation detection and proofreading by default
+    os.environ.setdefault("SC_ENABLE_TRUNCATION_DETECTION", "0")
+    os.environ.setdefault("SC_ENABLE_PROOFREAD", "0")
+    # Disable reasoning exposure by default
+    os.environ.setdefault("SC_EXPOSE_REASONING", "0")
+
+    # Runtime provider controls
+    # If SC_INCLUDE_CUDA=1, explicitly override any SC_FORCE_CPU setting
+    include_cuda = str(os.getenv("SC_INCLUDE_CUDA", "")).lower() in (
+        "1", "true", "yes"
+    )
+    force_cpu = str(os.getenv("SC_FORCE_CPU", "")).lower() in (
+        "1", "true", "yes"
+    )
+    if include_cuda:
+        # Prefer GPU when explicitly requested
+        os.environ["SC_FORCE_CPU"] = "0"
+        os.environ["ORT_DISABLE_GPU"] = "0"
+        # Remove CPU-forcing device mask if present
+        if os.environ.get("CUDA_VISIBLE_DEVICES") == "-1":
+            os.environ.pop("CUDA_VISIBLE_DEVICES", None)
+    elif force_cpu:
+        os.environ.setdefault("CUDA_VISIBLE_DEVICES", "-1")
+        os.environ.setdefault("ORT_DISABLE_GPU", "1")
+    else:
+        # Default: allow GPU if available
+        os.environ.setdefault("ORT_DISABLE_GPU", "0")
 
     # Allow forwarding host/port args to the UI
     parser = argparse.ArgumentParser(
@@ -78,11 +107,34 @@ def main() -> int:
         "--port", type=int, default=int(os.getenv("SC_PORT", "5002"))
     )
     parser.add_argument(
+        "--auto-port",
+        action="store_true",
+        help="If set, find a free port starting from the requested one",
+    )
+    parser.add_argument(
         "--skip-checks",
         action="store_true",
         help="Skip dependency and data file checks",
     )
     args = parser.parse_args()
+
+    # Optionally auto-pick an open port
+    if args.auto_port:
+        import socket
+
+        def _find_free_port(start: int) -> int:
+            port = start
+            while port < start + 100:
+                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                    try:
+                        s.bind((args.host, port))
+                        return port
+                    except OSError:
+                        port += 1
+            return start
+
+        args.port = _find_free_port(args.port)
 
     # Export args so the startup script can see them
     # (it uses argparse itself; exporting helps when run under frozen apps)

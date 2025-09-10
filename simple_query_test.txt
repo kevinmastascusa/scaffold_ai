@@ -1,0 +1,149 @@
+2025-09-10 16:00:28 - DEBUG - Starting query module initialization...
+2025-09-10 16:00:28 - DEBUG - Added project root to Python path: C:\Users\dlaev\scaffold\scaffold_ai
+2025-09-10 16:00:28 - DEBUG - Importing configuration...
+2025-09-10 16:00:28 - INFO - Using standard model (no ONNX): mistralai/Mistral-7B-Instruct-v0.2
+2025-09-10 16:00:28 - INFO - \U0001f680 GPU detected: NVIDIA GeForce RTX 2080 Ti with 11.8GB VRAM
+2025-09-10 16:00:28 - DEBUG - Configuration imported successfully
+2025-09-10 16:00:28 - DEBUG - Importing LLM manager...
+C:\Users\dlaev\scaffold\scaffold_ai\scaffold_env_312_py31210\Lib\site-packages\torch\onnx\_internal\registration.py:168: OnnxExporterWarning: Symbolic function 'aten::scaled_dot_product_attention' already registered for opset 14. Replacing the existing function with new function. This is unexpected. Please report it on https://github.com/pytorch/pytorch/issues.
+  warnings.warn(
+2025-09-10 16:00:29 - DEBUG - CUDA available - using GPU optimizations
+2025-09-10 16:00:29 - DEBUG - Starting LLM module initialization...
+2025-09-10 16:00:29 - DEBUG - Added project root to Python path: C:\Users\dlaev\scaffold\scaffold_ai
+2025-09-10 16:00:29 - DEBUG - Importing configuration...
+2025-09-10 16:00:29 - DEBUG - Configuration imported successfully
+2025-09-10 16:00:29 - DEBUG - LLM manager imported successfully
+2025-09-10 16:00:29 - INFO - Initializing improved enhanced query system...
+2025-09-10 16:00:29 - INFO - Use pytorch device_name: cuda:0
+2025-09-10 16:00:29 - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-09-10 16:00:29 - DEBUG - Starting new HTTPS connection (1): huggingface.co:443
+2025-09-10 16:00:30 - DEBUG - https://huggingface.co:443 "HEAD /sentence-transformers/all-MiniLM-L6-v2/resolve/main/modules.json HTTP/1.1" 307 0
+2025-09-10 16:00:30 - DEBUG - https://huggingface.co:443 "HEAD /api/resolve-cache/models/sentence-transformers/all-MiniLM-L6-v2/c9745ed1d9f207416be6d2e6f8de32d1f16199bf/modules.json HTTP/1.1" 200 0
+2025-09-10 16:00:30 - DEBUG - https://huggingface.co:443 "HEAD /sentence-transformers/all-MiniLM-L6-v2/resolve/main/config_sentence_transformers.json HTTP/1.1" 307 0
+2025-09-10 16:00:30 - DEBUG - https://huggingface.co:443 "HEAD /api/resolve-cache/models/sentence-transformers/all-MiniLM-L6-v2/c9745ed1d9f207416be6d2e6f8de32d1f16199bf/config_sentence_transformers.json HTTP/1.1" 200 0
+2025-09-10 16:00:30 - DEBUG - https://huggingface.co:443 "HEAD /sentence-transformers/all-MiniLM-L6-v2/resolve/main/config_sentence_transformers.json HTTP/1.1" 307 0
+2025-09-10 16:00:30 - DEBUG - https://huggingface.co:443 "HEAD /api/resolve-cache/models/sentence-transformers/all-MiniLM-L6-v2/c9745ed1d9f207416be6d2e6f8de32d1f16199bf/config_sentence_transformers.json HTTP/1.1" 200 0
+2025-09-10 16:00:30 - DEBUG - https://huggingface.co:443 "HEAD /sentence-transformers/all-MiniLM-L6-v2/resolve/main/README.md HTTP/1.1" 307 0
+2025-09-10 16:00:30 - DEBUG - https://huggingface.co:443 "HEAD /api/resolve-cache/models/sentence-transformers/all-MiniLM-L6-v2/c9745ed1d9f207416be6d2e6f8de32d1f16199bf/README.md HTTP/1.1" 200 0
+2025-09-10 16:00:30 - DEBUG - https://huggingface.co:443 "HEAD /sentence-transformers/all-MiniLM-L6-v2/resolve/main/modules.json HTTP/1.1" 307 0
+2025-09-10 16:00:30 - DEBUG - https://huggingface.co:443 "HEAD /api/resolve-cache/models/sentence-transformers/all-MiniLM-L6-v2/c9745ed1d9f207416be6d2e6f8de32d1f16199bf/modules.json HTTP/1.1" 200 0
+2025-09-10 16:00:30 - DEBUG - https://huggingface.co:443 "HEAD /sentence-transformers/all-MiniLM-L6-v2/resolve/main/sentence_bert_config.json HTTP/1.1" 307 0
+2025-09-10 16:00:30 - DEBUG - https://huggingface.co:443 "HEAD /api/resolve-cache/models/sentence-transformers/all-MiniLM-L6-v2/c9745ed1d9f207416be6d2e6f8de32d1f16199bf/sentence_bert_config.json HTTP/1.1" 200 0
+2025-09-10 16:00:30 - DEBUG - https://huggingface.co:443 "HEAD /sentence-transformers/all-MiniLM-L6-v2/resolve/main/adapter_config.json HTTP/1.1" 404 0
+2025-09-10 16:00:30 - DEBUG - https://huggingface.co:443 "HEAD /sentence-transformers/all-MiniLM-L6-v2/resolve/main/config.json HTTP/1.1" 307 0
+2025-09-10 16:00:30 - DEBUG - https://huggingface.co:443 "HEAD /api/resolve-cache/models/sentence-transformers/all-MiniLM-L6-v2/c9745ed1d9f207416be6d2e6f8de32d1f16199bf/config.json HTTP/1.1" 200 0
+2025-09-10 16:00:31 - DEBUG - https://huggingface.co:443 "HEAD /sentence-transformers/all-MiniLM-L6-v2/resolve/main/tokenizer_config.json HTTP/1.1" 307 0
+2025-09-10 16:00:31 - DEBUG - https://huggingface.co:443 "HEAD /api/resolve-cache/models/sentence-transformers/all-MiniLM-L6-v2/c9745ed1d9f207416be6d2e6f8de32d1f16199bf/tokenizer_config.json HTTP/1.1" 200 0
+2025-09-10 16:00:32 - DEBUG - https://huggingface.co:443 "GET /api/models/sentence-transformers/all-MiniLM-L6-v2/tree/main/additional_chat_templates?recursive=False&expand=False HTTP/1.1" 404 64
+2025-09-10 16:00:32 - DEBUG - https://huggingface.co:443 "HEAD /sentence-transformers/all-MiniLM-L6-v2/resolve/main/1_Pooling/config.json HTTP/1.1" 307 0
+2025-09-10 16:00:32 - DEBUG - https://huggingface.co:443 "HEAD /api/resolve-cache/models/sentence-transformers/all-MiniLM-L6-v2/c9745ed1d9f207416be6d2e6f8de32d1f16199bf/1_Pooling%2Fconfig.json HTTP/1.1" 200 0
+2025-09-10 16:00:32 - DEBUG - https://huggingface.co:443 "GET /api/models/sentence-transformers/all-MiniLM-L6-v2 HTTP/1.1" 200 6861
+2025-09-10 16:00:32 - DEBUG - https://huggingface.co:443 "HEAD /cross-encoder/ms-marco-MiniLM-L-6-v2/resolve/main/config.json HTTP/1.1" 307 0
+2025-09-10 16:00:32 - DEBUG - https://huggingface.co:443 "HEAD /cross-encoder/ms-marco-MiniLM-L6-v2/resolve/main/config.json HTTP/1.1" 307 0
+2025-09-10 16:00:32 - DEBUG - https://huggingface.co:443 "HEAD /api/resolve-cache/models/cross-encoder/ms-marco-MiniLM-L6-v2/c5ee24cb16019beea0893ab7796b1df96625c6b8/config.json HTTP/1.1" 200 0
+2025-09-10 16:00:32 - DEBUG - https://huggingface.co:443 "HEAD /cross-encoder/ms-marco-MiniLM-L-6-v2/resolve/main/tokenizer_config.json HTTP/1.1" 307 0
+2025-09-10 16:00:32 - DEBUG - https://huggingface.co:443 "HEAD /cross-encoder/ms-marco-MiniLM-L6-v2/resolve/main/tokenizer_config.json HTTP/1.1" 307 0
+2025-09-10 16:00:32 - DEBUG - https://huggingface.co:443 "HEAD /api/resolve-cache/models/cross-encoder/ms-marco-MiniLM-L6-v2/c5ee24cb16019beea0893ab7796b1df96625c6b8/tokenizer_config.json HTTP/1.1" 200 0
+2025-09-10 16:00:33 - DEBUG - https://huggingface.co:443 "GET /api/models/cross-encoder/ms-marco-MiniLM-L-6-v2/tree/main/additional_chat_templates?recursive=False&expand=False HTTP/1.1" 307 147
+2025-09-10 16:00:33 - DEBUG - https://huggingface.co:443 "GET /api/models/cross-encoder/ms-marco-MiniLM-L6-v2/tree/main/additional_chat_templates?recursive=False&expand=False HTTP/1.1" 404 64
+2025-09-10 16:00:33 - DEBUG - https://huggingface.co:443 "HEAD /cross-encoder/ms-marco-MiniLM-L-6-v2/resolve/main/README.md HTTP/1.1" 307 0
+2025-09-10 16:00:33 - DEBUG - https://huggingface.co:443 "HEAD /cross-encoder/ms-marco-MiniLM-L6-v2/resolve/main/README.md HTTP/1.1" 307 0
+2025-09-10 16:00:33 - DEBUG - https://huggingface.co:443 "HEAD /api/resolve-cache/models/cross-encoder/ms-marco-MiniLM-L6-v2/c5ee24cb16019beea0893ab7796b1df96625c6b8/README.md HTTP/1.1" 200 0
+2025-09-10 16:00:33 - INFO - Use pytorch device: cuda:0
+2025-09-10 16:00:33 - DEBUG - https://huggingface.co:443 "GET /api/models/cross-encoder/ms-marco-MiniLM-L-6-v2 HTTP/1.1" 307 82
+2025-09-10 16:00:33 - DEBUG - https://huggingface.co:443 "GET /api/models/cross-encoder/ms-marco-MiniLM-L6-v2 HTTP/1.1" 200 5261
+2025-09-10 16:00:33 - INFO - Loaded 2901 metadata entries from C:\Users\dlaev\scaffold\scaffold_ai\vector_outputs\scaffold_metadata_1.json
+2025-09-10 16:00:33 - INFO - \u2705 Enhanced query system initialized successfully
+2025-09-10 16:00:33 - INFO -    - FAISS index: 2901 vectors
+2025-09-10 16:00:33 - INFO -    - Metadata: 2901 entries
+2025-09-10 16:00:33 - INFO - Processing query: What is LEED certification for green buildings?
+=== TESTING SIMPLER SUSTAINABILITY QUERY ===
+
+Query: What is LEED certification for green buildings?
+============================================================
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|##########| 1/1 [00:00<00:00,  5.88it/s]Batches: 100%|##########| 1/1 [00:00<00:00,  5.81it/s]
+2025-09-10 16:00:34 - DEBUG - Found 50 initial candidates
+Batches:   0%|          | 0/2 [00:00<?, ?it/s]Batches: 100%|##########| 2/2 [00:00<00:00, 16.87it/s]Batches: 100%|##########| 2/2 [00:00<00:00, 16.87it/s]
+2025-09-10 16:00:34 - DEBUG - Filtered candidate with very low cross_score: -11.139
+2025-09-10 16:00:34 - DEBUG - Filtered candidate with very low cross_score: -11.206
+2025-09-10 16:00:34 - DEBUG - Filtered candidate with very low cross_score: -11.104
+2025-09-10 16:00:34 - DEBUG - Filtered meta-like candidate (score=-10.193, fname=Datadriven-design-as-a-vehicle-for-BIM-and-sustainability-educationBuildings.pdf)
+2025-09-10 16:00:34 - DEBUG - Filtered meta-like candidate (score=-11.112, fname=SUSTAI~4.PDF)
+2025-09-10 16:00:34 - DEBUG - Filtered candidate with very low cross_score: -10.698
+2025-09-10 16:00:34 - DEBUG - Filtered candidate with very low cross_score: -10.723
+2025-09-10 16:00:34 - DEBUG - Filtered candidate with very low cross_score: -10.903
+2025-09-10 16:00:34 - DEBUG - Filtered candidate with very low cross_score: -10.943
+2025-09-10 16:00:34 - DEBUG - Filtered candidate with very low cross_score: -10.943
+2025-09-10 16:00:34 - DEBUG - Filtered meta-like candidate (score=-11.108, fname=SU6388~1.PDF)
+2025-09-10 16:00:34 - DEBUG - Filtered candidate with very low cross_score: -10.347
+2025-09-10 16:00:34 - DEBUG - Filtered meta-like candidate (score=-10.570, fname=SU6388~1.PDF)
+2025-09-10 16:00:34 - DEBUG - Filtered candidate with very low cross_score: -10.560
+2025-09-10 16:00:34 - DEBUG - Filtered candidate with very low cross_score: -10.560
+2025-09-10 16:00:34 - DEBUG - Filtered candidate with very low cross_score: -9.703
+2025-09-10 16:00:34 - DEBUG - Filtered candidate with very low cross_score: -10.652
+2025-09-10 16:00:34 - DEBUG - Filtered candidate with very low cross_score: -9.176
+2025-09-10 16:00:34 - DEBUG - Filtered candidate with very low cross_score: -9.176
+2025-09-10 16:00:34 - DEBUG - Filtered candidate with very low cross_score: -5.252
+2025-09-10 16:00:34 - DEBUG - Filtered candidate with very low cross_score: -7.783
+2025-09-10 16:00:34 - DEBUG - Filtered meta-like candidate (score=-7.913, fname=Datadriven-design-as-a-vehicle-for-BIM-and-sustainability-educationBuildings.pdf)
+2025-09-10 16:00:34 - DEBUG - Filtered candidate with very low cross_score: -10.613
+2025-09-10 16:00:34 - DEBUG - Filtered meta-like candidate (score=-3.164, fname=MULTIP~1.PDF)
+2025-09-10 16:00:34 - DEBUG - Filtered candidate with very low cross_score: -5.761
+2025-09-10 16:00:34 - DEBUG - Filtered candidate with very low cross_score: -9.599
+2025-09-10 16:00:34 - DEBUG - Filtered candidate with very low cross_score: -11.348
+2025-09-10 16:00:34 - DEBUG - Filtered candidate with very low cross_score: -11.088
+2025-09-10 16:00:34 - DEBUG - Filtered candidate with very low cross_score: -10.664
+2025-09-10 16:00:34 - DEBUG - Filtered meta-like candidate (score=-11.162, fname=EOP-17-Engineering-Course-Activities-20250611.pdf)
+2025-09-10 16:00:34 - DEBUG - Filtered meta-like candidate (score=-11.080, fname=EOP-17-Engineering-Course-Activities-20250611.pdf)
+2025-09-10 16:00:34 - DEBUG - Filtered candidate with very low cross_score: -10.948
+2025-09-10 16:00:34 - DEBUG - Filtered candidate with very low cross_score: -8.958
+2025-09-10 16:00:34 - DEBUG - Filtered candidate with very low cross_score: -11.106
+2025-09-10 16:00:34 - DEBUG - Filtered candidate with very low cross_score: -8.572
+2025-09-10 16:00:34 - DEBUG - Filtered candidate with very low cross_score: -10.660
+2025-09-10 16:00:34 - DEBUG - Cross-encoder reranking: 14 candidates remaining after filtering
+2025-09-10 16:00:34 - DEBUG - Reranked to 14 candidates
+2025-09-10 16:00:34 - DEBUG - Contextual filtering: 14 candidates remaining after filtering
+2025-09-10 16:00:34 - DEBUG - Filtered to 14 candidates
+2025-09-10 16:00:34 - DEBUG - Using top 3 filtered candidates
+2025-09-10 16:00:34 - DEBUG - Generated prompt with ~391 tokens
+2025-09-10 16:00:34 - DEBUG - Initializing LLM Manager with model: mistralai/Mistral-7B-Instruct-v0.2
+2025-09-10 16:00:34 - DEBUG - Using device: cuda
+2025-09-10 16:00:34 - DEBUG - Using cache directory: C:\Users\dlaev/.cache/huggingface/hub
+2025-09-10 16:00:34 - DEBUG - Loading tokenizer...
+2025-09-10 16:00:35 - DEBUG - https://huggingface.co:443 "HEAD /mistralai/Mistral-7B-Instruct-v0.2/resolve/main/tokenizer_config.json HTTP/1.1" 401 0
+2025-09-10 16:00:35 - DEBUG - https://huggingface.co:443 "GET /api/models/mistralai/Mistral-7B-Instruct-v0.2/tree/main/additional_chat_templates?recursive=False&expand=False HTTP/1.1" 404 64
+2025-09-10 16:00:35 - DEBUG - Tokenizer loaded successfully
+2025-09-10 16:00:35 - DEBUG - Loading model using standard pipeline approach...
+2025-09-10 16:00:35 - INFO - \U0001f680 Using GPU-optimized pipeline settings (no quantization)
+2025-09-10 16:00:35 - DEBUG - https://huggingface.co:443 "HEAD /mistralai/Mistral-7B-Instruct-v0.2/resolve/main/config.json HTTP/1.1" 401 0
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]Loading checkpoint shards:  33%|###3      | 1/3 [00:04<00:08,  4.07s/it]Loading checkpoint shards:  67%|######6   | 2/3 [00:09<00:04,  4.65s/it]Loading checkpoint shards: 100%|##########| 3/3 [00:18<00:00,  6.67s/it]Loading checkpoint shards: 100%|##########| 3/3 [00:18<00:00,  6.07s/it]
+2025-09-10 16:00:54 - DEBUG - https://huggingface.co:443 "HEAD /mistralai/Mistral-7B-Instruct-v0.2/resolve/main/generation_config.json HTTP/1.1" 401 0
+2025-09-10 16:00:54 - DEBUG - https://huggingface.co:443 "HEAD /mistralai/Mistral-7B-Instruct-v0.2/resolve/main/custom_generate/generate.py HTTP/1.1" 404 0
+Device set to use cuda:0
+2025-09-10 16:01:11 - DEBUG - Pipeline loaded successfully
+2025-09-10 16:01:11 - DEBUG - Pipeline setup complete
+2025-09-10 16:01:11 - DEBUG - LLM Manager instance cached for reuse
+2025-09-10 16:02:40 - INFO - Generated response with 109 words
+2025-09-10 16:02:40 - INFO - Generated complete response with 109 words
+2025-09-10 16:02:40 - WARNING - Rejected response at stage=first_attempt; reasons=['surface_artifacts']; preview='LEED (Leadership in Energy and Environmental Design) certification is a rating system developed by the U.S. Green Building Council (USGBC) for evaluating the environmental performance of buildings. It provides a framework for identifying and implementing practical and measurable green solutions. Buildings certified under LEED earn points based on criteria such as energy efficiency, water savings, use of renewable resources, indoor environmental quality, and innovation. These certifications aim t'
+2025-09-10 16:04:06 - INFO - Generated response with 97 words
+2025-09-10 16:04:06 - ERROR - Error in LLM response generation: Garbled/Surface/Offtopic response detected
+2025-09-10 16:04:06 - WARNING - Retrying with minimal context
+2025-09-10 16:05:26 - WARNING - Response appears to be truncated - consider increasing max_new_tokens
+2025-09-10 16:05:26 - INFO - Generated response with 110 words
+2025-09-10 16:05:26 - INFO - Generated complete response with 110 words
+2025-09-10 16:05:26 - WARNING - Rejected response at stage=second_attempt; reasons=['surface_artifacts']; preview='LEED (Leadership in Energy and Environmental Design) certification is a rating system for evaluating the environmental performance of existing buildings. It is administered by the U.S. Green Building Council (USGBC). Buildings earn certification based on their performance in areas such as energy efficiency, water conservation, indoor air quality, and waste reduction. This certification process involves earning points within theLEED E\u0411+\u041e\u041c (Existing Buildings: Operations + Maintenance) points syst'
+2025-09-10 16:06:48 - WARNING - Response appears to be truncated - consider increasing max_new_tokens
+2025-09-10 16:06:48 - INFO - Generated response with 36 words
+2025-09-10 16:06:48 - ERROR - Rewrite after second attempt still invalid, using fallback
+SUCCESS: Query processed
+
+RESPONSE:
+I apologize, but I'm having trouble generating a comprehensive response for your question about 'What is LEED certification for green buildings?'. This could be due to limited relevant information in the available sources or technical issues. Please try rephrasing your question, asking about a different topic, or contact support if the issue persists.
+
+SOURCES USED:
+  [1] Score: 3.332 - TEACHI~1.PDF
+  [2] Score: 3.224 - Problembasedlearning-and-learningthroughservice-for-sustainability-education.pdf
+  [3] Score: 2.584 - implementing-nace-competencies-in-leed-lab-to-prepare-a-career-ready-workforce.pdf
+
+Response length: 353 characters

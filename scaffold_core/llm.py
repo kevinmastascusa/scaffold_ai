@@ -38,6 +38,11 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Allow disabling all model caching via environment
+DISABLE_MODEL_CACHE = str(
+    os.getenv("SC_DISABLE_MODEL_CACHE", "0")
+).lower() in ("1", "true", "yes")
+
 # CPU-specific optimizations
 if torch.cuda.is_available():
     logger.debug("CUDA available - using GPU optimizations")
@@ -114,24 +119,27 @@ class LLMManager:
         logger.debug("Loading tokenizer...")
         from transformers import AutoTokenizer
 
-        # Prefer local cached tokenizer next to ONNX export for fast startups
+        # Prefer local cached tokenizer next to ONNX export, unless caching is disabled
         onnx_cache_dir = os.path.join(
             project_root, "outputs", "onnx_models", LLM_MODEL.replace("/", "__")
         )
-        tokenizer_source = (
-            onnx_cache_dir if os.path.exists(os.path.join(onnx_cache_dir, "tokenizer.json"))
-            or os.path.exists(os.path.join(onnx_cache_dir, "vocab.json"))
-            else LLM_MODEL
-        )
+        if DISABLE_MODEL_CACHE:
+            tokenizer_source = LLM_MODEL
+        else:
+            tokenizer_source = (
+                onnx_cache_dir if os.path.exists(os.path.join(onnx_cache_dir, "tokenizer.json"))
+                or os.path.exists(os.path.join(onnx_cache_dir, "vocab.json"))
+                else LLM_MODEL
+            )
 
         try:
             self.tokenizer = AutoTokenizer.from_pretrained(
                 tokenizer_source,
                 token=self.hf_token,
                 trust_remote_code=True,
-                cache_dir=cache_dir,
+                cache_dir=None if DISABLE_MODEL_CACHE else cache_dir,
                 use_fast=False,
-                local_files_only=os.path.isdir(tokenizer_source)
+                local_files_only=False if DISABLE_MODEL_CACHE else os.path.isdir(tokenizer_source)
             )
         except Exception as e:
             logger.warning(f"Failed to load tokenizer with default method: {e}")
@@ -140,10 +148,9 @@ class LLMManager:
                 tokenizer_source,
                 token=self.hf_token,
                 trust_remote_code=True,
-                cache_dir=cache_dir,
+                cache_dir=None if DISABLE_MODEL_CACHE else cache_dir,
                 use_fast=False,
                 legacy=True,  # Use legacy mode for better compatibility
-
             )
         if not self.tokenizer.pad_token:
             self.tokenizer.pad_token = self.tokenizer.eos_token
@@ -201,16 +208,20 @@ class LLMManager:
                 onnx_cache_dir = os.path.join(
                     project_root, "outputs", "onnx_models", LLM_MODEL.replace("/", "__")
                 )
-                os.makedirs(onnx_cache_dir, exist_ok=True)
+                if not DISABLE_MODEL_CACHE:
+                    os.makedirs(onnx_cache_dir, exist_ok=True)
 
                 # Detect pre-exported model
-                try:
-                    existing_files = os.listdir(onnx_cache_dir)
-                except Exception:
-                    existing_files = []
-                has_onnx = any(fname.endswith(".onnx") for fname in existing_files)
-                has_config = os.path.exists(os.path.join(onnx_cache_dir, "config.json"))
-                preexport_exists = has_onnx and has_config
+                if DISABLE_MODEL_CACHE:
+                    preexport_exists = False
+                else:
+                    try:
+                        existing_files = os.listdir(onnx_cache_dir)
+                    except Exception:
+                        existing_files = []
+                    has_onnx = any(fname.endswith(".onnx") for fname in existing_files)
+                    has_config = os.path.exists(os.path.join(onnx_cache_dir, "config.json"))
+                    preexport_exists = has_onnx and has_config
 
                 if preexport_exists:
                     logger.debug(
@@ -232,19 +243,19 @@ class LLMManager:
                         providers=providers,
                         provider_options=provider_options,
                     )
-                    # Persist export for subsequent fast startups
-                    try:
-                        model.save_pretrained(onnx_cache_dir)
-                        logger.debug(f"Saved ONNX model to cache: {onnx_cache_dir}")
-                        # Also save tokenizer alongside for fully offline startup
+                    # When caching is disabled, skip persisting export/tokenizer
+                    if not DISABLE_MODEL_CACHE:
                         try:
-                            self.tokenizer.save_pretrained(onnx_cache_dir)
-                        except Exception as tok_err:
-                            logger.warning(
-                                f"Could not save tokenizer to ONNX cache: {tok_err}"
-                            )
-                    except Exception as save_err:
-                        logger.warning(f"Could not save ONNX model cache: {save_err}")
+                            model.save_pretrained(onnx_cache_dir)
+                            logger.debug(f"Saved ONNX model to cache: {onnx_cache_dir}")
+                            try:
+                                self.tokenizer.save_pretrained(onnx_cache_dir)
+                            except Exception as tok_err:
+                                logger.warning(
+                                    f"Could not save tokenizer to ONNX cache: {tok_err}"
+                                )
+                        except Exception as save_err:
+                            logger.warning(f"Could not save ONNX model cache: {save_err}")
 
                 # Create pipeline with ONNX model
                 self.pipeline = pipeline(
@@ -271,31 +282,75 @@ class LLMManager:
 
         # Use pipeline for better memory management and compatibility
         try:
-            # CPU-optimized pipeline configuration
-            pipeline_kwargs = {
+            # Base pipeline configuration
+            pipeline_kwargs: Dict[str, Any] = {
                 "task": "text-generation",
-                "model": LLM_MODEL,
                 "tokenizer": self.tokenizer,
                 "token": self.hf_token,
                 "trust_remote_code": True,
                 "pad_token_id": self.tokenizer.pad_token_id,
-                "return_full_text": False,  # Only return generated completion
+                "return_full_text": False,
             }
 
-            # Device-specific optimizations
-            if LLM_DEVICE == "cpu":
-                pipeline_kwargs.update({
-                    "torch_dtype": torch.float32,  # Use float32 for CPU
-                    "device": "cpu",
-                })
-                logger.info("💻 Using CPU-optimized pipeline settings")
-            else:
-                # GPU-optimized settings
-                pipeline_kwargs.update({
-                    "torch_dtype": torch.float16,  # Use float16 for GPU memory efficiency
-                    "device": "cuda:0",  # Explicitly use first GPU
-                })
-                logger.info("🚀 Using GPU-optimized pipeline settings")
+            # Optional quantization flags
+            use_8bit = str(os.getenv("SC_GPU_8BIT", "")).lower() in ("1", "true", "yes")
+            use_4bit = str(os.getenv("SC_GPU_4BIT", "")).lower() in ("1", "true", "yes")
+
+            loaded_model = None
+
+            if LLM_DEVICE != "cpu" and (use_8bit or use_4bit):
+                try:
+                    from transformers import AutoModelForCausalLM
+                    quant_args: Dict[str, Any] = {"device_map": "auto"}
+                    if use_4bit:
+                        # bitsandbytes 4-bit
+                        import bitsandbytes as bnb  # noqa: F401
+                        quant_args.update({
+                            "load_in_4bit": True,
+                            "bnb_4bit_use_double_quant": True,
+                            "bnb_4bit_quant_type": "nf4",
+                            "bnb_4bit_compute_dtype": torch.float16,
+                        })
+                        logger.info("🚀 Loading model in 4-bit quantization on GPU")
+                    elif use_8bit:
+                        # bitsandbytes 8-bit
+                        import bitsandbytes as bnb  # noqa: F401
+                        quant_args.update({
+                            "load_in_8bit": True,
+                        })
+                        logger.info("🚀 Loading model in 8-bit quantization on GPU")
+
+                    loaded_model = AutoModelForCausalLM.from_pretrained(
+                        LLM_MODEL,
+                        token=self.hf_token,
+                        trust_remote_code=True,
+                        **quant_args,
+                    )
+
+                    # When passing a loaded model, let pipeline infer device from the model
+                    pipeline_kwargs.update({
+                        "model": loaded_model,
+                    })
+                except Exception as quant_err:
+                    logger.warning(f"Quantized load failed ({quant_err}); falling back to standard pipeline loading")
+                    loaded_model = None
+
+            if loaded_model is None:
+                # Non-quantized path
+                if LLM_DEVICE == "cpu":
+                    pipeline_kwargs.update({
+                        "model": LLM_MODEL,
+                        "torch_dtype": torch.float32,
+                        "device": "cpu",
+                    })
+                    logger.info("💻 Using CPU-optimized pipeline settings")
+                else:
+                    pipeline_kwargs.update({
+                        "model": LLM_MODEL,
+                        "torch_dtype": torch.float16,
+                        "device": "cuda:0",
+                    })
+                    logger.info("🚀 Using GPU-optimized pipeline settings (no quantization)")
 
             self.pipeline = pipeline(**pipeline_kwargs)
             logger.debug("Pipeline loaded successfully")
@@ -496,23 +551,53 @@ You are an expert in sustainability education and engineering curriculum develop
             return f"Error generating response: {str(e)}"
 
     def _is_response_truncated(self, response_text: str) -> bool:
-        """Check if a response appears to be truncated."""
-        # Check for truncation indicators
-        truncation_indicators = [
-            "...", "etc.", "and so on", "continues", "more",
-            "further", "additionally", "moreover", "furthermore",
-            "[Note: Response may be incomplete due to length limits]"
-        ]
+        """Heuristic truncation detection (reduced false positives).
 
-        for indicator in truncation_indicators:
-            if indicator.lower() in response_text.lower():
-                return True
+        Require a combination of signals instead of a single keyword.
+        - Ignore if very short (< 80 words) unless it ends mid-sentence.
+        - Treat structured endings as complete (e.g., headings, bullets).
+        - Consider explicit cutoff markers only when near the end.
+        """
+        try:
+            if not isinstance(response_text, str):
+                return False
 
-        # Check if response seems incomplete (ends mid-sentence)
-        if response_text and not response_text.strip().endswith(('.', '!', '?', ':', ';')):
-            return True
+            text = response_text.strip()
+            if not text:
+                return False
 
-        return False
+            words = text.split()
+            word_count = len(words)
+
+            # If it ends in a proper terminator, assume complete
+            if text.endswith(('.', '!', '?')):
+                return False
+
+            # Structured endings: line ends with ':' or a bullet/numbered list
+            stripped_last_line = text.splitlines()[-1].strip()
+            if (
+                stripped_last_line.endswith(':') or
+                re.match(r"^[\-\*]\s+\S+", stripped_last_line) or
+                re.match(r"^\d+\.[\)\s]", stripped_last_line)
+            ):
+                return False
+
+            # Explicit indicators only count if near the end and long enough
+            indicators = (" and so on", "continues", "moreover", "furthermore")
+            indicator_hit = any(text.lower().endswith(tok) for tok in indicators)
+
+            ellipsis_hit = text.endswith('...')
+            etc_hit = text.lower().endswith('etc.')
+
+            # If the answer is very short, only flag when it obviously ends mid-sentence
+            if word_count < 80:
+                return not text.endswith(('.', '!', '?'))
+
+            # For longer answers, require two signals: no terminal punctuation + indicator/ellipsis
+            no_terminal = not text.endswith(('.', '!', '?', ';'))
+            return no_terminal and (ellipsis_hit or etc_hit or indicator_hit)
+        except Exception:
+            return False
 
     def _generate_continuation(
         self,
@@ -544,7 +629,7 @@ Continue from where it left off and provide a complete conclusion:"""
             logger.debug("Generating continuation with context")
 
             # Generate continuation with shorter length to avoid infinite recursion
-            continuation_tokens = min(max_new_tokens or LLM_MAX_NEW_TOKENS, 500)
+            continuation_tokens = min(max_new_tokens or LLM_MAX_NEW_TOKENS, 800)
 
             # Use original generate_response to avoid recursion
             continuation = self.generate_response(

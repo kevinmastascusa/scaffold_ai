@@ -1,0 +1,584 @@
+<h1 id="system-overview">System Overview</h1>
+<h2 id="purpose-and-scope">Purpose and Scope</h2>
+<p>The Scaffold AI system is a Flask-based web application designed to
+assist educators in integrating sustainability concepts into engineering
+curricula. The system leverages:</p>
+<ul>
+<li><p><strong>RAG Architecture</strong>: Retrieval-Augmented Generation
+with 2,901 indexed documents</p></li>
+<li><p><strong>Vector Search</strong>: FAISS-based semantic document
+retrieval</p></li>
+<li><p><strong>LLM Integration</strong>: TinyLlama and
+Mistral-7B-Instruct model support</p></li>
+<li><p><strong>Quality Control</strong>: Multi-stage response validation
+pipeline</p></li>
+<li><p><strong>Web Interface</strong>: Enhanced UI with real-time query
+processing</p></li>
+</ul>
+<h2 id="key-capabilities">Key Capabilities</h2>
+<ol>
+<li><p>Curriculum integration recommendations for sustainability
+concepts</p></li>
+<li><p>Learning outcome development assistance</p></li>
+<li><p>Framework integration guidance (LEED, UN SDGs, Engineering for
+One Planet)</p></li>
+<li><p>Course-specific contextual recommendations</p></li>
+<li><p>Resource and tool recommendations for educators</p></li>
+</ol>
+<h1 id="system-architecture">System Architecture</h1>
+<h2 id="component-overview">Component Overview</h2>
+<figure>
+<pre class="text" data-language="text"><code>┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
+│   Frontend      │    │   Core Engine    │    │   Data Layer    │
+│                 │    │                  │    │                 │
+│ • Flask App     │◄──►│ • Query Processor│◄──►│ • FAISS Index   │
+│ • Enhanced UI   │    │ • LLM Manager    │    │ • PDF Documents │
+│ • Templates     │    │ • Quality Control│    │ • Metadata      │
+│                 │    │ • Text Cleaning  │    │                 │
+└─────────────────┘    └──────────────────┘    └─────────────────┘</code></pre>
+<figcaption>High-level system architecture</figcaption>
+</figure>
+<h2 id="directory-structure">Directory Structure</h2>
+<div class="sourceCode" id="cb2" data-language="bash"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">scaffold_ai/</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> frontend/</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="ex">│</span>   ├── app_enhanced.py           <span class="co"># Main Flask application</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="ex">│</span>   └── templates/</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="ex">│</span>       └── index_enhanced.html   <span class="co"># Enhanced UI template</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> scaffold_core/</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="ex">│</span>   ├── config.py                 <span class="co"># System configuration</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="ex">│</span>   ├── llm.py                    <span class="co"># LLM integration layer</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="ex">│</span>   ├── text_clean.py             <span class="co"># Quality control algorithms</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="ex">│</span>   ├── pdf_processor.py          <span class="co"># Document processing</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="ex">│</span>   └── vector/</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="ex">│</span>       ├── enhanced_query_improved.py  <span class="co"># Core query engine</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="ex">│</span>       └── chunk.py              <span class="co"># Document chunking</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> vector_outputs/</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="ex">│</span>   ├── scaffold_index_1.faiss    <span class="co"># Vector index</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="ex">│</span>   ├── scaffold_metadata_1.json  <span class="co"># Document metadata</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="ex">│</span>   └── processed_1.json          <span class="co"># Processing logs</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> data/                         <span class="co"># PDF document repository</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="ex">├──</span> model_config.json             <span class="co"># Model configuration</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="ex">└──</span> requirements.txt              <span class="co"># Python dependencies</span></span></code></pre></div>
+<h1 id="installation-and-deployment">Installation and Deployment</h1>
+<h2 id="prerequisites">Prerequisites</h2>
+<ul>
+<li><p>Python 3.12+</p></li>
+<li><p>CUDA-compatible GPU (recommended)</p></li>
+<li><p>16GB+ RAM</p></li>
+<li><p>HuggingFace account and token</p></li>
+</ul>
+<h2 id="environment-setup">Environment Setup</h2>
+<div class="sourceCode" id="cb3" data-language="bash"
+data-caption="Virtual environment creation"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create and activate virtual environment</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> <span class="at">-m</span> venv scaffold_env_312_py31210</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="ex">scaffold_env_312_py31210/Scripts/activate</span>  <span class="co"># Windows</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># source scaffold_env_312_py31210/bin/activate  # Linux/Mac</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Install dependencies</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install <span class="at">-r</span> requirements.txt</span></code></pre></div>
+<h2 id="configuration">Configuration</h2>
+<h3 id="environment-variables">Environment Variables</h3>
+<div class="sourceCode" id="cb4" data-language="bash"
+data-caption="Required environment variables"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Quality control configuration</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">SC_ENABLE_PROOFREAD</span><span class="op">=</span>1</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">SC_GARBLED_STRICTNESS</span><span class="op">=</span>medium</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">SC_ENABLE_TRUNCATION_DETECTION</span><span class="op">=</span>1</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co"># HuggingFace integration</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">HUGGINGFACE_TOKEN</span><span class="op">=</span>hf_your_token_here</span></code></pre></div>
+<h3 id="model-configuration">Model Configuration</h3>
+<p>Edit <code>model_config.json</code>:</p>
+<div class="sourceCode" id="cb5" data-language="json"
+data-caption="Model configuration file"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;selected_models&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;llm&quot;</span><span class="fu">:</span> <span class="st">&quot;tinyllama&quot;</span><span class="fu">,</span>          <span class="er">//</span> <span class="er">or</span> <span class="dt">&quot;mistral&quot;</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;embedding&quot;</span><span class="fu">:</span> <span class="st">&quot;miniLM&quot;</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">},</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;model_settings&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;llm&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;temperature&quot;</span><span class="fu">:</span> <span class="fl">0.2</span><span class="fu">,</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;max_new_tokens&quot;</span><span class="fu">:</span> <span class="dv">1000</span><span class="fu">,</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;top_p&quot;</span><span class="fu">:</span> <span class="fl">0.8</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">},</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;embedding&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;chunk_size&quot;</span><span class="fu">:</span> <span class="dv">600</span><span class="fu">,</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;chunk_overlap&quot;</span><span class="fu">:</span> <span class="dv">100</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h2 id="database-initialization">Database Initialization</h2>
+<div class="sourceCode" id="cb6" data-language="bash"
+data-caption="Vector database setup"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Process PDF documents</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> scaffold_core/scripts/chunk/ChunkTest.py</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Build vector index</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> scaffold_core/vector/main.py</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify index creation</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> <span class="at">-la</span> vector_outputs/</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Expected files:</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a><span class="co"># - scaffold_index_1.faiss (vector index)</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a><span class="co"># - scaffold_metadata_1.json (metadata)</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="co"># - processed_1.json (processing logs)</span></span></code></pre></div>
+<h1 id="operations">Operations</h1>
+<h2 id="starting-the-system">Starting the System</h2>
+<div class="sourceCode" id="cb7" data-language="bash"
+data-caption="System startup"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Activate environment</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="ex">scaffold_env_312_py31210/Scripts/activate</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Start enhanced UI (recommended)</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> frontend/app_enhanced.py <span class="at">--port</span> 5004</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Alternative: Standard UI</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> run_enhanced_ui.py</span></code></pre></div>
+<h2 id="system-health-checks">System Health Checks</h2>
+<div class="sourceCode" id="cb8" data-language="python"
+data-caption="Health check script"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Test query processing</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>python <span class="op">-</span>c <span class="st">&quot;</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="er">import sys, os</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>sys.path.append(<span class="st">&#39;.&#39;</span>)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>os.environ[<span class="st">&#39;SC_ENABLE_PROOFREAD&#39;</span>] <span class="op">=</span> <span class="st">&#39;1&#39;</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>os.environ[<span class="st">&#39;SC_GARBLED_STRICTNESS&#39;</span>] <span class="op">=</span> <span class="st">&#39;medium&#39;</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scaffold_core.vector.enhanced_query_improved <span class="im">import</span> query_enhanced_improved</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>result <span class="op">=</span> query_enhanced_improved(<span class="st">&#39;What is sustainability?&#39;</span>)</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&#39;Status: </span><span class="sc">{</span><span class="st">&quot;SUCCESS&quot;</span> <span class="cf">if</span> <span class="bu">len</span>(result.get(<span class="st">&quot;response&quot;</span>, <span class="st">&quot;&quot;</span>)) <span class="op">&gt;</span> <span class="dv">100</span> <span class="cf">else</span> <span class="st">&quot;FAIL&quot;</span><span class="sc">}</span><span class="ss">&#39;</span>)</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&#39;Response length: </span><span class="sc">{</span><span class="bu">len</span>(result.get(<span class="st">&quot;response&quot;</span>, <span class="st">&quot;&quot;</span>))<span class="sc">}</span><span class="ss"> characters&#39;</span>)</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="co">&quot;</span></span></code></pre></div>
+<h2 id="performance-monitoring">Performance Monitoring</h2>
+<p>Key metrics to monitor:</p>
+<ul>
+<li><p><strong>Response Time</strong>: Target &lt;30 seconds for complex
+queries</p></li>
+<li><p><strong>Success Rate</strong>: Should maintain &gt;95%
+non-fallback responses</p></li>
+<li><p><strong>Memory Usage</strong>: Monitor GPU/CPU memory during
+operation</p></li>
+<li><p><strong>Error Rates</strong>: Check logs for system
+exceptions</p></li>
+</ul>
+<h1 id="quality-control-system">Quality Control System</h1>
+<h2 id="multi-stage-pipeline">Multi-Stage Pipeline</h2>
+<p>The quality control system implements a sophisticated validation
+pipeline:</p>
+<ol>
+<li><p><strong>Initial Generation</strong>: LLM produces candidate
+response</p></li>
+<li><p><strong>Garbled Detection</strong>: Check for obvious text
+corruption</p></li>
+<li><p><strong>Surface Artifacts</strong>: Scan for OCR-style
+artifacts</p></li>
+<li><p><strong>Topic Validation</strong>: Ensure response
+relevance</p></li>
+<li><p><strong>Rewrite Attempt</strong>: Attempt correction if issues
+found</p></li>
+<li><p><strong>Final Decision</strong>: Accept response or provide
+fallback</p></li>
+</ol>
+<h2 id="configuration-parameters">Configuration Parameters</h2>
+<table>
+<caption>Quality control configuration parameters</caption>
+<thead>
+<tr>
+<th style="text-align: left;"><strong>Parameter</strong></th>
+<th style="text-align: left;"><strong>Values</strong></th>
+<th style="text-align: left;"><strong>Description</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">SC_ENABLE_PROOFREAD</td>
+<td style="text-align: left;">0, 1</td>
+<td style="text-align: left;">Enable/disable quality checking</td>
+</tr>
+<tr>
+<td style="text-align: left;">SC_GARBLED_STRICTNESS</td>
+<td style="text-align: left;">low, medium, high</td>
+<td style="text-align: left;">Detection sensitivity</td>
+</tr>
+<tr>
+<td style="text-align: left;">SC_ENABLE_TRUNCATION_DETECTION</td>
+<td style="text-align: left;">0, 1</td>
+<td style="text-align: left;">Detect incomplete responses</td>
+</tr>
+</tbody>
+</table>
+<h2 id="pattern-detection-details">Pattern Detection Details</h2>
+<p>The refined surface artifact detection targets specific OCR
+corruption patterns:</p>
+<div class="sourceCode" id="cb9" data-language="python"
+data-caption="Surface artifact patterns"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Patterns for detecting genuine OCR artifacts</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>inword_split_patterns <span class="op">=</span> [</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="vs">r&quot;</span><span class="dv">\b</span><span class="kw">(</span><span class="vs">sustain</span><span class="cf">|</span><span class="vs">develop</span><span class="cf">|</span><span class="vs">architec</span><span class="cf">|</span><span class="vs">engin</span><span class="cf">|</span><span class="vs">build</span><span class="cf">|</span><span class="vs">energ</span><span class="kw">)</span><span class="dv">\s</span><span class="op">+</span><span class="kw">(</span><span class="vs">ed</span><span class="cf">|</span><span class="vs">ing</span><span class="cf">|</span><span class="vs">ment</span><span class="cf">|</span><span class="vs">t</span><span class="cf">|</span><span class="vs">ture</span><span class="cf">|</span><span class="vs">al</span><span class="cf">|</span><span class="vs">er</span><span class="cf">|</span><span class="vs">y</span><span class="kw">)</span><span class="dv">\b</span><span class="vs">&quot;</span>,</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="vs">r&quot;</span><span class="dv">\b</span><span class="kw">(</span><span class="vs">archite</span><span class="cf">|</span><span class="vs">buildi</span><span class="cf">|</span><span class="vs">sustaina</span><span class="cf">|</span><span class="vs">develo</span><span class="cf">|</span><span class="vs">enginee</span><span class="kw">)</span><span class="dv">\s</span><span class="op">+</span><span class="kw">(</span><span class="vs">cture</span><span class="cf">|</span><span class="vs">ng</span><span class="cf">|</span><span class="vs">bility</span><span class="cf">|</span><span class="vs">pment</span><span class="cf">|</span><span class="vs">ring</span><span class="kw">)</span><span class="dv">\b</span><span class="vs">&quot;</span>, </span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="vs">r&quot;</span><span class="dv">\b</span><span class="kw">(</span><span class="vs">cur</span><span class="cf">|</span><span class="vs">fl</span><span class="cf">|</span><span class="vs">sys</span><span class="cf">|</span><span class="vs">eff</span><span class="kw">)</span><span class="dv">\s</span><span class="op">+</span><span class="kw">(</span><span class="vs">ricul</span><span class="cf">|</span><span class="vs">uid</span><span class="cf">|</span><span class="vs">tem</span><span class="cf">|</span><span class="vs">ici</span><span class="kw">)</span><span class="dv">\b</span><span class="vs">&quot;</span>,</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Examples of detected artifacts:</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="co"># &quot;sustain ability&quot; -&gt; sustainability</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co"># &quot;archite cture&quot; -&gt; architecture  </span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="co"># &quot;develop ment&quot; -&gt; development</span></span></code></pre></div>
+<h1 id="troubleshooting">Troubleshooting</h1>
+<h2 id="common-issues-and-solutions">Common Issues and Solutions</h2>
+<h3 id="model-loading-timeouts">Model Loading Timeouts</h3>
+<p><strong>Symptoms</strong>: Long delays during first query, timeout
+errors<br />
+<strong>Solution</strong>:</p>
+<div class="sourceCode" id="cb10" data-language="bash"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Increase timeout and ensure sufficient memory</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">PYTORCH_CUDA_ALLOC_CONF</span><span class="op">=</span>max_split_size_mb:512</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Allow 2-3 minutes for initial model loading</span></span></code></pre></div>
+<h3 id="high-fallback-rates">High Fallback Rates</h3>
+<p><strong>Symptoms</strong>: Frequent "I apologize" responses<br />
+<strong>Solution</strong>:</p>
+<div class="sourceCode" id="cb11" data-language="bash"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Adjust quality control strictness</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">SC_GARBLED_STRICTNESS</span><span class="op">=</span>low</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Or disable proofread temporarily for testing</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">SC_ENABLE_PROOFREAD</span><span class="op">=</span>0</span></code></pre></div>
+<h3 id="missing-vector-index">Missing Vector Index</h3>
+<p><strong>Symptoms</strong>: FileNotFoundError for FAISS files<br />
+<strong>Solution</strong>:</p>
+<div class="sourceCode" id="cb12" data-language="bash"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Rebuild vector database</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> scaffold_core/scripts/chunk/ChunkTest.py</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> scaffold_core/vector/main.py</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Verify files exist in vector_outputs/</span></span></code></pre></div>
+<h3 id="gpu-memory-issues">GPU Memory Issues</h3>
+<p><strong>Symptoms</strong>: CUDA out of memory errors<br />
+<strong>Solution</strong>:</p>
+<div class="sourceCode" id="cb13" data-language="bash"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Clear GPU cache</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> <span class="at">-c</span> <span class="st">&quot;import torch; torch.cuda.empty_cache()&quot;</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Reduce batch size in model configuration</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Use CPU fallback if necessary</span></span></code></pre></div>
+<h2 id="log-analysis">Log Analysis</h2>
+<p>Important log locations and patterns:</p>
+<div class="sourceCode" id="cb14" data-language="bash"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># System logs show processing flow</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="st">&quot;Enhanced query system initialized&quot;</span> logs/</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="st">&quot;Generated response with&quot;</span> logs/</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="st">&quot;WARNING.*Rejected response&quot;</span> logs/</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Error patterns to monitor</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="st">&quot;ERROR&quot;</span> logs/</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="st">&quot;FALLBACK&quot;</span> logs/</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="fu">grep</span> <span class="st">&quot;FileNotFoundError&quot;</span> logs/</span></code></pre></div>
+<h1 id="maintenance">Maintenance</h1>
+<h2 id="regular-maintenance-tasks">Regular Maintenance Tasks</h2>
+<h3 id="weekly">Weekly</h3>
+<ul>
+<li><p>Monitor system performance metrics</p></li>
+<li><p>Review error logs for patterns</p></li>
+<li><p>Verify disk space for model cache</p></li>
+<li><p>Test sample queries across categories</p></li>
+</ul>
+<h3 id="monthly">Monthly</h3>
+<ul>
+<li><p>Update Python dependencies:
+<code>pip install -r requirements.txt --upgrade</code></p></li>
+<li><p>Clear model cache:
+<code>rm -rf  /.cache/huggingface/</code></p></li>
+<li><p>Backup vector database:
+<code>cp -r vector_outputs/ vector_outputs_backup/</code></p></li>
+<li><p>Review and update test query suite</p></li>
+</ul>
+<h3 id="quarterly">Quarterly</h3>
+<ul>
+<li><p>Evaluate model performance against newer releases</p></li>
+<li><p>Review and update quality control patterns</p></li>
+<li><p>Conduct comprehensive testing across all categories</p></li>
+<li><p>Update documentation based on system changes</p></li>
+</ul>
+<h2 id="performance-optimization">Performance Optimization</h2>
+<h3 id="model-selection">Model Selection</h3>
+<table>
+<caption>Model performance characteristics</caption>
+<thead>
+<tr>
+<th style="text-align: left;"><strong>Model</strong></th>
+<th style="text-align: left;"><strong>Size</strong></th>
+<th style="text-align: left;"><strong>Quality</strong></th>
+<th style="text-align: left;"><strong>Speed</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">TinyLlama-1.1B</td>
+<td style="text-align: left;">Small</td>
+<td style="text-align: left;">Good</td>
+<td style="text-align: left;">Fast</td>
+</tr>
+<tr>
+<td style="text-align: left;">Mistral-7B-Instruct</td>
+<td style="text-align: left;">Large</td>
+<td style="text-align: left;">Excellent</td>
+<td style="text-align: left;">Moderate</td>
+</tr>
+</tbody>
+</table>
+<h3 id="hardware-optimization">Hardware Optimization</h3>
+<ul>
+<li><p><strong>GPU</strong>: NVIDIA RTX 2080 Ti or better
+recommended</p></li>
+<li><p><strong>RAM</strong>: 16GB minimum, 32GB recommended</p></li>
+<li><p><strong>Storage</strong>: SSD for model cache and vector
+database</p></li>
+<li><p><strong>Network</strong>: Stable internet for HuggingFace model
+downloads</p></li>
+</ul>
+<h1 id="testing-framework">Testing Framework</h1>
+<h2 id="automated-testing">Automated Testing</h2>
+<div class="sourceCode" id="cb15" data-language="python"
+data-caption="Automated test script"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co">#!/usr/bin/env python3</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="co">&quot;&quot;&quot;Automated testing script for Scaffold AI system.&quot;&quot;&quot;</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> sys</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>sys.path.append(<span class="st">&#39;.&#39;</span>)</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Set environment</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>os.environ.update({</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;SC_ENABLE_PROOFREAD&#39;</span>: <span class="st">&#39;1&#39;</span>,</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;SC_GARBLED_STRICTNESS&#39;</span>: <span class="st">&#39;medium&#39;</span>,</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>    <span class="st">&#39;SC_ENABLE_TRUNCATION_DETECTION&#39;</span>: <span class="st">&#39;1&#39;</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scaffold_core.vector.enhanced_query_improved <span class="im">import</span> query_enhanced_improved</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>test_queries <span class="op">=</span> [</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;How can I incorporate sustainability into my Fluid Mechanics course?&quot;</span>,</span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;What are some learning outcomes for environmental justice?&quot;</span>,</span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Sustainability in fluids?&quot;</span>,  <span class="co"># Brief query test</span></span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>    <span class="st">&quot;Integration of LEED principles into curriculum?&quot;</span></span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> run_tests():</span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>    results <span class="op">=</span> []</span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i, query <span class="kw">in</span> <span class="bu">enumerate</span>(test_queries, <span class="dv">1</span>):</span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span>:</span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>            result <span class="op">=</span> query_enhanced_improved(query)</span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a>            response <span class="op">=</span> result.get(<span class="st">&#39;response&#39;</span>, <span class="st">&#39;&#39;</span>)</span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a>            is_fallback <span class="op">=</span> <span class="st">&#39;apologize&#39;</span> <span class="kw">in</span> response.lower() <span class="kw">and</span> <span class="st">&#39;having trouble&#39;</span> <span class="kw">in</span> response.lower()</span>
+<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a>            status <span class="op">=</span> <span class="st">&#39;FALLBACK&#39;</span> <span class="cf">if</span> is_fallback <span class="cf">else</span> <span class="st">&#39;SUCCESS&#39;</span></span>
+<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a>            results.append({</span>
+<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a>                <span class="st">&#39;query&#39;</span>: query,</span>
+<span id="cb15-34"><a href="#cb15-34" aria-hidden="true" tabindex="-1"></a>                <span class="st">&#39;status&#39;</span>: status,</span>
+<span id="cb15-35"><a href="#cb15-35" aria-hidden="true" tabindex="-1"></a>                <span class="st">&#39;length&#39;</span>: <span class="bu">len</span>(response)</span>
+<span id="cb15-36"><a href="#cb15-36" aria-hidden="true" tabindex="-1"></a>            })</span>
+<span id="cb15-37"><a href="#cb15-37" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="ss">f&quot;Test </span><span class="sc">{</span>i<span class="sc">}</span><span class="ss">: </span><span class="sc">{</span>status<span class="sc">}</span><span class="ss"> (</span><span class="sc">{</span><span class="bu">len</span>(response)<span class="sc">}</span><span class="ss"> chars)&quot;</span>)</span>
+<span id="cb15-38"><a href="#cb15-38" aria-hidden="true" tabindex="-1"></a>        <span class="cf">except</span> <span class="pp">Exception</span> <span class="im">as</span> e:</span>
+<span id="cb15-39"><a href="#cb15-39" aria-hidden="true" tabindex="-1"></a>            results.append({<span class="st">&#39;query&#39;</span>: query, <span class="st">&#39;status&#39;</span>: <span class="st">&#39;ERROR&#39;</span>, <span class="st">&#39;length&#39;</span>: <span class="dv">0</span>})</span>
+<span id="cb15-40"><a href="#cb15-40" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="ss">f&quot;Test </span><span class="sc">{</span>i<span class="sc">}</span><span class="ss">: ERROR - </span><span class="sc">{</span><span class="bu">str</span>(e)<span class="sc">}</span><span class="ss">&quot;</span>)</span>
+<span id="cb15-41"><a href="#cb15-41" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb15-42"><a href="#cb15-42" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Summary</span></span>
+<span id="cb15-43"><a href="#cb15-43" aria-hidden="true" tabindex="-1"></a>    success_count <span class="op">=</span> <span class="bu">sum</span>(<span class="dv">1</span> <span class="cf">for</span> r <span class="kw">in</span> results <span class="cf">if</span> r[<span class="st">&#39;status&#39;</span>] <span class="op">==</span> <span class="st">&#39;SUCCESS&#39;</span>)</span>
+<span id="cb15-44"><a href="#cb15-44" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f&quot;</span><span class="ch">\n</span><span class="ss">Results: </span><span class="sc">{</span>success_count<span class="sc">}</span><span class="ss">/</span><span class="sc">{</span><span class="bu">len</span>(results)<span class="sc">}</span><span class="ss"> successful&quot;</span>)</span>
+<span id="cb15-45"><a href="#cb15-45" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> success_count <span class="op">==</span> <span class="bu">len</span>(results)</span>
+<span id="cb15-46"><a href="#cb15-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-47"><a href="#cb15-47" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">&quot;__main__&quot;</span>:</span>
+<span id="cb15-48"><a href="#cb15-48" aria-hidden="true" tabindex="-1"></a>    success <span class="op">=</span> run_tests()</span>
+<span id="cb15-49"><a href="#cb15-49" aria-hidden="true" tabindex="-1"></a>    sys.exit(<span class="dv">0</span> <span class="cf">if</span> success <span class="cf">else</span> <span class="dv">1</span>)</span></code></pre></div>
+<h2 id="test-categories">Test Categories</h2>
+<p>Comprehensive testing should cover:</p>
+<ol>
+<li><p><strong>Core Integration</strong>: Subject-specific
+sustainability integration</p></li>
+<li><p><strong>Learning Outcomes</strong>: Pedagogical goal
+development</p></li>
+<li><p><strong>Framework Integration</strong>: Standards and
+frameworks</p></li>
+<li><p><strong>Course Context</strong>: Detailed scenario
+handling</p></li>
+<li><p><strong>Brief Queries</strong>: Minimal input processing</p></li>
+<li><p><strong>Advanced Integration</strong>: Complex conceptual
+queries</p></li>
+</ol>
+<h1 id="security-considerations">Security Considerations</h1>
+<h2 id="data-protection">Data Protection</h2>
+<ul>
+<li><p><strong>API Keys</strong>: Store HuggingFace tokens securely,
+rotate regularly</p></li>
+<li><p><strong>User Data</strong>: No persistent storage of user
+queries</p></li>
+<li><p><strong>Document Access</strong>: Ensure PDF sources are
+appropriately licensed</p></li>
+<li><p><strong>Network Security</strong>: Use HTTPS in production
+deployments</p></li>
+</ul>
+<h2 id="model-security">Model Security</h2>
+<ul>
+<li><p><strong>Model Provenance</strong>: Use verified models from
+HuggingFace</p></li>
+<li><p><strong>Input Validation</strong>: Sanitize user inputs before
+processing</p></li>
+<li><p><strong>Output Filtering</strong>: Quality control prevents
+harmful outputs</p></li>
+<li><p><strong>Resource Limits</strong>: Implement timeouts and memory
+limits</p></li>
+</ul>
+<h1 id="support-and-escalation">Support and Escalation</h1>
+<h2 id="issue-classification">Issue Classification</h2>
+<table>
+<caption>Issue severity classification</caption>
+<thead>
+<tr>
+<th style="text-align: left;"><strong>Severity</strong></th>
+<th style="text-align: left;"><strong>Response Time</strong></th>
+<th style="text-align: left;"><strong>Examples</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">Critical</td>
+<td style="text-align: left;">Immediate</td>
+<td style="text-align: left;">System completely down, data loss</td>
+</tr>
+<tr>
+<td style="text-align: left;">High</td>
+<td style="text-align: left;">4 hours</td>
+<td style="text-align: left;">High fallback rates, performance
+degradation</td>
+</tr>
+<tr>
+<td style="text-align: left;">Medium</td>
+<td style="text-align: left;">24 hours</td>
+<td style="text-align: left;">Feature issues, minor bugs</td>
+</tr>
+<tr>
+<td style="text-align: left;">Low</td>
+<td style="text-align: left;">1 week</td>
+<td style="text-align: left;">Documentation updates, enhancement
+requests</td>
+</tr>
+</tbody>
+</table>
+<h2 id="contact-information">Contact Information</h2>
+<ul>
+<li><p><strong>Repository</strong>: <a
+href="https://github.com/kevinmastascusa/scaffold_ai"
+class="uri">https://github.com/kevinmastascusa/scaffold_ai</a></p></li>
+<li><p><strong>Issues</strong>: GitHub Issues for bug reports and
+feature requests</p></li>
+<li><p><strong>Documentation</strong>: This handoff document and README
+files</p></li>
+<li><p><strong>Technical Specs</strong>: Research report and test
+results</p></li>
+</ul>
+<h1 id="appendices">Appendices</h1>
+<h2 id="appendix-a-configuration-files">Appendix A: Configuration
+Files</h2>
+<h3 id="requirements.txt">requirements.txt</h3>
+<pre class="text" data-language="text"><code>flask==2.3.3
+torch&gt;=2.0.0
+transformers&gt;=4.30.0
+sentence-transformers&gt;=2.2.0
+faiss-cpu&gt;=1.7.0
+numpy&gt;=1.24.0
+pandas&gt;=2.0.0
+PyPDF2&gt;=3.0.0
+python-dotenv&gt;=1.0.0</code></pre>
+<h3 id="sample-model_config.json">Sample model_config.json</h3>
+<div class="sourceCode" id="cb17" data-language="json"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;selected_models&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;llm&quot;</span><span class="fu">:</span> <span class="st">&quot;tinyllama&quot;</span><span class="fu">,</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;embedding&quot;</span><span class="fu">:</span> <span class="st">&quot;miniLM&quot;</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">},</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;model_settings&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;llm&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;temperature&quot;</span><span class="fu">:</span> <span class="fl">0.2</span><span class="fu">,</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;max_new_tokens&quot;</span><span class="fu">:</span> <span class="dv">1000</span><span class="fu">,</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;top_p&quot;</span><span class="fu">:</span> <span class="fl">0.8</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">},</span></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;embedding&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;chunk_size&quot;</span><span class="fu">:</span> <span class="dv">600</span><span class="fu">,</span></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;chunk_overlap&quot;</span><span class="fu">:</span> <span class="dv">100</span></span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h2 id="appendix-b-performance-benchmarks">Appendix B: Performance
+Benchmarks</h2>
+<table>
+<caption>Performance benchmark data</caption>
+<thead>
+<tr>
+<th style="text-align: left;"><strong>Query Type</strong></th>
+<th style="text-align: center;"><strong>Response Time</strong></th>
+<th style="text-align: center;"><strong>Success Rate</strong></th>
+<th style="text-align: center;"><strong>Avg Length</strong></th>
+<th style="text-align: center;"><strong>Quality</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">Brief Queries</td>
+<td style="text-align: center;">15-20s</td>
+<td style="text-align: center;">100%</td>
+<td style="text-align: center;">2,000+ chars</td>
+<td style="text-align: center;">High</td>
+</tr>
+<tr>
+<td style="text-align: left;">Standard Queries</td>
+<td style="text-align: center;">20-30s</td>
+<td style="text-align: center;">100%</td>
+<td style="text-align: center;">1,500+ chars</td>
+<td style="text-align: center;">High</td>
+</tr>
+<tr>
+<td style="text-align: left;">Complex Queries</td>
+<td style="text-align: center;">30-45s</td>
+<td style="text-align: center;">100%</td>
+<td style="text-align: center;">2,500+ chars</td>
+<td style="text-align: center;">High</td>
+</tr>
+<tr>
+<td style="text-align: left;">Framework Queries</td>
+<td style="text-align: center;">25-35s</td>
+<td style="text-align: center;">100%</td>
+<td style="text-align: center;">2,000+ chars</td>
+<td style="text-align: center;">High</td>
+</tr>
+</tbody>
+</table>
+<h2 id="appendix-c-error-codes">Appendix C: Error Codes</h2>
+<table>
+<caption>Common error codes and resolutions</caption>
+<thead>
+<tr>
+<th style="text-align: left;"><strong>Code</strong></th>
+<th style="text-align: left;"><strong>Description</strong></th>
+<th style="text-align: left;"><strong>Action</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;">FAISS_001</td>
+<td style="text-align: left;">Vector index not found</td>
+<td style="text-align: left;">Rebuild index</td>
+</tr>
+<tr>
+<td style="text-align: left;">LLM_001</td>
+<td style="text-align: left;">Model loading timeout</td>
+<td style="text-align: left;">Increase timeout, check GPU</td>
+</tr>
+<tr>
+<td style="text-align: left;">QC_001</td>
+<td style="text-align: left;">High fallback rate</td>
+<td style="text-align: left;">Adjust quality parameters</td>
+</tr>
+<tr>
+<td style="text-align: left;">MEM_001</td>
+<td style="text-align: left;">Out of memory</td>
+<td style="text-align: left;">Reduce batch size, clear cache</td>
+</tr>
+</tbody>
+</table>

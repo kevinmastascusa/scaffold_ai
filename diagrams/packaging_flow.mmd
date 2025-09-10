@@ -1,0 +1,5 @@
+flowchart TB
+  DEV[Developer env\nPython 3.12] -->|PyInstaller| BUILD[dist/ScaffoldAI-EnhancedUI]
+  SUB[frontend/, scaffold_core/, vector_outputs/] --> BUILD
+  ENV[.env.local (optional)] -->|copy| BUILD
+  BUILD --> TEACHER[Teacher runs .exe\ninside folder]

@@ -333,6 +333,7 @@ def api_health():
         'SC_ENABLE_TOT': os.getenv('SC_ENABLE_TOT', ''),
         'SC_TOT_BREADTH': os.getenv('SC_TOT_BREADTH', ''),
         'SC_TOT_DEPTH': os.getenv('SC_TOT_DEPTH', ''),
+        'SC_ENABLE_PROOFREAD': os.getenv('SC_ENABLE_PROOFREAD', ''),
     }
     return jsonify({
         'status': 'healthy',
@@ -357,6 +358,7 @@ def get_flags():
         'SC_ENABLE_TOT': os.getenv('SC_ENABLE_TOT', ''),
         'SC_TOT_BREADTH': os.getenv('SC_TOT_BREADTH', ''),
         'SC_TOT_DEPTH': os.getenv('SC_TOT_DEPTH', ''),
+        'SC_ENABLE_PROOFREAD': os.getenv('SC_ENABLE_PROOFREAD', ''),
         'success': True,
     })
 
@@ -387,6 +389,8 @@ def set_flags():
                 os.environ['SC_FORCE_CPU'] = '0'
         if 'SC_FORCE_CPU' in data:
             os.environ['SC_FORCE_CPU'] = _as_env_bool(data['SC_FORCE_CPU'])
+        if 'SC_ENABLE_PROOFREAD' in data:
+            os.environ['SC_ENABLE_PROOFREAD'] = _as_env_bool(data['SC_ENABLE_PROOFREAD'])
 
         # ToT flags (numeric)
         if 'SC_ENABLE_TOT' in data:

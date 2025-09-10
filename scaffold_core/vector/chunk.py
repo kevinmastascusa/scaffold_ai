@@ -27,7 +27,14 @@ def extract_text_per_page(path):
     if not HAS_PYPDF2:
         raise ImportError("PyPDF2 not available for PDF processing")
     reader = PdfReader(path)
-    return [page.extract_text() or "" for page in reader.pages]
+    pages = [page.extract_text() or "" for page in reader.pages]
+    # Normalize each page to fix OCR artifacts at the source
+    try:
+        from scaffold_core.text_clean import normalize_extracted_text
+        pages = [normalize_extracted_text(p) for p in pages]
+    except Exception:
+        pass
+    return pages
 
 def chunk_text_by_words(pages, chunk_size, overlap):
     chunks = []

@@ -1,17 +1,17 @@
 {
   "selected_models": {
-    "llm": "mistral",
+    "llm": "tinyllama",
     "embedding": "miniLM"
   },
   "model_settings": {
     "llm": {
-      "temperature": 0.3,
+      "temperature": 0.2,
       "max_new_tokens": 1000,
       "top_p": 0.8
     },
     "embedding": {
-      "chunk_size": 1000,
-      "chunk_overlap": 200
+      "chunk_size": 600,
+      "chunk_overlap": 100
     }
   }
 }

@@ -1,0 +1,62 @@
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <base href="file:///C:/Users/dlaev/scaffold/scaffold_ai/" />
+    <style>
+    body { font-family: -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 2rem; }
+    pre, code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    img { max-width: 100%; height: auto; }
+    h1, h2, h3 { page-break-after: avoid; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ddd; padding: 6px; }
+    .page-break { page-break-before: always; }
+    </style>
+    <title>HIGH_LEVEL_HANDOFF.md</title>
+  </head>
+  <body>
+    <h3 id="scaffoldai-highlevel-research-handoff-concise">ScaffoldAI — High‑Level Research Handoff (Concise)</h3>
+<p>This document gives a plain, high‑level overview for instructors and reviewers. It avoids external links and numeric results and uses only the correct local figure.</p>
+<h4 id="purpose">Purpose</h4>
+<ul>
+<li>Assist educators in designing sustainability and climate‑resilience curriculum by turning course PDFs and questions into sourced, explainable suggestions.</li>
+</ul>
+<h4 id="what-the-system-does">What the system does</h4>
+<ul>
+<li>Ingests course materials (PDFs) and prepares them for retrieval.</li>
+<li>Answers questions with relevant excerpts and clear citations from the uploaded materials.</li>
+<li>Provides a simple classroom‑ready Windows application (no Python required for teachers).</li>
+</ul>
+<h4 id="how-it-works-at-a-glance">How it works (at a glance)</h4>
+<ul>
+<li>Chunk and embed syllabus/reading PDFs into a vector index (FAISS).</li>
+<li>Retrieve top‑matching passages for a user question and assemble context.</li>
+<li>Run a small language model to draft an answer grounded in those passages.</li>
+<li>Return the answer with citations back to the user interface.</li>
+</ul>
+<h4 id="methods-figure">Methods (figure)</h4>
+<p><img alt="Methods Diagram" src="diagrams/methods_diagram_poster.png"></p>
+<h4 id="what-ships-in-this-repository">What ships in this repository</h4>
+<ul>
+<li>Teacher application (Windows folder build) plus example index files under <code>vector_outputs</code>.</li>
+<li>Core processing modules in <code>scaffold_core/</code> (PDF processing, retrieval, LLM, citations).</li>
+<li>Enhanced Flask UI under <code>frontend/</code>.</li>
+</ul>
+<h4 id="running-options-onesentence-pointers">Running options (one‑sentence pointers)</h4>
+<ul>
+<li>Teachers: use the zipped Windows app folder and follow <code>TEACHER_ZIP_RUN.md</code> in this repository.</li>
+<li>Developers: use Python 3.12, install requirements, and start the Enhanced UI.</li>
+</ul>
+<h4 id="notes-on-access">Notes on access</h4>
+<ul>
+<li>Some models may require a Hugging Face token. A temporary token can be placed in <code>.env.local</code> next to the app; long‑term use should employ a personal token.</li>
+</ul>
+<h4 id="maintenance-pointers">Maintenance pointers</h4>
+<ul>
+<li>When adding new PDFs, re‑create the vector index to keep retrieval accurate.</li>
+<li>Prefer small, well‑cited answers in the UI; review and refine prompts as needed.</li>
+</ul>
+  </body>
+</html>

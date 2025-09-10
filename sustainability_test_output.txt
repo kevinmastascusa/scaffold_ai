@@ -1,0 +1,129 @@
+2025-09-10 15:37:23 - DEBUG - Starting query module initialization...
+2025-09-10 15:37:23 - DEBUG - Added project root to Python path: C:\Users\dlaev\scaffold\scaffold_ai
+2025-09-10 15:37:23 - DEBUG - Importing configuration...
+2025-09-10 15:37:23 - INFO - Using standard model (no ONNX): mistralai/Mistral-7B-Instruct-v0.2
+2025-09-10 15:37:23 - INFO - \U0001f680 GPU detected: NVIDIA GeForce RTX 2080 Ti with 11.8GB VRAM
+2025-09-10 15:37:23 - DEBUG - Configuration imported successfully
+2025-09-10 15:37:23 - DEBUG - Importing LLM manager...
+C:\Users\dlaev\scaffold\scaffold_ai\scaffold_env_312_py31210\Lib\site-packages\torch\onnx\_internal\registration.py:168: OnnxExporterWarning: Symbolic function 'aten::scaled_dot_product_attention' already registered for opset 14. Replacing the existing function with new function. This is unexpected. Please report it on https://github.com/pytorch/pytorch/issues.
+  warnings.warn(
+2025-09-10 15:37:24 - DEBUG - CUDA available - using GPU optimizations
+2025-09-10 15:37:24 - DEBUG - Starting LLM module initialization...
+2025-09-10 15:37:24 - DEBUG - Added project root to Python path: C:\Users\dlaev\scaffold\scaffold_ai
+2025-09-10 15:37:24 - DEBUG - Importing configuration...
+2025-09-10 15:37:24 - DEBUG - Configuration imported successfully
+2025-09-10 15:37:24 - DEBUG - LLM manager imported successfully
+2025-09-10 15:37:24 - INFO - Initializing improved enhanced query system...
+2025-09-10 15:37:24 - INFO - Use pytorch device_name: cuda:0
+2025-09-10 15:37:24 - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-09-10 15:37:24 - DEBUG - Starting new HTTPS connection (1): huggingface.co:443
+2025-09-10 15:37:25 - DEBUG - https://huggingface.co:443 "HEAD /sentence-transformers/all-MiniLM-L6-v2/resolve/main/modules.json HTTP/1.1" 307 0
+2025-09-10 15:37:25 - DEBUG - https://huggingface.co:443 "HEAD /api/resolve-cache/models/sentence-transformers/all-MiniLM-L6-v2/c9745ed1d9f207416be6d2e6f8de32d1f16199bf/modules.json HTTP/1.1" 200 0
+2025-09-10 15:37:25 - DEBUG - https://huggingface.co:443 "HEAD /sentence-transformers/all-MiniLM-L6-v2/resolve/main/config_sentence_transformers.json HTTP/1.1" 307 0
+2025-09-10 15:37:25 - DEBUG - https://huggingface.co:443 "HEAD /api/resolve-cache/models/sentence-transformers/all-MiniLM-L6-v2/c9745ed1d9f207416be6d2e6f8de32d1f16199bf/config_sentence_transformers.json HTTP/1.1" 200 0
+2025-09-10 15:37:25 - DEBUG - https://huggingface.co:443 "HEAD /sentence-transformers/all-MiniLM-L6-v2/resolve/main/config_sentence_transformers.json HTTP/1.1" 307 0
+2025-09-10 15:37:25 - DEBUG - https://huggingface.co:443 "HEAD /api/resolve-cache/models/sentence-transformers/all-MiniLM-L6-v2/c9745ed1d9f207416be6d2e6f8de32d1f16199bf/config_sentence_transformers.json HTTP/1.1" 200 0
+2025-09-10 15:37:25 - DEBUG - https://huggingface.co:443 "HEAD /sentence-transformers/all-MiniLM-L6-v2/resolve/main/README.md HTTP/1.1" 307 0
+2025-09-10 15:37:25 - DEBUG - https://huggingface.co:443 "HEAD /api/resolve-cache/models/sentence-transformers/all-MiniLM-L6-v2/c9745ed1d9f207416be6d2e6f8de32d1f16199bf/README.md HTTP/1.1" 200 0
+2025-09-10 15:37:25 - DEBUG - https://huggingface.co:443 "HEAD /sentence-transformers/all-MiniLM-L6-v2/resolve/main/modules.json HTTP/1.1" 307 0
+2025-09-10 15:37:25 - DEBUG - https://huggingface.co:443 "HEAD /api/resolve-cache/models/sentence-transformers/all-MiniLM-L6-v2/c9745ed1d9f207416be6d2e6f8de32d1f16199bf/modules.json HTTP/1.1" 200 0
+2025-09-10 15:37:25 - DEBUG - https://huggingface.co:443 "HEAD /sentence-transformers/all-MiniLM-L6-v2/resolve/main/sentence_bert_config.json HTTP/1.1" 307 0
+2025-09-10 15:37:25 - DEBUG - https://huggingface.co:443 "HEAD /api/resolve-cache/models/sentence-transformers/all-MiniLM-L6-v2/c9745ed1d9f207416be6d2e6f8de32d1f16199bf/sentence_bert_config.json HTTP/1.1" 200 0
+2025-09-10 15:37:25 - DEBUG - https://huggingface.co:443 "HEAD /sentence-transformers/all-MiniLM-L6-v2/resolve/main/adapter_config.json HTTP/1.1" 404 0
+2025-09-10 15:37:25 - DEBUG - https://huggingface.co:443 "HEAD /sentence-transformers/all-MiniLM-L6-v2/resolve/main/config.json HTTP/1.1" 307 0
+2025-09-10 15:37:25 - DEBUG - https://huggingface.co:443 "HEAD /api/resolve-cache/models/sentence-transformers/all-MiniLM-L6-v2/c9745ed1d9f207416be6d2e6f8de32d1f16199bf/config.json HTTP/1.1" 200 0
+2025-09-10 15:37:26 - DEBUG - https://huggingface.co:443 "HEAD /sentence-transformers/all-MiniLM-L6-v2/resolve/main/tokenizer_config.json HTTP/1.1" 307 0
+2025-09-10 15:37:26 - DEBUG - https://huggingface.co:443 "HEAD /api/resolve-cache/models/sentence-transformers/all-MiniLM-L6-v2/c9745ed1d9f207416be6d2e6f8de32d1f16199bf/tokenizer_config.json HTTP/1.1" 200 0
+2025-09-10 15:37:26 - DEBUG - https://huggingface.co:443 "GET /api/models/sentence-transformers/all-MiniLM-L6-v2/tree/main/additional_chat_templates?recursive=False&expand=False HTTP/1.1" 404 64
+2025-09-10 15:37:26 - DEBUG - https://huggingface.co:443 "HEAD /sentence-transformers/all-MiniLM-L6-v2/resolve/main/1_Pooling/config.json HTTP/1.1" 307 0
+2025-09-10 15:37:26 - DEBUG - https://huggingface.co:443 "HEAD /api/resolve-cache/models/sentence-transformers/all-MiniLM-L6-v2/c9745ed1d9f207416be6d2e6f8de32d1f16199bf/1_Pooling%2Fconfig.json HTTP/1.1" 200 0
+2025-09-10 15:37:27 - DEBUG - https://huggingface.co:443 "GET /api/models/sentence-transformers/all-MiniLM-L6-v2 HTTP/1.1" 200 6861
+2025-09-10 15:37:27 - DEBUG - https://huggingface.co:443 "HEAD /cross-encoder/ms-marco-MiniLM-L-6-v2/resolve/main/config.json HTTP/1.1" 307 0
+2025-09-10 15:37:27 - DEBUG - https://huggingface.co:443 "HEAD /cross-encoder/ms-marco-MiniLM-L6-v2/resolve/main/config.json HTTP/1.1" 307 0
+2025-09-10 15:37:27 - DEBUG - https://huggingface.co:443 "HEAD /api/resolve-cache/models/cross-encoder/ms-marco-MiniLM-L6-v2/c5ee24cb16019beea0893ab7796b1df96625c6b8/config.json HTTP/1.1" 200 0
+2025-09-10 15:37:27 - DEBUG - https://huggingface.co:443 "HEAD /cross-encoder/ms-marco-MiniLM-L-6-v2/resolve/main/tokenizer_config.json HTTP/1.1" 307 0
+2025-09-10 15:37:27 - DEBUG - https://huggingface.co:443 "HEAD /cross-encoder/ms-marco-MiniLM-L6-v2/resolve/main/tokenizer_config.json HTTP/1.1" 307 0
+2025-09-10 15:37:27 - DEBUG - https://huggingface.co:443 "HEAD /api/resolve-cache/models/cross-encoder/ms-marco-MiniLM-L6-v2/c5ee24cb16019beea0893ab7796b1df96625c6b8/tokenizer_config.json HTTP/1.1" 200 0
+2025-09-10 15:37:27 - DEBUG - https://huggingface.co:443 "GET /api/models/cross-encoder/ms-marco-MiniLM-L-6-v2/tree/main/additional_chat_templates?recursive=False&expand=False HTTP/1.1" 307 147
+2025-09-10 15:37:27 - DEBUG - https://huggingface.co:443 "GET /api/models/cross-encoder/ms-marco-MiniLM-L6-v2/tree/main/additional_chat_templates?recursive=False&expand=False HTTP/1.1" 404 64
+2025-09-10 15:37:27 - DEBUG - https://huggingface.co:443 "HEAD /cross-encoder/ms-marco-MiniLM-L-6-v2/resolve/main/README.md HTTP/1.1" 307 0
+2025-09-10 15:37:27 - DEBUG - https://huggingface.co:443 "HEAD /cross-encoder/ms-marco-MiniLM-L6-v2/resolve/main/README.md HTTP/1.1" 307 0
+2025-09-10 15:37:27 - DEBUG - https://huggingface.co:443 "HEAD /api/resolve-cache/models/cross-encoder/ms-marco-MiniLM-L6-v2/c5ee24cb16019beea0893ab7796b1df96625c6b8/README.md HTTP/1.1" 200 0
+2025-09-10 15:37:27 - INFO - Use pytorch device: cuda:0
+2025-09-10 15:37:27 - DEBUG - https://huggingface.co:443 "GET /api/models/cross-encoder/ms-marco-MiniLM-L-6-v2 HTTP/1.1" 307 82
+2025-09-10 15:37:28 - DEBUG - https://huggingface.co:443 "GET /api/models/cross-encoder/ms-marco-MiniLM-L6-v2 HTTP/1.1" 200 5261
+2025-09-10 15:37:28 - INFO - Loaded 2901 metadata entries from C:\Users\dlaev\scaffold\scaffold_ai\vector_outputs\scaffold_metadata_1.json
+2025-09-10 15:37:28 - INFO - \u2705 Enhanced query system initialized successfully
+2025-09-10 15:37:28 - INFO -    - FAISS index: 2901 vectors
+2025-09-10 15:37:28 - INFO -    - Metadata: 2901 entries
+2025-09-10 15:37:28 - INFO - Processing query: Can you help me incorporate sustainability aspects to my building envelope systems course for architectural engineering?
+=== TESTING SUSTAINABILITY QUERY ===
+
+Query: Can you help me incorporate sustainability aspects to my building envelope systems course for architectural engineering?
+================================================================================
+Batches:   0%|          | 0/1 [00:00<?, ?it/s]Batches: 100%|##########| 1/1 [00:00<00:00,  4.82it/s]Batches: 100%|##########| 1/1 [00:00<00:00,  4.82it/s]
+2025-09-10 15:37:29 - DEBUG - Found 50 initial candidates
+Batches:   0%|          | 0/2 [00:00<?, ?it/s]Batches: 100%|##########| 2/2 [00:00<00:00, 17.11it/s]Batches: 100%|##########| 2/2 [00:00<00:00, 17.11it/s]
+2025-09-10 15:37:29 - DEBUG - Filtered candidate with very low cross_score: -5.205
+2025-09-10 15:37:29 - DEBUG - Filtered meta-like candidate (score=-4.583, fname=UTILIZ~1.PDF)
+2025-09-10 15:37:29 - DEBUG - Filtered candidate with very low cross_score: -7.206
+2025-09-10 15:37:29 - DEBUG - Filtered meta-like candidate (score=-3.659, fname=UTILIZ~1.PDF)
+2025-09-10 15:37:29 - DEBUG - Filtered meta-like candidate (score=-5.420, fname=Teaching_decision-making_for_s (1).pdf)
+2025-09-10 15:37:29 - DEBUG - Filtered meta-like candidate (score=-5.420, fname=Teaching_decision-making_for_s.pdf)
+2025-09-10 15:37:29 - DEBUG - Filtered candidate with very low cross_score: -8.060
+2025-09-10 15:37:29 - DEBUG - Filtered candidate with very low cross_score: -5.679
+2025-09-10 15:37:29 - DEBUG - Filtered candidate with very low cross_score: -5.834
+2025-09-10 15:37:29 - DEBUG - Filtered meta-like candidate (score=-1.604, fname=UTILIZ~1.PDF)
+2025-09-10 15:37:29 - DEBUG - Filtered candidate with very low cross_score: -5.081
+2025-09-10 15:37:29 - DEBUG - Filtered meta-like candidate (score=-4.581, fname=UTILIZ~1.PDF)
+2025-09-10 15:37:29 - DEBUG - Cross-encoder reranking: 38 candidates remaining after filtering
+2025-09-10 15:37:29 - DEBUG - Reranked to 38 candidates
+2025-09-10 15:37:29 - DEBUG - Contextual filtering: 38 candidates remaining after filtering
+2025-09-10 15:37:29 - DEBUG - Filtered to 38 candidates
+2025-09-10 15:37:29 - DEBUG - Using top 3 filtered candidates
+2025-09-10 15:37:29 - DEBUG - Generated prompt with ~400 tokens
+2025-09-10 15:37:29 - DEBUG - Initializing LLM Manager with model: mistralai/Mistral-7B-Instruct-v0.2
+2025-09-10 15:37:29 - DEBUG - Using device: cuda
+2025-09-10 15:37:29 - DEBUG - Using cache directory: C:\Users\dlaev/.cache/huggingface/hub
+2025-09-10 15:37:29 - DEBUG - Loading tokenizer...
+2025-09-10 15:37:29 - DEBUG - https://huggingface.co:443 "HEAD /mistralai/Mistral-7B-Instruct-v0.2/resolve/main/tokenizer_config.json HTTP/1.1" 401 0
+2025-09-10 15:37:29 - DEBUG - https://huggingface.co:443 "GET /api/models/mistralai/Mistral-7B-Instruct-v0.2/tree/main/additional_chat_templates?recursive=False&expand=False HTTP/1.1" 404 64
+2025-09-10 15:37:30 - DEBUG - Tokenizer loaded successfully
+2025-09-10 15:37:30 - DEBUG - Loading model using standard pipeline approach...
+2025-09-10 15:37:30 - INFO - \U0001f680 Using GPU-optimized pipeline settings (no quantization)
+2025-09-10 15:37:30 - DEBUG - https://huggingface.co:443 "HEAD /mistralai/Mistral-7B-Instruct-v0.2/resolve/main/config.json HTTP/1.1" 401 0
+Loading checkpoint shards:   0%|          | 0/3 [00:00<?, ?it/s]Loading checkpoint shards:  33%|###3      | 1/3 [00:03<00:07,  3.94s/it]Loading checkpoint shards:  67%|######6   | 2/3 [00:07<00:04,  4.01s/it]Loading checkpoint shards: 100%|##########| 3/3 [00:11<00:00,  3.83s/it]Loading checkpoint shards: 100%|##########| 3/3 [00:11<00:00,  3.87s/it]
+2025-09-10 15:37:42 - DEBUG - https://huggingface.co:443 "HEAD /mistralai/Mistral-7B-Instruct-v0.2/resolve/main/generation_config.json HTTP/1.1" 401 0
+2025-09-10 15:37:42 - DEBUG - https://huggingface.co:443 "HEAD /mistralai/Mistral-7B-Instruct-v0.2/resolve/main/custom_generate/generate.py HTTP/1.1" 404 0
+Device set to use cuda:0
+2025-09-10 15:37:48 - DEBUG - Pipeline loaded successfully
+2025-09-10 15:37:48 - DEBUG - Pipeline setup complete
+2025-09-10 15:37:48 - DEBUG - LLM Manager instance cached for reuse
+2025-09-10 15:41:57 - INFO - Generated response with 265 words
+2025-09-10 15:41:57 - INFO - Generated complete response with 265 words
+2025-09-10 15:41:57 - WARNING - Rejected response at stage=first_attempt; reasons=['very_long_tokens>=threshold', 'surface_artifacts']; preview='To incorporate sustain ability aspects into your building envelope sys tems course for archi\u0442\u0435ctural engineering, consider the following approaches based on the provided sources:\n\n1. Introduce the LE ED green-building rating system as a framework for improving sustainability in building designs. This system covers various aspects, including energy efficiency, water conservation, materials selection, and indoor environmental quality.\n2. Discuss the relevance of sustain ability to architecture and'
+2025-09-10 15:50:50 - INFO - Generated response with 210 words
+2025-09-10 15:50:50 - ERROR - Error in LLM response generation: Garbled/Surface/Offtopic response detected
+2025-09-10 15:50:50 - WARNING - Retrying with minimal context
+2025-09-10 15:53:19 - INFO - Generated response with 181 words
+2025-09-10 15:53:19 - INFO - Generated complete response with 181 words
+2025-09-10 15:53:19 - WARNING - Rejected response at stage=second_attempt; reasons=['surface_artifacts']; preview='Certainly! Incorporating sustainability into your building envelope Systems course for Architectural Engineering can be achieved through various means. One effective approach is introducing students to the LEEd Green Building Rating System. This system evaluates buildings based on criteria such as energy efficiency, water savings, materials selection, indoor environmental quality, and innovation (U.S. Green Building Council, 2023).\n\nAdditionally, discussing how the United Nations Millenniem Deve'
+2025-09-10 15:57:16 - WARNING - Response appears to be truncated - consider increasing max_new_tokens
+2025-09-10 15:57:16 - INFO - Generated response with 71 words
+2025-09-10 15:57:16 - ERROR - Rewrite after second attempt still invalid, using fallback
+SUCCESS: Query processed
+
+RESPONSE:
+I apologize, but I'm having trouble generating a comprehensive response for your question about 'Can you help me incorporate sustainability aspects to my building envelope systems course for architectural engineering?'. This could be due to limited relevant information in the available sources or technical issues. Please try rephrasing your question, asking about a different topic, or contact support if the issue persists.
+
+SOURCES USED:
+  [1] Score: -2.023 - INCORP~2.PDF
+  [2] Score: -3.689 - integrating-sustainability-in-higher-education-curricular-review-and-opportunities-for-future-development.pdf
+  [3] Score: -3.940 - EMBEDD~2.PDF
+
+BUGFIX FEATURES ACTIVE:
+  - Proofread enabled: 1
+  - Garbled detection: medium
+  - Truncation detection: 1
+
+Response length: 426 characters
