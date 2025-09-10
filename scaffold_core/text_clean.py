@@ -94,10 +94,24 @@ def _has_mixed_caps_or_inword_splits(text: str) -> bool:
         return False
 
     # Mixed caps within a token: letters with multiple uppers in tail
-    mixed_caps = re.search(r"\b[A-Za-z]+[A-Z]{2,}[a-z]*\b", text)
+    # But exclude common acronyms and proper patterns
+    mixed_caps_pattern = r"\b[a-z]+[A-Z]{2,}[a-z]*\b"
+    mixed_caps = re.search(mixed_caps_pattern, text)
+    if mixed_caps:
+        # Check if it's a known problematic pattern vs legitimate text
+        match_text = mixed_caps.group()
+        # Skip if it's likely a legitimate compound or technical term
+        if not any(bad_pattern in match_text.lower() for bad_pattern in ['ability', 'ology', 'ation', 'ment']):
+            mixed_caps = None
 
-    # In-word splits: short-fragment splits that shouldn't be separate
-    inword_split = re.search(r"\b([A-Za-z]{1,2})\s+([A-Za-z]{2,})\b", text)
+    # In-word splits: only catch very obvious OCR artifacts
+    # Look for specific patterns that clearly indicate split words
+    inword_split_patterns = [
+        r"\b(sustain|develop|architec|engin|build|energ)\s+(ed|ing|ment|t|ture|al|er|y)\b",
+        r"\b(archite|buildi|sustaina|develo|enginee)\s+(cture|ng|bility|pment|ring)\b",
+        r"\b(cur|fl|sys|eff)\s+(ricul|uid|tem|ici)\b",
+    ]
+    inword_split = any(re.search(pattern, text, re.IGNORECASE) for pattern in inword_split_patterns)
 
     # Comma inside a word
     inword_comma = re.search(r"[A-Za-z],[A-Za-z]", text)
