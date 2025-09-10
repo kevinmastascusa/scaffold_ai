@@ -40,10 +40,22 @@ from scaffold_core.config import (
     LLM_MODEL,
 )
 from scaffold_core.llm import get_llm
+from scaffold_core.text_clean import clean_model_output, _has_mixed_caps_or_inword_splits
+
+# Diagnostics / logging controls
+_LOG_REJECTED = str(os.getenv('SC_LOG_REJECTED_RESPONSES', '')).lower() in ('1', 'true', 'yes')
+_REJECTED_LOG_PATH = os.path.join(project_root, 'outputs', 'rejected_responses.log')
+_GARBLED_STRICTNESS = (os.getenv('SC_GARBLED_STRICTNESS', 'medium') or 'medium').strip().lower()
+
+# Common acronym whitelist to avoid false garbled flags for all-caps tokens
+_ACRONYM_WHITELIST = {
+    'HVAC', 'ASHRAE', 'LEED', 'LCA', 'EPD', 'EUI', 'PV', 'BIM',
+    'CO2', 'GHG', 'IAQ', 'RFI', 'RFP',
+}
 
 # Constants (balanced for quality and speed)
 TOP_K_INITIAL = 50  # Increase initial recall for better coverage
-TOP_K_FINAL = 5     # Use up to 5 sources in final context
+TOP_K_FINAL = 3     # Use up to 3 sources in final context
 # Tunable via env to accommodate models whose cross-encoder returns negative logits
 try:
     MIN_CROSS_SCORE = float(os.getenv("SC_MIN_CROSS_SCORE", "-5.0"))
@@ -65,7 +77,9 @@ except Exception:
 MAIN_PROMPT = """You are an expert in sustainability education and engineering curriculum development.
 Answer the user's question directly and concisely. Do not restate the instructions, do not provide meta-guidance
 (e.g., "here's what you can do"), and do not discuss formatting. When sources are available, cite them succinctly.
-Focus on practical, technically accurate content."""
+Write clean professional prose: avoid mid-word capitalization (e.g., sustainABILITY), avoid random spaces inside words
+(e.g., Fl uid, cur ricular), and avoid OCR-like artifacts. Prefer simple sentences. Focus on practical, technically
+accurate content."""
 
 # Configurable minimal prompt for fallback scenarios
 MINIMAL_PROMPT = "You are Scaffold AI, a course curriculum assistant. Answer this question directly and clearly using the available information:"
@@ -137,9 +151,23 @@ class ImprovedEnhancedQuerySystem:
             metadata_path = get_metadata_json_path(ITERATION)
 
             if not os.path.exists(index_path) or not os.path.exists(metadata_path):
-                raise FileNotFoundError(
-                    f"Index or metadata not found: {index_path}, {metadata_path}"
+                missing_files = []
+                if not os.path.exists(index_path):
+                    missing_files.append(f"FAISS index: {index_path}")
+                if not os.path.exists(metadata_path):
+                    missing_files.append(f"Metadata: {metadata_path}")
+                
+                error_msg = (
+                    f"❌ Required files not found:\n" + 
+                    "\n".join(f"  - {file}" for file in missing_files) +
+                    f"\n\n🔧 To fix this issue:\n" +
+                    f"  1. Ensure PDF files are in the 'data/' directory\n" +
+                    f"  2. Run: python scaffold_core/scripts/chunk/ChunkTest.py\n" +
+                    f"  3. Run: python scaffold_core/vector/main.py\n" +
+                    f"  4. Restart the application"
                 )
+                logger.error(error_msg)
+                raise FileNotFoundError(error_msg)
 
             self.faiss_index = faiss.read_index(str(index_path))
             self.metadata = self.load_metadata(str(metadata_path))
@@ -829,6 +857,89 @@ class ImprovedEnhancedQuerySystem:
 
         return False
 
+    def _garbled_reasons(self, response: str):
+        """Analyze response for garbling and return (is_garbled, reasons).
+
+        Reasons are short strings indicating the trigger(s) to aid debugging.
+        Heuristics are tuned to reduce false positives.
+        """
+        reasons = []
+        if not isinstance(response, str):
+            return True, ['non_string_response']
+        text = response.strip()
+        if not text:
+            return True, ['empty_response']
+
+        words = text.split()
+        if len(words) < 10:
+            return False, []
+
+        # Excessive repetition (case-insensitive)
+        counts = {}
+        for w in words:
+            key = w.lower()
+            counts[key] = counts.get(key, 0) + 1
+        if counts:
+            max_ratio = max(counts.values()) / max(1, len(words))
+            # Strictness thresholds
+            rep_thresh = 0.45 if _GARBLED_STRICTNESS == 'low' else (0.35 if _GARBLED_STRICTNESS == 'medium' else 0.30)
+            if max_ratio > rep_thresh:
+                reasons.append(f'repetition_ratio>{rep_thresh:.2f}')
+
+        # Very long single tokens
+        long_len = 35 if _GARBLED_STRICTNESS == 'low' else 28 if _GARBLED_STRICTNESS == 'medium' else 24
+        very_long_tokens = [w for w in words if len(w) >= long_len]
+        if len(very_long_tokens) >= (2 if _GARBLED_STRICTNESS != 'high' else 1):
+            reasons.append('very_long_tokens>=threshold')
+
+        # All caps tokens (exclude known acronyms, count only long ones)
+        cap_len = 14 if _GARBLED_STRICTNESS == 'low' else 12
+        all_caps_tokens = [w for w in words if w.isupper() and len(w) >= cap_len and w.strip('.,;:!?()[]{}') not in _ACRONYM_WHITELIST]
+        if len(all_caps_tokens) >= (3 if _GARBLED_STRICTNESS == 'low' else 2 if _GARBLED_STRICTNESS == 'medium' else 1):
+            reasons.append('many_all_caps_tokens')
+
+        # Repeated characters sequences but ignore common markdown separators
+        # Ignore '-', '=', '_', '*', '~' runs (formatting)
+        repeated_runs = re.findall(r'([^\-=_*~\s])\1{5,}', text)
+        if repeated_runs:
+            reasons.append('repeated_characters>=6')
+
+        # Multiple special characters in a row (ignore common bullets/dashes)
+        # Allow .,!?-–—:;()[]'" and bullets •
+        if re.search(r"[^\w\s\.,\!\?\-–—:;()\[\]'\"•]{6,}", text):
+            reasons.append('special_char_run>=6')
+
+        is_garbled = len(reasons) > 0
+        # For low strictness, require at least two independent reasons
+        if _GARBLED_STRICTNESS == 'low' and len(reasons) < 2:
+            is_garbled = False
+        return is_garbled, reasons
+
+    def _log_rejected_response(self, query: str, response: str, session_id: Optional[str], reasons: list, stage: str) -> None:
+        """Log rejected response content with reasons to file and logger when enabled."""
+        try:
+            preview = (response or '')[:500]
+            logger.warning(
+                f"Rejected response at stage={stage}; reasons={reasons}; preview={preview!r}"
+            )
+            if not _LOG_REJECTED:
+                return
+            # Ensure outputs dir exists
+            out_dir = os.path.dirname(_REJECTED_LOG_PATH)
+            os.makedirs(out_dir, exist_ok=True)
+            entry = {
+                'timestamp': datetime.datetime.now().isoformat(),
+                'stage': stage,
+                'session_id': session_id,
+                'query': query,
+                'reasons': reasons,
+                'response': response,
+            }
+            with open(_REJECTED_LOG_PATH, 'a', encoding='utf-8') as f:
+                f.write(json.dumps(entry, ensure_ascii=False) + '\n')
+        except Exception as e:
+            logger.debug(f'Failed to write rejected response log: {e}')
+
     def _generate_minimal_prompt(self, query: str, chunks: List[Dict]) -> str:
         """Generate a minimal prompt with very limited context."""
         context = ""
@@ -855,7 +966,19 @@ class ImprovedEnhancedQuerySystem:
     def query(self, query: str, session_id: Optional[str] = None) -> Dict[str, Any]:
         """Process a query and return relevant results with improved prompt engineering."""
         if not self.initialized:
-            self.initialize()
+            try:
+                self.initialize()
+            except FileNotFoundError as e:
+                # Provide user-friendly error response
+                return {
+                    "response": (
+                        "I'm sorry, but the knowledge base is not properly initialized. "
+                        "The required index files are missing. Please check the system logs "
+                        "or contact your administrator to rebuild the knowledge base."
+                    ),
+                    "sources": [],
+                    "error": str(e)
+                }
 
         # Input validation to prevent garbled text
         if not query or not isinstance(query, str):
@@ -915,8 +1038,8 @@ class ImprovedEnhancedQuerySystem:
             llm_response = ""
             try:
                 # First attempt with optional Tree-of-Thought generation
-                strict_env = str(os.getenv("SC_STRICT_ANSWERS", "")).lower() in ("1", "true", "yes")
-                first_temp = 0.15 if strict_env else min(0.2, float(temperature or 0.2))
+                # Use configured temperature directly; no strict-answers override
+                first_temp = float(temperature or 0.2)
 
                 enable_tot = str(os.getenv("SC_ENABLE_TOT", "")).lower() in ("1", "true", "yes")
                 if enable_tot:
@@ -946,9 +1069,42 @@ class ImprovedEnhancedQuerySystem:
                     )
 
                 # Validate response quality
-                if self._is_response_garbled(llm_response) or self._is_offtopic_or_template(llm_response, query):
-                    logger.warning("Detected garbled response, retrying with reduced context")
-                    raise ValueError("Garbled response detected")
+                garbled, reasons = self._garbled_reasons(llm_response)
+                surface_bad = _has_mixed_caps_or_inword_splits(llm_response)
+                offtopic = self._is_offtopic_or_template(llm_response, query)
+                if garbled or surface_bad or offtopic:
+                    combined_reasons = reasons + (["surface_artifacts"] if surface_bad else []) + (["offtopic/template"] if offtopic else [])
+                    self._log_rejected_response(query, llm_response, session_id, combined_reasons, stage='first_attempt')
+                    # Try an on-model rewrite to clean prose at the source
+                    try:
+                        rewrite_prompt = (
+                            "Rewrite the following answer in clean, professional prose. "
+                            "Do not change the meaning. Fix any mid-word capitalization (e.g., sustainABILITY), "
+                            "remove random spaces inside words (e.g., Fl uid, cur ricular), and keep any bracketed citations "
+                            "like [1], [2] in place. Output only the revised answer.\n\n"
+                            f"Original answer:\n{llm_response}\n\nRevised answer:"
+                        )
+                        rewritten = get_llm().generate_response(
+                            rewrite_prompt,
+                            temperature=0.15,
+                            top_p=0.7,
+                            max_new_tokens=None,
+                        )
+                        if isinstance(rewritten, str) and rewritten.strip():
+                            # Re-validate rewritten text
+                            g2, r2 = self._garbled_reasons(rewritten)
+                            s2 = _has_mixed_caps_or_inword_splits(rewritten)
+                            o2 = self._is_offtopic_or_template(rewritten, query)
+                            if not (g2 or s2 or o2):
+                                llm_response = rewritten.strip()
+                            else:
+                                # Fall through to second attempt path
+                                raise ValueError('Rewrite still invalid')
+                        else:
+                            raise ValueError('Empty rewrite')
+                    except Exception:
+                        # Trigger second-attempt path below
+                        raise ValueError('Garbled/Surface/Offtopic response detected')
 
             except Exception as e:
                 logger.error(f"Error in LLM response generation: {e}")
@@ -964,13 +1120,55 @@ class ImprovedEnhancedQuerySystem:
                     )
 
                     # Validate response again
-                    if self._is_response_garbled(llm_response) or self._is_offtopic_or_template(llm_response, query):
-                        logger.error("Still getting garbled response, using fallback")
-                        llm_response = self._generate_fallback_response(query)
+                    garbled2, reasons2 = self._garbled_reasons(llm_response)
+                    surface_bad2 = _has_mixed_caps_or_inword_splits(llm_response)
+                    offtopic2 = self._is_offtopic_or_template(llm_response, query)
+                    if garbled2 or surface_bad2 or offtopic2:
+                        # Try one rewrite before fallback
+                        try:
+                            combined_reasons2 = reasons2 + (["surface_artifacts"] if surface_bad2 else []) + (["offtopic/template"] if offtopic2 else [])
+                            self._log_rejected_response(query, llm_response, session_id, combined_reasons2, stage='second_attempt')
+                            rewrite_prompt2 = (
+                                "Rewrite the following answer in clean, professional prose without changing meaning. "
+                                "Eliminate mid-word caps and in-word spaces. Preserve bracketed citations. Output only the revised answer.\n\n"
+                                f"Original answer:\n{llm_response}\n\nRevised answer:"
+                            )
+                            rewritten2 = get_llm().generate_response(
+                                rewrite_prompt2,
+                                temperature=0.15,
+                                top_p=0.7,
+                                max_new_tokens=None,
+                            )
+                            if isinstance(rewritten2, str) and rewritten2.strip():
+                                g3, _ = self._garbled_reasons(rewritten2)
+                                s3 = _has_mixed_caps_or_inword_splits(rewritten2)
+                                o3 = self._is_offtopic_or_template(rewritten2, query)
+                                if not (g3 or s3 or o3):
+                                    llm_response = rewritten2.strip()
+                                else:
+                                    logger.error("Rewrite after second attempt still invalid, using fallback")
+                                    llm_response = self._generate_fallback_response(query)
+                            else:
+                                logger.error("Empty rewrite after second attempt, using fallback")
+                                llm_response = self._generate_fallback_response(query)
+                        except Exception:
+                            logger.error("Rewrite failed after second attempt, using fallback")
+                            llm_response = self._generate_fallback_response(query)
 
                 except Exception as e2:
                     logger.error(f"Second attempt failed: {e2}")
                     llm_response = self._generate_fallback_response(query)
+
+            # Optional proofread/clean step
+            try:
+                proofread_enabled = str(os.getenv('SC_ENABLE_PROOFREAD', '')).lower() in ('1','true','yes','on')
+            except Exception:
+                proofread_enabled = False
+            if proofread_enabled:
+                try:
+                    llm_response = clean_model_output(llm_response)
+                except Exception:
+                    pass
 
             # Validate and truncate response if necessary
             if len(llm_response) > 8000:  # Increased from 2000 to allow longer responses
