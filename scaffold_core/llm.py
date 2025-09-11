@@ -190,7 +190,7 @@ class LLMManager:
                         },
                         {},
                     ]
-                    logger.info("🚀 Using GPU-optimized ONNX Runtime settings")
+                    logger.info("Using GPU-optimized ONNX Runtime settings")
                 else:
                     # Optimized CPU threading
                     session_options.intra_op_num_threads = 6
@@ -311,14 +311,14 @@ class LLMManager:
                             "bnb_4bit_quant_type": "nf4",
                             "bnb_4bit_compute_dtype": torch.float16,
                         })
-                        logger.info("🚀 Loading model in 4-bit quantization on GPU")
+                        logger.info("Loading model in 4-bit quantization on GPU")
                     elif use_8bit:
                         # bitsandbytes 8-bit
                         import bitsandbytes as bnb  # noqa: F401
                         quant_args.update({
                             "load_in_8bit": True,
                         })
-                        logger.info("🚀 Loading model in 8-bit quantization on GPU")
+                        logger.info("Loading model in 8-bit quantization on GPU")
 
                     loaded_model = AutoModelForCausalLM.from_pretrained(
                         LLM_MODEL,
@@ -343,14 +343,14 @@ class LLMManager:
                         "torch_dtype": torch.float32,
                         "device": "cpu",
                     })
-                    logger.info("💻 Using CPU-optimized pipeline settings")
+                    logger.info("Using CPU-optimized pipeline settings")
                 else:
                     pipeline_kwargs.update({
                         "model": LLM_MODEL,
                         "torch_dtype": torch.float16,
                         "device": "cuda:0",
                     })
-                    logger.info("🚀 Using GPU-optimized pipeline settings (no quantization)")
+                    logger.info("Using GPU-optimized pipeline settings (no quantization)")
 
             self.pipeline = pipeline(**pipeline_kwargs)
             logger.debug("Pipeline loaded successfully")
@@ -428,7 +428,8 @@ You are an expert in sustainability education and engineering curriculum develop
                 top_k=50,
                 repetition_penalty=1.15,
                 no_repeat_ngram_size=3,
-                do_sample=True
+                do_sample=True,
+                return_full_text=False,
             )
 
             # Extract response text
@@ -457,6 +458,35 @@ You are an expert in sustainability education and engineering curriculum develop
 
             # Clean up response formatting
             response_text = response_text.strip()
+
+            # If the assistant segment is empty, retry once with adjusted params
+            if not response_text:
+                try:
+                    retry_max_new = (max_new_tokens or get_dynamic_max_new_tokens() or LLM_MAX_NEW_TOKENS) + 64
+                    outputs_retry = self.pipeline(
+                        formatted_prompt,
+                        max_new_tokens=retry_max_new,
+                        min_new_tokens=16,
+                        temperature=current_temperature,
+                        top_p=current_top_p,
+                        top_k=50,
+                        repetition_penalty=1.15,
+                        no_repeat_ngram_size=3,
+                        do_sample=True,
+                        return_full_text=False,
+                    )
+                    if isinstance(outputs_retry, list) and len(outputs_retry) > 0:
+                        response = outputs_retry[0]
+                        if isinstance(response, dict) and "generated_text" in response:
+                            response_text = response["generated_text"]
+                        else:
+                            response_text = str(response)
+                    else:
+                        response_text = str(outputs_retry)
+                    response_text = response_text.strip()
+                except Exception:
+                    # Fall through with empty response_text; caller can handle
+                    pass
 
             # Remove common formatting artifacts
             artifacts_to_remove = [
