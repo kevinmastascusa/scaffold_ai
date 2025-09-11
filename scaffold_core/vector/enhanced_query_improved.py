@@ -75,40 +75,19 @@ except Exception:
 
 # Configurable main prompt for testing different prompt variations (original)
 MAIN_PROMPT = """You are an expert in sustainability education and engineering curriculum development.
-Answer the user's question directly and concisely. Do not restate the instructions, do not provide meta-guidance
-(e.g., "here's what you can do"), and do not discuss formatting. When sources are available, cite them succinctly.
-Write clean professional prose: avoid mid-word capitalization (e.g., sustainABILITY), avoid random spaces inside words
+Answer the user's question directly and concisely.
+Do not write an essay, introduction, or preamble.
+Do not start with phrases like "Certainly", "Here is", or "In this essay".
+Use brief, scannable bullets (3–6) or short sentences unless the user explicitly asks for an essay.
+When sources are available, cite them succinctly.
+Write clean, professional prose: avoid mid-word capitalization (e.g., sustainABILITY), avoid random spaces inside words
 (e.g., Fl uid, cur ricular), and avoid OCR-like artifacts. Prefer simple sentences. Focus on practical, technically
 accurate content."""
 
 # Configurable minimal prompt for fallback scenarios
 MINIMAL_PROMPT = "You are Scaffold AI, a course curriculum assistant. Answer this question directly and clearly using the available information:"
 
-# Domain glossary for foundational terms (used when retrieval has no coverage)
-GLOSSARY = {
-    "hydrograph": (
-        "A hydrograph is a plot of streamflow (discharge) versus time at a specific location in a river or "
-        "channel. In storm hydrology, the hydrograph shows how runoff responds to rainfall over a watershed."
-    ),
-    "hydrographs": (
-        "Hydrographs are plots of discharge versus time that describe how flow at a point in a river changes "
-        "during and after rainfall or snowmelt events."
-    ),
-    "unit hydrograph": (
-        "A unit hydrograph is the direct-runoff hydrograph resulting from one unit depth (e.g., 1 cm or 1 inch) "
-        "of effective rainfall distributed uniformly over a watershed for a specified duration. It is used to "
-        "predict storm runoff by convolution of rainfall excess with the unit response."
-    ),
-}
 
-# Simple glossary matcher without alias/typo mapping
-def _find_glossary_term(text: str) -> str:
-    """Return a matched glossary term for the given text (direct match only)."""
-    lowered = (text or "").lower()
-    for term in GLOSSARY.keys():
-        if term in lowered:
-            return term
-    return ""
 
 class ImprovedEnhancedQuerySystem:
     """Improved enhanced query system with better prompt engineering and chat memory."""
@@ -134,6 +113,12 @@ class ImprovedEnhancedQuerySystem:
             )  # 0..1 overlap
         except Exception:
             self.topic_shift_threshold = 0.2
+
+        # Concise output guardrails
+        try:
+            self.max_answer_words = int(os.getenv("SC_MAX_ANSWER_WORDS", "220"))
+        except Exception:
+            self.max_answer_words = 220
 
     def initialize(self):
         """Initialize the enhanced query system."""
@@ -239,14 +224,7 @@ class ImprovedEnhancedQuerySystem:
             "good luck", "table of contents", "rubric", "grading rubric"
         )):
             return True
-        # Optional (disabled by default): if enabled, require domain terms when the query mentions hydrology
-        require_domain = str(os.getenv("SC_REQUIRE_DOMAIN_TERMS", "")).lower() in ("1", "true", "yes")
-        if require_domain:
-            q = (query or "").lower()
-            if any(t in q for t in ("hydrograph", "hydrology", "unit hydrograph", "baseflow", "bf i", "eckhardt")):
-                domain_terms = ("peak", "recession", "baseflow", "bf i", "unit hydrograph", "effective rainfall", "convolution")
-                if not any(t in resp for t in domain_terms):
-                    return True
+        # Removed domain-specific term requirements as glossary functionality has been removed
         return False
 
     # Removed terminology normalization to avoid domain-specific term mixing
@@ -963,6 +941,35 @@ class ImprovedEnhancedQuerySystem:
         """Generate a fallback response when all else fails."""
         return f"I apologize, but I'm having trouble generating a comprehensive response for your question about '{query}'. This could be due to limited relevant information in the available sources or technical issues. Please try rephrasing your question, asking about a different topic, or contact support if the issue persists."
 
+    def _postprocess_concise(self, text: str) -> str:
+        """Strip common preambles and cap response length in words for concision."""
+        if not isinstance(text, str):
+            return text
+
+        t = text.strip()
+        # Remove common prefaces
+        lowered = t.lower()
+        prefixes = [
+            "certainly! ", "certainly. ", "certainly, ", "certainly ",
+            "here is ", "here are ", "here's ",
+            "in this essay, ", "in this essay ", "in this paper, ", "in this paper ",
+            "this essay ", "this paper ", "i will ", "overall, ", "in conclusion, ",
+        ]
+        for p in prefixes:
+            if lowered.startswith(p):
+                t = t[len(p):].lstrip()
+                break
+
+        # Cap by words to avoid long essays
+        try:
+            max_words = int(getattr(self, 'max_answer_words', 220) or 220)
+        except Exception:
+            max_words = 220
+        words = t.split()
+        if len(words) > max_words:
+            t = ' '.join(words[:max_words]) + "..."
+        return t
+
     def query(self, query: str, session_id: Optional[str] = None) -> Dict[str, Any]:
         """Process a query and return relevant results with improved prompt engineering."""
         if not self.initialized:
@@ -1040,6 +1047,11 @@ class ImprovedEnhancedQuerySystem:
                 # First attempt with optional Tree-of-Thought generation
                 # Use configured temperature directly; no strict-answers override
                 first_temp = float(temperature or 0.2)
+                # Cap length via max_new_tokens derived from desired word cap
+                try:
+                    desired_max_new_tokens = max(120, min(480, int(self.max_answer_words * 14 // 10)))
+                except Exception:
+                    desired_max_new_tokens = 320
 
                 enable_tot = str(os.getenv("SC_ENABLE_TOT", "")).lower() in ("1", "true", "yes")
                 if enable_tot:
@@ -1066,6 +1078,7 @@ class ImprovedEnhancedQuerySystem:
                         improved_prompt,
                         temperature=first_temp,
                         top_p=0.8,
+                        max_new_tokens=desired_max_new_tokens,
                     )
 
                 # Validate response quality
@@ -1088,7 +1101,7 @@ class ImprovedEnhancedQuerySystem:
                             rewrite_prompt,
                             temperature=0.15,
                             top_p=0.7,
-                            max_new_tokens=None,
+                            max_new_tokens=max(120, min(400, int(self.max_answer_words * 12 // 10))),
                         )
                         if isinstance(rewritten, str) and rewritten.strip():
                             # Re-validate rewritten text
@@ -1137,7 +1150,7 @@ class ImprovedEnhancedQuerySystem:
                                 rewrite_prompt2,
                                 temperature=0.15,
                                 top_p=0.7,
-                                max_new_tokens=None,
+                                max_new_tokens=max(120, min(400, int(self.max_answer_words * 12 // 10))),
                             )
                             if isinstance(rewritten2, str) and rewritten2.strip():
                                 g3, _ = self._garbled_reasons(rewritten2)
@@ -1169,6 +1182,9 @@ class ImprovedEnhancedQuerySystem:
                     llm_response = clean_model_output(llm_response)
                 except Exception:
                     pass
+
+            # Enforce concise style post-processing
+            llm_response = self._postprocess_concise(llm_response)
 
             # Validate and truncate response if necessary
             if len(llm_response) > 8000:  # Increased from 2000 to allow longer responses
