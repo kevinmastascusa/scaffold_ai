@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback Dashboard - Scaffold AI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 0;
+            margin-bottom: 30px;
+        }
+        
+        .feedback-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-left: 4px solid #3498db;
+        }
+        
+        .rating-display {
+            color: #f39c12;
+            font-size: 1.2em;
+        }
+        
+        .query-text {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 3px solid #27ae60;
+        }
+        
+        .response-preview {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-size: 0.95em;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        
+        .helpful-aspects {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin: 10px 0;
+        }
+        
+        .aspect-badge {
+            background: #27ae60;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+        }
+        
+        .stats-summary {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        .stat-label {
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+        
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1><i class="fas fa-chart-line"></i> Feedback Dashboard</h1>
+            <p>Monitor user feedback and system performance</p>
+            <a href="/" class="btn btn-light">
+                <i class="fas fa-arrow-left"></i> Back to Query Interface
+            </a>
+        </div>
+    </div>
+    
+    <div class="container">
+        {% if error %}
+            <div class="error-message">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h4>Error Loading Feedback</h4>
+                <p>{{ error }}</p>
+            </div>
+        {% elif feedback_data %}
+            <!-- Statistics Summary -->
+            <div class="stats-summary">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="stat-item">
+                            <div class="stat-number">{{ feedback_data|length }}</div>
+                            <div class="stat-label">Total Feedback</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-item">
+                            <div class="stat-number">
+                                {% set total_rating = feedback_data|sum(attribute='rating') %}
+                                {% if feedback_data|length > 0 %}
+                                    {{ "%.1f"|format(total_rating / feedback_data|length) }}
+                                {% else %}
+                                    0.0
+                                {% endif %}
+                            </div>
+                            <div class="stat-label">Average Rating</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-item">
+                            <div class="stat-number">
+                                {{ feedback_data|selectattr('rating', 'ge', 4)|list|length }}
+                            </div>
+                            <div class="stat-label">Positive Ratings (4-5)</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-item">
+                            <div class="stat-number">
+                                {{ feedback_data|selectattr('comments', 'defined')|selectattr('comments', 'ne', '')|list|length }}
+                            </div>
+                            <div class="stat-label">With Comments</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Feedback Items -->
+            <h3>Recent Feedback</h3>
+            {% for feedback in feedback_data %}
+                <div class="feedback-card">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h5>Feedback #{{ loop.index }}</h5>
+                            <small class="text-muted">
+                                <i class="fas fa-clock"></i> 
+                                {{ feedback.timestamp.split('T')[0] }} at {{ feedback.timestamp.split('T')[1].split('.')[0] }}
+                            </small>
+                        </div>
+                        <div class="rating-display">
+                            {% for i in range(1, 6) %}
+                                {% if i <= feedback.rating %}
+                                    <i class="fas fa-star"></i>
+                                {% else %}
+                                    <i class="far fa-star"></i>
+                                {% endif %}
+                            {% endfor %}
+                            <span class="ms-2">{{ feedback.rating }}/5</span>
+                        </div>
+                    </div>
+                    
+                    <div class="query-text">
+                        <strong>Query:</strong> {{ feedback.query }}
+                    </div>
+                    
+                    <div class="response-preview">
+                        <strong>Response Preview:</strong>
+                        {{ feedback.response[:300] }}
+                        {% if feedback.response|length > 300 %}...{% endif %}
+                    </div>
+                    
+                    {% if feedback.helpful_aspects %}
+                        <div>
+                            <strong>Helpful Aspects:</strong>
+                            <div class="helpful-aspects">
+                                {% for aspect in feedback.helpful_aspects %}
+                                    <span class="aspect-badge">{{ aspect.title() }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+                    
+                    {% if feedback.comments %}
+                        <div class="mt-3">
+                            <strong>Comments:</strong>
+                            <p class="mb-0">{{ feedback.comments }}</p>
+                        </div>
+                    {% endif %}
+                    
+                    {% if feedback.improvement_suggestions %}
+                        <div class="mt-3">
+                            <strong>Improvement Suggestions:</strong>
+                            <p class="mb-0">{{ feedback.improvement_suggestions }}</p>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-comment-slash fa-3x text-muted mb-3"></i>
+                <h4>No Feedback Yet</h4>
+                <p class="text-muted">Feedback will appear here as users interact with the system.</p>
+                <a href="/" class="btn btn-primary">
+                    <i class="fas fa-search"></i> Try the Query Interface
+                </a>
+            </div>
+        {% endif %}
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

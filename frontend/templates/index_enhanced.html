@@ -1,0 +1,1465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scaffold AI - Sustainability Education Assistant</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #10a37f;
+            --secondary-color: #1a7f64;
+            --accent-color: #059669;
+            --background-color: #ffffff;
+            --chat-bg: #f7f7f8;
+            --sidebar-bg: #202123;
+            --text-primary: #2d3748;
+            --text-secondary: #718096;
+            --border-color: #e2e8f0;
+            --user-msg-bg: #10a37f;
+            --ai-msg-bg: #f7f7f8;
+            --hover-bg: #f1f5f9;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: var(--background-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow: hidden;
+        }
+        
+        .app-container {
+            display: flex;
+            height: 100vh;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: var(--sidebar-bg);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #4a5568;
+        }
+        
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid #4a5568;
+            text-align: center;
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+        
+        .logo {
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+        }
+        
+        .brand-name {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: white;
+        }
+        
+        .sidebar-actions {
+            padding: 20px;
+            flex-grow: 1;
+        }
+        
+        .upload-section {
+            margin-bottom: 20px;
+        }
+        
+        .upload-btn {
+            width: 100%;
+            background: var(--primary-color);
+            border: none;
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .upload-btn:hover {
+            background: var(--secondary-color);
+        }
+        
+        .upload-btn:disabled {
+            background: #6b7280;
+            cursor: not-allowed;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .clear-btn {
+            width: 100%;
+            background: transparent;
+            border: 1px solid #4a5568;
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 10px;
+        }
+        
+        .clear-btn:hover {
+            background: #4a5568;
+        }
+        
+        .upload-status {
+            margin-top: 10px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            display: none;
+        }
+        
+        .upload-status.success {
+            background: #065f46;
+            color: #d1fae5;
+        }
+        
+        .upload-status.error {
+            background: #991b1b;
+            color: #fecaca;
+        }
+        
+        /* Main Chat Area */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--background-color);
+        }
+        
+        .chat-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--background-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .chat-title {
+            font-size: 1.5em;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: var(--chat-bg);
+        }
+        
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .message.user {
+            flex-direction: row-reverse;
+        }
+        
+        .message-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 12px;
+            flex-shrink: 0;
+        }
+        
+        .message.user .message-avatar {
+            background: var(--user-msg-bg);
+            color: white;
+        }
+        
+        .message.ai .message-avatar {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .message-content {
+            flex: 1;
+            padding: 12px 16px;
+            border-radius: 8px;
+            max-width: calc(100% - 60px);
+            word-wrap: break-word;
+        }
+        
+        .message.user .message-content {
+            background: var(--user-msg-bg);
+            color: white;
+        }
+        
+        .message.ai .message-content {
+            background: var(--ai-msg-bg);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+        
+        .sources-section {
+            margin-top: 12px;
+            padding: 12px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            font-size: 13px;
+        }
+        
+        .sources-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+        
+        .source-item {
+            margin-bottom: 8px;
+            padding: 8px;
+            background: var(--hover-bg);
+            border-radius: 4px;
+            border-left: 3px solid var(--primary-color);
+        }
+        
+        .source-title {
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+        
+        .source-preview {
+            color: var(--text-secondary);
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        
+        .welcome-message {
+            text-align: center;
+            color: var(--text-secondary);
+            padding: 60px 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .welcome-icon {
+            font-size: 4em;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+        
+        .welcome-title {
+            font-size: 1.8em;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 15px;
+        }
+        
+        .welcome-text {
+            font-size: 1.1em;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        
+        .welcome-suggestion {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 20px;
+            text-align: left;
+        }
+        
+        .suggestion-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+        
+        .suggestion-text {
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+        
+        /* Input Area */
+        .input-container {
+            padding: 20px;
+            background: var(--background-color);
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .input-wrapper {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+        }
+        
+        .chat-input {
+            width: 100%;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 12px 50px 12px 16px;
+            font-size: 16px;
+            line-height: 1.5;
+            resize: none;
+            outline: none;
+            transition: border-color 0.2s;
+            background: var(--background-color);
+            color: var(--text-primary);
+        }
+        
+        .chat-input:focus {
+            border-color: var(--primary-color);
+        }
+        
+        .send-btn {
+            position: absolute;
+            right: 8px;
+            bottom: 8px;
+            background: var(--primary-color);
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .send-btn:hover {
+            background: var(--secondary-color);
+        }
+        
+        .send-btn:disabled {
+            background: #6b7280;
+            cursor: not-allowed;
+        }
+        
+        .typing-indicator {
+            display: none;
+            padding: 12px 16px;
+            background: var(--ai-msg-bg);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 20px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .typing-dots {
+            display: inline-block;
+        }
+        
+        .typing-dots span {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--text-secondary);
+            margin: 0 2px;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+        
+        .typing-dots span:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dots span:nth-child(2) { animation-delay: -0.16s; }
+        
+        @keyframes typing {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+        
+        /* Model Control Panel Styles */
+        .model-control-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #e2e8f0;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .model-selector {
+            margin-bottom: 15px;
+        }
+        
+        .model-label {
+            display: block;
+            font-size: 12px;
+            color: #a0aec0;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        .model-select {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            color: white;
+            padding: 8px 10px;
+            font-size: 12px;
+            outline: none;
+        }
+        
+        .model-select:focus {
+            border-color: var(--primary-color);
+        }
+        
+        .model-select option {
+            background: #2d3748;
+            color: white;
+        }
+        
+        .model-params {
+            margin-bottom: 12px;
+        }
+        
+        .param-label {
+            display: block;
+            font-size: 12px;
+            color: #a0aec0;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        .param-slider {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            outline: none;
+            margin-bottom: 5px;
+        }
+        
+        .param-slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        
+        .param-slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .param-value {
+            font-size: 11px;
+            color: #e2e8f0;
+            text-align: right;
+        }
+        
+        .model-actions {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .model-btn {
+            flex: 1;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+        
+        .model-btn.primary {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .model-btn.primary:hover {
+            background: var(--secondary-color);
+        }
+        
+        .model-btn.secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #e2e8f0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .model-btn.secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .model-status {
+            text-align: center;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 500;
+        }
+        
+        .status-badge.active {
+            background: rgba(72, 187, 120, 0.2);
+            color: #48bb78;
+        }
+        
+        .status-badge.updating {
+            background: rgba(237, 137, 54, 0.2);
+            color: #ed8936;
+        }
+        
+        .status-badge.error {
+            background: rgba(245, 101, 101, 0.2);
+            color: #f56565;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                left: -260px;
+                top: 0;
+                height: 100vh;
+                z-index: 1000;
+                transition: left 0.3s;
+            }
+            
+            .sidebar.open {
+                left: 0;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .mobile-menu-btn {
+                display: block;
+                position: fixed;
+                top: 20px;
+                left: 20px;
+                z-index: 1001;
+                background: var(--primary-color);
+                border: none;
+                color: white;
+                padding: 10px;
+                border-radius: 6px;
+                cursor: pointer;
+            }
+            
+            .message {
+                margin-left: 10px;
+                margin-right: 10px;
+            }
+        }
+        
+        .mobile-menu-btn {
+            display: none;
+        }
+        
+        /* Loading States */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        
+        /* Scrollbar Styling */
+        .chat-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .chat-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .chat-container::-webkit-scrollbar-thumb {
+            background: #cbd5e0;
+            border-radius: 3px;
+        }
+        
+        .chat-container::-webkit-scrollbar-thumb:hover {
+            background: #a0aec0;
+        }
+        
+        /* Notification Animations */
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Mobile Menu Button -->
+        <button class="mobile-menu-btn" onclick="toggleSidebar()">
+            <i class="fas fa-bars"></i>
+        </button>
+        
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-container">
+                    <img src="/static/LogoR1.png" alt="Scaffold AI" class="logo">
+                    <span class="brand-name">Scaffold AI</span>
+                </div>
+                <div style="font-size: 12px; color: #a0aec0; margin-top: 5px;">
+                    Sustainability Education Assistant
+                </div>
+            </div>
+            
+            <div class="sidebar-actions">
+                <div class="upload-section">
+                    <input type="file" class="file-input" id="syllabusFile" accept=".pdf" onchange="handleFileSelect(event)">
+                    <button class="upload-btn" onclick="document.getElementById('syllabusFile').click()" id="uploadBtn">
+                        <i class="fas fa-file-upload"></i>
+                        Upload Syllabus
+                    </button>
+                    <div class="upload-status" id="uploadStatus"></div>
+                </div>
+                
+                <!-- Model Control Panel -->
+                <div class="model-control-section">
+                    <div class="section-title">
+                        <i class="fas fa-cogs"></i> Model Settings
+                    </div>
+                    
+                    <div class="model-selector">
+                        <label class="model-label">Language Model</label>
+                        <select id="llmModelSelect" class="model-select">
+                            <option value="">Loading...</option>
+                        </select>
+                    </div>
+                    
+                    <div class="model-selector">
+                        <label class="model-label">Embedding Model</label>
+                        <select id="embeddingModelSelect" class="model-select">
+                            <option value="">Loading...</option>
+                        </select>
+                    </div>
+                    
+                    <div class="model-params">
+                        <label class="param-label">Temperature</label>
+                        <input type="range" id="temperature" min="0" max="2" step="0.1" value="0.3" class="param-slider">
+                        <div class="param-value" id="temperatureValue">0.3</div>
+                    </div>
+                    
+                    <div class="model-params">
+                        <label class="param-label">Max Tokens</label>
+                        <input type="range" id="maxTokens" min="100" max="2000" step="100" value="800" class="param-slider">
+                        <div class="param-value" id="maxTokensValue">800</div>
+                    </div>
+                    
+                    <div class="model-params">
+                        <label class="param-label">Chunk Size</label>
+                        <input type="range" id="chunkSize" min="500" max="2000" step="100" value="1000" class="param-slider">
+                        <div class="param-value" id="chunkSizeValue">1000</div>
+                    </div>
+                    
+                    <div class="model-params">
+                        <label class="param-label">Chunk Overlap</label>
+                        <input type="range" id="chunkOverlap" min="0" max="500" step="50" value="200" class="param-slider">
+                        <div class="param-value" id="chunkOverlapValue">200</div>
+                    </div>
+                    
+                    <div class="model-actions">
+                        <button class="model-btn primary" onclick="applyModelChanges()">
+                            <i class="fas fa-check"></i> Apply
+                        </button>
+                        <button class="model-btn secondary" onclick="resetToDefaults()">
+                            <i class="fas fa-undo"></i> Reset
+                        </button>
+                        <button class="model-btn secondary" onclick="clearMemory()">
+                            <i class="fas fa-eraser"></i> Clear Memory
+                        </button>
+                    </div>
+                    
+                    <div class="model-status">
+                        <span class="status-badge active" id="modelStatus">Active</span>
+                    </div>
+                </div>
+                
+                <button class="clear-btn" onclick="clearConversation()">
+                    <i class="fas fa-trash"></i>
+                    Clear Chat
+                </button>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="chat-header">
+                <h1 class="chat-title">Chat with Scaffold AI</h1>
+            </div>
+            
+            <div class="chat-container" id="chatContainer">
+                <div class="welcome-message">
+                    <div class="welcome-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <h2 class="welcome-title">Welcome to Scaffold AI</h2>
+                    <p class="welcome-text">
+                        I'm here to help you integrate sustainability into your engineering courses. 
+                        Upload your syllabus to get personalized suggestions, or start a conversation about sustainability education.
+                    </p>
+                    
+                    <div class="welcome-suggestion">
+                        <div class="suggestion-title">💡 Try asking:</div>
+                        <div class="suggestion-text">
+                            "How can I incorporate sustainability into my Fluid Mechanics course?"
+                        </div>
+                    </div>
+                    
+                    <div class="welcome-suggestion">
+                        <div class="suggestion-title">📚 Upload your syllabus</div>
+                        <div class="suggestion-text">
+                            Get personalized sustainability integration suggestions based on your specific course content.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="typing-indicator" id="typingIndicator">
+                <div class="typing-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                Scaffold AI is thinking...
+            </div>
+            
+            <div class="input-container">
+                <div class="input-wrapper">
+                    <textarea 
+                        class="chat-input" 
+                        id="chatInput" 
+                        placeholder="Message Scaffold AI..." 
+                        rows="1"
+                        onkeypress="handleKeyPress(event)"
+                        oninput="autoResize(this)"
+                    ></textarea>
+                    <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let conversationHistory = [];
+        let isProcessing = false;
+
+        // Initialize chat
+        document.addEventListener('DOMContentLoaded', function() {
+            loadConversationHistory();
+            initializeModelControls();
+        });
+
+        // Auto-resize textarea
+        function autoResize(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+        }
+
+        // Mobile sidebar toggle
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('open');
+        }
+
+        // File upload handling
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                uploadSyllabus(file);
+            }
+        }
+
+        function uploadSyllabus(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            const statusDiv = document.getElementById('uploadStatus');
+            const uploadBtn = document.getElementById('uploadBtn');
+            
+            statusDiv.style.display = 'block';
+            statusDiv.className = 'upload-status';
+            statusDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading and analyzing...';
+            uploadBtn.disabled = true;
+            uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            
+            fetch('/api/upload-syllabus', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    statusDiv.className = 'upload-status success';
+                    statusDiv.innerHTML = `<i class="fas fa-check"></i> ${data.filename} uploaded successfully`;
+                    
+                    // Add a system message to the chat
+                    addMessage('system', `📄 Syllabus "${data.filename}" uploaded and analyzed. You can now ask me about integrating sustainability into this course.`);
+                    
+                    // Add suggestions if available
+                    if (data.suggestions && data.suggestions.length > 0) {
+                        const suggestionsText = data.suggestions.slice(0, 3).join('\n• ');
+                        addMessage('ai', `Here are some initial suggestions for your course:\n\n• ${suggestionsText}`);
+                    }
+                } else {
+                    statusDiv.className = 'upload-status error';
+                    statusDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Error: ${data.error}`;
+                }
+            })
+            .catch(error => {
+                statusDiv.className = 'upload-status error';
+                statusDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Upload failed: ${error.message}`;
+            })
+            .finally(() => {
+                uploadBtn.disabled = false;
+                uploadBtn.innerHTML = '<i class="fas fa-file-upload"></i> Upload Syllabus';
+            });
+        }
+
+        // Chat functionality
+        function handleKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            console.log('sendMessage called with:', message);
+            
+            if (message && !isProcessing) {
+                console.log('Adding user message to chat');
+                addMessage('user', message);
+                input.value = '';
+                input.style.height = 'auto';
+                
+                // Show typing indicator
+                showTypingIndicator();
+                
+                console.log('Sending request to /api/chat');
+                // Get current temperature setting
+                const temperature = parseFloat(document.getElementById('temperature').value);
+                
+                // Send to API
+                fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        message: message,
+                        temperature: temperature
+                    })
+                })
+                .then(response => {
+                    console.log('Response received:', response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Data received:', data);
+                    hideTypingIndicator();
+                    
+                    if (data.success) {
+                        console.log('Adding AI response to chat');
+                        addMessage('ai', data.response.content, data.response.sources);
+                    } else {
+                        console.error('API error:', data.error);
+                        addMessage('system', `Error: ${data.error}`);
+                    }
+                })
+                .catch(error => {
+                    console.error('Fetch error:', error);
+                    hideTypingIndicator();
+                    addMessage('system', `Error: ${error.message}`);
+                });
+            }
+        }
+
+        function addMessage(type, content, sources = null) {
+            console.log('addMessage called:', type, content);
+            const chatContainer = document.getElementById('chatContainer');
+            
+            // Remove welcome message if it exists
+            const welcomeMessage = chatContainer.querySelector('.welcome-message');
+            if (welcomeMessage) {
+                console.log('Removing welcome message');
+                welcomeMessage.remove();
+            }
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            
+            // Set avatar and content based on message type
+            if (type === 'user') {
+                avatar.innerHTML = '<i class="fas fa-user"></i>';
+                contentDiv.textContent = content;
+            } else if (type === 'ai') {
+                avatar.innerHTML = '<i class="fas fa-robot"></i>';
+                contentDiv.innerHTML = content.replace(/\n/g, '<br>');
+                
+                // Add sources if available
+                if (sources && sources.length > 0) {
+                    const sourcesDiv = document.createElement('div');
+                    sourcesDiv.className = 'sources-section';
+                    sourcesDiv.innerHTML = '<div class="sources-title">📚 Sources:</div>';
+                    
+                    sources.forEach(source => {
+                        const sourceDiv = document.createElement('div');
+                        sourceDiv.className = 'source-item';
+                        sourceDiv.innerHTML = `
+                            <div class="source-title">${source.source.name || 'Unknown Source'}</div>
+                            <div class="source-preview">${source.text_preview}</div>
+                        `;
+                        sourcesDiv.appendChild(sourceDiv);
+                    });
+                    
+                    contentDiv.appendChild(sourcesDiv);
+                }
+            } else if (type === 'system') {
+                avatar.innerHTML = '<i class="fas fa-info-circle"></i>';
+                contentDiv.innerHTML = `<em>${content}</em>`;
+            }
+            
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(contentDiv);
+            chatContainer.appendChild(messageDiv);
+            
+            console.log('Message added to chat container');
+            
+            // Scroll to bottom
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            
+            // Add to conversation history
+            conversationHistory.push({
+                type: type,
+                content: content,
+                timestamp: new Date().toISOString()
+            });
+        }
+
+        function showTypingIndicator() {
+            console.log('Showing typing indicator');
+            const indicator = document.getElementById('typingIndicator');
+            indicator.style.display = 'block';
+            document.getElementById('chatContainer').scrollTop = document.getElementById('chatContainer').scrollHeight;
+        }
+
+        function hideTypingIndicator() {
+            console.log('Hiding typing indicator');
+            const indicator = document.getElementById('typingIndicator');
+            indicator.style.display = 'none';
+        }
+
+        function loadConversationHistory() {
+            console.log('Loading conversation history');
+            fetch('/api/conversation')
+            .then(response => response.json())
+            .then(data => {
+                console.log('Conversation history loaded:', data);
+                if (data.success && data.conversation.length > 0) {
+                    conversationHistory = data.conversation;
+                    
+                    // Clear chat container
+                    const chatContainer = document.getElementById('chatContainer');
+                    chatContainer.innerHTML = '';
+                    
+                    // Add messages from history
+                    data.conversation.forEach(msg => {
+                        addMessage(msg.type, msg.content, msg.sources);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error loading conversation history:', error);
+            });
+        }
+
+        function clearConversation() {
+            console.log('Clearing conversation');
+            if (confirm('Are you sure you want to clear the conversation history?')) {
+                fetch('/api/clear-conversation', {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Clear conversation response:', data);
+                    if (data.success) {
+                        conversationHistory = [];
+                        const chatContainer = document.getElementById('chatContainer');
+                        chatContainer.innerHTML = `
+                            <div class="welcome-message">
+                                <div class="welcome-icon">
+                                    <i class="fas fa-graduation-cap"></i>
+                                </div>
+                                <h2 class="welcome-title">Welcome to Scaffold AI</h2>
+                                <p class="welcome-text">
+                                    I'm here to help you integrate sustainability into your engineering courses. 
+                                    Upload your syllabus to get personalized suggestions, or start a conversation about sustainability education.
+                                </p>
+                                
+                                <div class="welcome-suggestion">
+                                    <div class="suggestion-title">💡 Try asking:</div>
+                                    <div class="suggestion-text">
+                                        "How can I incorporate sustainability into my Fluid Mechanics course?"
+                                    </div>
+                                </div>
+                                
+                                <div class="welcome-suggestion">
+                                    <div class="suggestion-title">📚 Upload your syllabus</div>
+                                    <div class="suggestion-text">
+                                        Get personalized sustainability integration suggestions based on your specific course content.
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error clearing conversation:', error);
+                });
+            }
+        }
+
+        // Add a reset function for debugging
+        function resetChat() {
+            console.log('Resetting chat...');
+            // Clear conversation via API
+            fetch('/api/clear-conversation', {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Reset response:', data);
+                // Force reload the page
+                window.location.reload(true);
+            })
+            .catch(error => {
+                console.error('Reset error:', error);
+                // Force reload anyway
+                window.location.reload(true);
+            });
+        }
+
+        // Add reset button to the page
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Page loaded, adding reset button');
+            const chatHeader = document.querySelector('.chat-header');
+            if (chatHeader) {
+                const resetBtn = document.createElement('button');
+                resetBtn.innerHTML = '<i class="fas fa-redo"></i> Reset';
+                resetBtn.className = 'btn btn-sm btn-outline-secondary';
+                resetBtn.style.marginLeft = '10px';
+                resetBtn.onclick = resetChat;
+                chatHeader.appendChild(resetBtn);
+            }
+        });
+
+        // Close mobile sidebar when clicking outside
+        document.addEventListener('click', function(event) {
+            const sidebar = document.getElementById('sidebar');
+            const mobileBtn = document.querySelector('.mobile-menu-btn');
+            
+            if (window.innerWidth <= 768 && 
+                !sidebar.contains(event.target) && 
+                !mobileBtn.contains(event.target)) {
+                sidebar.classList.remove('open');
+            }
+        });
+
+        // Model Control Functions
+        function initializeModelControls() {
+            // Load available models
+            loadAvailableModels();
+            
+            // Set up slider event listeners
+            setupSliderListeners();
+            
+            // Load saved settings
+            loadSavedSettings();
+        }
+
+        function loadAvailableModels() {
+            fetch('/api/models')
+                .then(response => response.json())
+                .then(data => {
+                    const llmSelect = document.getElementById('llmModelSelect');
+                    const embeddingSelect = document.getElementById('embeddingModelSelect');
+                    
+                    // Populate LLM models
+                    llmSelect.innerHTML = '<option value="">Select LLM Model</option>';
+                    Object.entries(data.llm).forEach(([key, model]) => {
+                        const option = document.createElement('option');
+                        option.value = key;
+                        option.textContent = model.name;
+                        option.title = model.desc;
+                        if (key === data.current_llm) {
+                            option.selected = true;
+                        }
+                        llmSelect.appendChild(option);
+                    });
+                    
+                    // Populate embedding models
+                    embeddingSelect.innerHTML = '<option value="">Select Embedding Model</option>';
+                    Object.entries(data.embedding).forEach(([key, model]) => {
+                        const option = document.createElement('option');
+                        option.value = key;
+                        option.textContent = model.name;
+                        option.title = model.desc;
+                        if (key === data.current_embedding) {
+                            option.selected = true;
+                        }
+                        embeddingSelect.appendChild(option);
+                    });
+                    
+                    // Load current settings
+                    if (data.settings) {
+                        if (data.settings.llm) {
+                                            document.getElementById('temperature').value = data.settings.llm.temperature || 0.3;
+                document.getElementById('temperatureValue').textContent = data.settings.llm.temperature || 0.3;
+                            document.getElementById('maxTokens').value = data.settings.llm.max_new_tokens || 1000;
+                            document.getElementById('maxTokensValue').textContent = data.settings.llm.max_new_tokens || 1000;
+                        }
+                        if (data.settings.embedding) {
+                            document.getElementById('chunkSize').value = data.settings.embedding.chunk_size || 1000;
+                            document.getElementById('chunkSizeValue').textContent = data.settings.embedding.chunk_size || 1000;
+                            document.getElementById('chunkOverlap').value = data.settings.embedding.chunk_overlap || 200;
+                            document.getElementById('chunkOverlapValue').textContent = data.settings.embedding.chunk_overlap || 200;
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading models:', error);
+                });
+        }
+
+        function setupSliderListeners() {
+            // Temperature slider
+            const tempSlider = document.getElementById('temperature');
+            const tempValue = document.getElementById('temperatureValue');
+            if (tempSlider && tempValue) {
+                tempSlider.addEventListener('input', function() {
+                    tempValue.textContent = this.value;
+                });
+            }
+            
+            // Max tokens slider
+            const tokensSlider = document.getElementById('maxTokens');
+            const tokensValue = document.getElementById('maxTokensValue');
+            if (tokensSlider && tokensValue) {
+                tokensSlider.addEventListener('input', function() {
+                    tokensValue.textContent = this.value;
+                });
+            }
+            
+            // Chunk size slider
+            const chunkSizeSlider = document.getElementById('chunkSize');
+            const chunkSizeValue = document.getElementById('chunkSizeValue');
+            if (chunkSizeSlider && chunkSizeValue) {
+                chunkSizeSlider.addEventListener('input', function() {
+                    chunkSizeValue.textContent = this.value;
+                });
+            }
+            
+            // Chunk overlap slider
+            const chunkOverlapSlider = document.getElementById('chunkOverlap');
+            const chunkOverlapValue = document.getElementById('chunkOverlapValue');
+            if (chunkOverlapSlider && chunkOverlapValue) {
+                chunkOverlapSlider.addEventListener('input', function() {
+                    chunkOverlapValue.textContent = this.value;
+                });
+            }
+        }
+
+        function loadSavedSettings() {
+            // Load from localStorage if available
+            const savedSettings = localStorage.getItem('modelSettings');
+            if (savedSettings) {
+                const settings = JSON.parse(savedSettings);
+                document.getElementById('temperature').value = settings.temperature || 0.3;
+                document.getElementById('temperatureValue').textContent = settings.temperature || 0.3;
+                document.getElementById('maxTokens').value = settings.maxTokens || 800;
+                document.getElementById('maxTokensValue').textContent = settings.maxTokens || 800;
+                document.getElementById('chunkSize').value = settings.chunkSize || 1000;
+                document.getElementById('chunkSizeValue').textContent = settings.chunkSize || 1000;
+                document.getElementById('chunkOverlap').value = settings.chunkOverlap || 200;
+                document.getElementById('chunkOverlapValue').textContent = settings.chunkOverlap || 200;
+            }
+        }
+
+        function applyModelChanges() {
+            const llmModel = document.getElementById('llmModelSelect').value;
+            const embeddingModel = document.getElementById('embeddingModelSelect').value;
+            const temperature = parseFloat(document.getElementById('temperature').value);
+            const maxTokens = parseInt(document.getElementById('maxTokens').value);
+            const chunkSize = parseInt(document.getElementById('chunkSize').value);
+            const chunkOverlap = parseInt(document.getElementById('chunkOverlap').value);
+            
+            // Update status
+            updateModelStatus('updating');
+            
+            // Save settings to localStorage
+            const settings = { temperature, maxTokens, chunkSize, chunkOverlap };
+            localStorage.setItem('modelSettings', JSON.stringify(settings));
+            
+            // Create promises for model switching and settings updates
+            const promises = [];
+            
+            // Switch LLM model if changed
+            if (llmModel) {
+                promises.push(
+                    fetch('/api/models/switch', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            model_type: 'llm',
+                            model_key: llmModel
+                        })
+                    }).then(response => response.json())
+                );
+            }
+            
+            // Switch embedding model if changed
+            if (embeddingModel) {
+                promises.push(
+                    fetch('/api/models/switch', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            model_type: 'embedding',
+                            model_key: embeddingModel
+                        })
+                    }).then(response => response.json())
+                );
+            }
+            
+            // Update LLM settings
+            promises.push(
+                fetch('/api/models/settings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model_type: 'llm',
+                        settings: {
+                            temperature: temperature,
+                            max_new_tokens: maxTokens
+                        }
+                    })
+                }).then(response => response.json())
+            );
+            
+            // Update embedding settings
+            promises.push(
+                fetch('/api/models/settings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model_type: 'embedding',
+                        settings: {
+                            chunk_size: chunkSize,
+                            chunk_overlap: chunkOverlap
+                        }
+                    })
+                }).then(response => response.json())
+            );
+            
+            // Execute all promises
+            Promise.all(promises)
+                .then(results => {
+                    const allSuccess = results.every(result => result.success);
+                    if (allSuccess) {
+                        updateModelStatus('active');
+                        showNotification('Model settings applied successfully!', 'success');
+                    } else {
+                        updateModelStatus('error');
+                        showNotification('Some settings failed to apply', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error applying model settings:', error);
+                    updateModelStatus('error');
+                    showNotification('Error applying model settings', 'error');
+                });
+        }
+
+        function resetToDefaults() {
+            document.getElementById('temperature').value = 0.3;
+            document.getElementById('temperatureValue').textContent = '0.3';
+            document.getElementById('maxTokens').value = 1000;
+            document.getElementById('maxTokensValue').textContent = '1000';
+            document.getElementById('chunkSize').value = 1000;
+            document.getElementById('chunkSizeValue').textContent = '1000';
+            document.getElementById('chunkOverlap').value = 200;
+            document.getElementById('chunkOverlapValue').textContent = '200';
+            
+            // Clear localStorage
+            localStorage.removeItem('modelSettings');
+            
+            showNotification('Settings reset to defaults', 'info');
+        }
+        
+        function updateModelStatus(status) {
+            const statusElement = document.getElementById('modelStatus');
+            if (statusElement) {
+                statusElement.className = `badge ${status === 'active' ? 'bg-success' : status === 'updating' ? 'bg-warning' : 'bg-danger'}`;
+                statusElement.textContent = status === 'active' ? 'Active' : status === 'updating' ? 'Updating' : 'Error';
+            }
+        }
+        
+        function testNotification() {
+            showNotification('This is a test notification!', 'success');
+            setTimeout(() => showNotification('This is an error test!', 'error'), 1000);
+            setTimeout(() => showNotification('This is an info test!', 'info'), 2000);
+        }
+        
+        function showNotification(message, type = 'info') {
+            console.log(`Notification: ${message} (${type})`); // Debug log
+            
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type === 'success' ? 'success' : type === 'error' ? 'danger' : 'info'} alert-dismissible fade show`;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 10000;
+                min-width: 300px;
+                max-width: 400px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                border-radius: 8px;
+                padding: 16px 20px;
+                margin: 0;
+                animation: slideIn 0.3s ease-out;
+            `;
+            
+            notification.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'} me-2"></i>
+                    <span>${message}</span>
+                    <button type="button" class="btn-close ms-auto" onclick="this.parentElement.parentElement.remove()"></button>
+                </div>
+            `;
+            
+            // Add to body
+            document.body.appendChild(notification);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.style.animation = 'slideOut 0.3s ease-in';
+                    setTimeout(() => {
+                        if (notification.parentNode) {
+                            notification.remove();
+                        }
+                    }, 300);
+                }
+            }, 5000);
+        }
+
+        function clearMemory() {
+            if (confirm('Are you sure you want to clear the AI\'s memory? This will reset the AI\'s memory but keep the chat history.')) {
+                fetch('/api/clear-memory', {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showNotification('AI memory cleared successfully', 'success');
+                    } else {
+                        showNotification('Error clearing AI memory', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error clearing memory:', error);
+                    showNotification('Error clearing AI memory', 'error');
+                });
+            }
+        }
+
+
+    </script>
+</body>
+</html> 

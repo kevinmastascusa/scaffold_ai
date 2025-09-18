@@ -1,0 +1,62 @@
+[
+  {
+    "model_key": "tinyllama",
+    "model_name": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+    "model_desc": "Very fast, low resource, lower quality.",
+    "use_onnx": false,
+    "timestamp": "2025-08-04T22:04:53.893633",
+    "queries": [
+      {
+        "query": "What is sustainability in engineering?",
+        "time": 30.351563215255737,
+        "words": 225,
+        "response": "Sustainability in engineering refers to the design, development, and operation of engineering systems and products that minimize their environmental impact and promote long-term sustainability. This includes reducing waste, conserving energy, and minimizing greenhouse gas emissions. Sustainability in engineering is an essential aspect of environmental and social responsibility, and it is increasingly becoming a critical factor in the development and implementation of engineering solutions.\n\nSome..."
+      },
+      {
+        "query": "Explain the concept of life cycle assessment.",
+        "time": 22.7883780002594,
+        "words": 272,
+        "response": "Life cycle assessment (LCA) is a method used to evaluate the environmental impacts of products, processes, and systems throughout their entire life cycle. The LCA approach considers the environmental impacts of a product or system from the moment it is designed, manufactured, used, and disposed of.\n\nThe life cycle of a product or system includes the following stages:\n\n1. Design: The design stage involves the development of the product or system, including its design, materials, and production pr..."
+      },
+      {
+        "query": "How does climate change impact engineering design?",
+        "time": 18.59119415283203,
+        "words": 220,
+        "response": "Climate change has a significant impact on engineering design in several ways:\n\n1. Changes in weather patterns: Climate change causes changes in weather patterns, such as increased frequency and intensity of extreme weather events, such as hurricanes, floods, and droughts. These changes can affect the design of buildings, roads, and infrastructure, such as the placement of bridges, dams, and airports.\n\n2. Changes in natural resources: Climate change can affect the availability and quality of nat..."
+      }
+    ],
+    "load_time": 2.204792022705078,
+    "total_time": 71.73113536834717,
+    "average_time": 23.910378456115723
+  },
+  {
+    "model_key": "tinyllama-onnx",
+    "model_name": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+    "model_desc": "ONNX optimized version for maximum CPU speed.",
+    "use_onnx": true,
+    "timestamp": "2025-08-04T22:06:07.829883",
+    "queries": [
+      {
+        "query": "What is sustainability in engineering?",
+        "time": 16.979656219482422,
+        "words": 197,
+        "response": "Sustainability in engineering refers to the design and development of engineering systems and products that are environmentally friendly, energy-efficient, and have minimal negative impact on the environment. It involves the consideration of environmental, social, and economic factors in the design and implementation of engineering solutions. Sustainability in engineering is a crucial aspect of modern engineering practice, as it helps to address the challenges of climate change, resource depleti..."
+      },
+      {
+        "query": "Explain the concept of life cycle assessment.",
+        "time": 33.096752882003784,
+        "words": 359,
+        "response": "Life cycle assessment (LCA) is a method used to evaluate the environmental impacts of products, processes, and systems from their production to disposal or decommissioning. It is a comprehensive approach that considers the entire life cycle of a product or system, from raw material extraction and production to end-of-life disposal or decommissioning.\n\nThe LCA approach identifies and quantifies the environmental impacts of a product or system, including its production, use, and disposal. It does ..."
+      },
+      {
+        "query": "How does climate change impact engineering design?",
+        "time": 23.295612812042236,
+        "words": 263,
+        "response": "Climate change has significant impacts on engineering design, including:\n\n1. Increased demand for sustainable materials: As the world warms, demand for sustainable materials such as recycled metals, renewable energy sources, and biodegradable plastics is increasing. This demand is driving the development of new materials and technologies that are more sustainable and environmentally friendly.\n\n2. Changes in climate patterns: Climate change is causing changes in climate patterns, such as increase..."
+      }
+    ],
+    "load_time": 1.4066696166992188e-05,
+    "total_time": 73.37202191352844,
+    "average_time": 24.457340637842815
+  }
+]

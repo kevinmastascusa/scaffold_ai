@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+*.egg-info/
+.eggs/
+.build/
+.dist/
+
+# Environments
+scaffold_env/
+scaffold_env_*/
+.venv/
+venv/
+ENV/
+
+# Editors/IDE
+.vscode/
+.idea/
+*.code-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data and outputs (keep small metadata)
+data/**/*.pdf
+outputs/**
+vector_outputs/**
+math_outputs/**
+logs/**
+conversations/**
+uploads/**
+
+# Reports build artifacts
+report/*.aux
+report/*.log
+report/*.out
+report/*.toc
+report/*.synctex*
+
+# Node / Playwright caches (if any)
+node_modules/
+playwright/.cache/

@@ -1,0 +1,67 @@
+% TikZ workflow and settings figure for Scaffold AI (no external images)
+% This file is intended to be included with \input{../diagrams/workflow_settings_figure.tikz}
+% It defines a single tikzpicture environment that draws the complete pipeline.
+
+\begin{tikzpicture}[
+  font=\small,
+  block/.style={draw, rounded corners=2pt, thick, align=center, inner sep=4pt, minimum width=30mm, minimum height=10mm},
+  stageA/.style={block, fill=blue!8, draw=blue!60},
+  stageB/.style={block, fill=gray!10, draw=gray!70},
+  stageC/.style={block, fill=green!8, draw=green!60},
+  stageD/.style={block, fill=orange!10, draw=orange!70},
+  stageE/.style={block, fill=purple!8, draw=purple!60},
+  stageF/.style={block, fill=red!6, draw=red!60},
+  line/.style={-Latex, thick}
+]
+
+% Row 1: Inputs and Setup
+\node[stageA] (pdfs) {Data Corpus\\PDFs collected\\(e.g., 273 docs)};
+\node[stageA, right=14mm of pdfs] (setup) {Project Setup\\portable config\\`setup.py`};
+
+% Row 2: Preprocess
+\node[stageB, below=12mm of pdfs, xshift=0mm] (chunk) {Preprocess \& Chunk\\`CHUNK\_SIZE` = 1000\\`CHUNK\_OVERLAP` = 200};
+\node[stageB, right=14mm of chunk] (clean) {Unicode, cleaning\\combined-word fixes};
+
+% Row 3: Embeddings + Index
+\node[stageC, below=12mm of chunk] (embed) {Embed Chunks\\Embedding: `all-MiniLM-L6-v2`};
+\node[stageC, right=14mm of embed] (faiss) {Vector Index\\FAISS `IndexFlatL2`};
+
+% Row 4: Retrieval + Rerank
+\node[stageD, below=12mm of embed] (retr) {Retrieval\\Initial `TOP\_K` = 30};
+\node[stageD, right=14mm of retr] (rerank) {Rerank\\Cross-Encoder\\`ms-marco-MiniLM-L-6-v2`};
+
+% Row 5: Context + Generation
+\node[stageE, below=12mm of retr] (context) {Context Selection\\Use filtered candidates};
+\node[stageE, right=14mm of context] (llm) {LLM Generation\\LLM: `TinyLlama-1.1B` (ONNX)\\`temperature` = 0.3, `top\_p` = 0.9\\`max\_new\_tokens` = 2048, `max\_length` = 4096};
+
+% Row 6: Output
+\node[stageF, below=12mm of llm, xshift=-35mm] (answer) {Grounded Answer\\with citations \& metadata};
+
+% Connections
+\draw[line] (pdfs) -- (setup);
+\draw[line] (pdfs) -- (chunk);
+\draw[line] (setup) -- (chunk);
+\draw[line] (chunk) -- (clean);
+\draw[line] (clean) -- (embed);
+\draw[line] (embed) -- (faiss);
+\draw[line] (faiss) -- (retr);
+\draw[line] (retr) -- (rerank);
+\draw[line] (rerank) -- (context);
+\draw[line] (context) -- (llm);
+\draw[line] (llm) -- (answer);
+
+% Annotations (bottom legend)
+\node[below=6mm of context, align=left] (legend) {Settings summary:~\ttfamily
+\begin{tabular}{@{}ll@{}}
+Embedding & all-MiniLM-L6-v2 \\
+Cross-Encoder & cross-encoder/ms-marco-MiniLM-L-6-v2 \\
+LLM & TinyLlama/TinyLlama-1.1B-Chat-v1.0 (ONNX) \\
+FAISS & IndexFlatL2 \\
+Chunking & size=1000, overlap=200 \\
+Retrieval & initial TOP\_K=30, final candidates=all filtered \\
+Generation & temperature=0.3, top\_p=0.9, max\_new\_tokens=2048, max\_length=4096 \\
+\end{tabular}};
+
+\end{tikzpicture}
+
+

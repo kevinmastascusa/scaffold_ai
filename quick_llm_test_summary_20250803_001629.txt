@@ -1,0 +1,191 @@
+Quick LLM Performance Test Results
+============================================================
+
+OVERALL STATISTICS
+------------------------------
+Total Tests: 15
+Successful: 0
+Failed: 15
+
+============================================================
+
+TEST 1
+------------------------------
+Prompt: Hi
+Temperature: 0.1
+Response Time: 0.00 seconds
+STATUS: ERROR
+Error: LLMManager.generate_response() got an unexpected keyword argument 'do_sample'
+
+Timestamp: 2025-08-03T00:16:29.211868
+
+============================================================
+
+TEST 2
+------------------------------
+Prompt: Hi
+Temperature: 0.3
+Response Time: 0.00 seconds
+STATUS: ERROR
+Error: LLMManager.generate_response() got an unexpected keyword argument 'do_sample'
+
+Timestamp: 2025-08-03T00:16:29.211881
+
+============================================================
+
+TEST 3
+------------------------------
+Prompt: Hi
+Temperature: 0.7
+Response Time: 0.00 seconds
+STATUS: ERROR
+Error: LLMManager.generate_response() got an unexpected keyword argument 'do_sample'
+
+Timestamp: 2025-08-03T00:16:29.211889
+
+============================================================
+
+TEST 4
+------------------------------
+Prompt: Hello
+Temperature: 0.1
+Response Time: 0.00 seconds
+STATUS: ERROR
+Error: LLMManager.generate_response() got an unexpected keyword argument 'do_sample'
+
+Timestamp: 2025-08-03T00:16:29.211900
+
+============================================================
+
+TEST 5
+------------------------------
+Prompt: Hello
+Temperature: 0.3
+Response Time: 0.00 seconds
+STATUS: ERROR
+Error: LLMManager.generate_response() got an unexpected keyword argument 'do_sample'
+
+Timestamp: 2025-08-03T00:16:29.211906
+
+============================================================
+
+TEST 6
+------------------------------
+Prompt: Hello
+Temperature: 0.7
+Response Time: 0.00 seconds
+STATUS: ERROR
+Error: LLMManager.generate_response() got an unexpected keyword argument 'do_sample'
+
+Timestamp: 2025-08-03T00:16:29.211911
+
+============================================================
+
+TEST 7
+------------------------------
+Prompt: Test
+Temperature: 0.1
+Response Time: 0.00 seconds
+STATUS: ERROR
+Error: LLMManager.generate_response() got an unexpected keyword argument 'do_sample'
+
+Timestamp: 2025-08-03T00:16:29.211920
+
+============================================================
+
+TEST 8
+------------------------------
+Prompt: Test
+Temperature: 0.3
+Response Time: 0.00 seconds
+STATUS: ERROR
+Error: LLMManager.generate_response() got an unexpected keyword argument 'do_sample'
+
+Timestamp: 2025-08-03T00:16:29.211925
+
+============================================================
+
+TEST 9
+------------------------------
+Prompt: Test
+Temperature: 0.7
+Response Time: 0.00 seconds
+STATUS: ERROR
+Error: LLMManager.generate_response() got an unexpected keyword argument 'do_sample'
+
+Timestamp: 2025-08-03T00:16:29.211984
+
+============================================================
+
+TEST 10
+------------------------------
+Prompt: Quick
+Temperature: 0.1
+Response Time: 0.00 seconds
+STATUS: ERROR
+Error: LLMManager.generate_response() got an unexpected keyword argument 'do_sample'
+
+Timestamp: 2025-08-03T00:16:29.212005
+
+============================================================
+
+TEST 11
+------------------------------
+Prompt: Quick
+Temperature: 0.3
+Response Time: 0.00 seconds
+STATUS: ERROR
+Error: LLMManager.generate_response() got an unexpected keyword argument 'do_sample'
+
+Timestamp: 2025-08-03T00:16:29.212013
+
+============================================================
+
+TEST 12
+------------------------------
+Prompt: Quick
+Temperature: 0.7
+Response Time: 0.00 seconds
+STATUS: ERROR
+Error: LLMManager.generate_response() got an unexpected keyword argument 'do_sample'
+
+Timestamp: 2025-08-03T00:16:29.212020
+
+============================================================
+
+TEST 13
+------------------------------
+Prompt: Fast
+Temperature: 0.1
+Response Time: 0.00 seconds
+STATUS: ERROR
+Error: LLMManager.generate_response() got an unexpected keyword argument 'do_sample'
+
+Timestamp: 2025-08-03T00:16:29.212030
+
+============================================================
+
+TEST 14
+------------------------------
+Prompt: Fast
+Temperature: 0.3
+Response Time: 0.00 seconds
+STATUS: ERROR
+Error: LLMManager.generate_response() got an unexpected keyword argument 'do_sample'
+
+Timestamp: 2025-08-03T00:16:29.212037
+
+============================================================
+
+TEST 15
+------------------------------
+Prompt: Fast
+Temperature: 0.7
+Response Time: 0.00 seconds
+STATUS: ERROR
+Error: LLMManager.generate_response() got an unexpected keyword argument 'do_sample'
+
+Timestamp: 2025-08-03T00:16:29.212043
+
+============================================================
+

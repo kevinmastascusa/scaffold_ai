@@ -1,0 +1,122 @@
+2025-09-17 14:05:09,163 - INFO - Initializing improved enhanced query system...
+2025-09-17 14:05:09,167 - INFO - Use pytorch device_name: cuda:0
+2025-09-17 14:05:09,167 - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-09-17 14:06:22,110 - INFO - Initializing improved enhanced query system...
+2025-09-17 14:06:22,112 - INFO - Use pytorch device_name: cuda:0
+2025-09-17 14:06:22,112 - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-09-17 14:06:24,013 - INFO - Use pytorch device: cuda:0
+2025-09-17 14:06:24,298 - INFO - Loaded 2914 metadata entries from C:\Users\dlaev\Downloads\scaffold_ai-0.1.0alpha\scaffold_ai-0.1.0\vector_outputs\scaffold_metadata_1.json
+2025-09-17 14:06:24,299 - INFO - ✅ Enhanced query system initialized successfully
+2025-09-17 14:06:24,299 - INFO -    - FAISS index: 2914 vectors
+2025-09-17 14:06:24,299 - INFO -    - Metadata: 2914 entries
+2025-09-17 14:06:24,322 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5002
+2025-09-17 14:06:24,323 - INFO - [33mPress CTRL+C to quit[0m
+2025-09-17 14:06:24,325 - INFO -  * Restarting with stat
+2025-09-17 14:06:31,282 - INFO - Initializing improved enhanced query system...
+2025-09-17 14:06:31,285 - INFO - Use pytorch device_name: cuda:0
+2025-09-17 14:06:31,286 - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-09-17 14:06:33,236 - INFO - Use pytorch device: cuda:0
+2025-09-17 14:06:33,503 - INFO - Loaded 2914 metadata entries from C:\Users\dlaev\Downloads\scaffold_ai-0.1.0alpha\scaffold_ai-0.1.0\vector_outputs\scaffold_metadata_1.json
+2025-09-17 14:06:33,504 - INFO - ✅ Enhanced query system initialized successfully
+2025-09-17 14:06:33,504 - INFO -    - FAISS index: 2914 vectors
+2025-09-17 14:06:33,504 - INFO -    - Metadata: 2914 entries
+2025-09-17 14:06:33,514 - WARNING -  * Debugger is active!
+2025-09-17 14:06:33,519 - INFO -  * Debugger PIN: 804-494-007
+2025-09-17 14:06:33,721 - INFO - 127.0.0.1 - - [17/Sep/2025 14:06:33] "GET / HTTP/1.1" 200 -
+2025-09-17 14:06:33,759 - INFO - 127.0.0.1 - - [17/Sep/2025 14:06:33] "GET /api/conversation HTTP/1.1" 200 -
+2025-09-17 14:06:33,821 - INFO - 127.0.0.1 - - [17/Sep/2025 14:06:33] "[36mGET /static/LogoR1.png HTTP/1.1[0m" 304 -
+2025-09-17 14:06:34,069 - INFO - 127.0.0.1 - - [17/Sep/2025 14:06:34] "GET /api/models HTTP/1.1" 200 -
+2025-09-17 14:06:39,822 - INFO - Successfully processed syllabus: 9aeb0a90-515d-409c-ba84-9619e15e23ba_AE_444_-_Fernanda.pdf
+2025-09-17 14:06:39,825 - INFO - 127.0.0.1 - - [17/Sep/2025 14:06:39] "POST /api/upload-syllabus HTTP/1.1" 200 -
+2025-09-17 14:06:58,914 - INFO - [LOG] Conversation context (84 tokens):
+UPLOADED SYLLABUS CONTEXT:
+Course: Unknown Course
+Course Code: N/A
+Topics: 
+Content Summary: ASEE-EOP AE 444 Building Envelope Systems  
+Ideas in this document: 
+• Building envelope systems mapping 
+• Embodied carbon & Envelope materials 
+• Designing (envelopes) for resilience today and tomorrow 
+• Autodesk Forma and passive design 
+• Building Envelope & Ecosystem services 
+ 
+➢ Building design systems mapping  
+Introduce students to causal loop diagramming using tools like Loopy to map interactions 
+between water, daylight, air, heat, materials, and energy in the building envelope. Stud...
+2025-09-17 14:06:58,915 - INFO - [LOG] Processing query: Can you help me incorporate sustainability aspects to my building envelope systems course for architectural engineering? (session: 9aeb0a90-515d-409c-ba84-9619e15e23ba)
+2025-09-17 14:07:00,706 - INFO - [LOG] Found 30 initial candidates
+2025-09-17 14:07:01,034 - INFO - [LOG] Reranked to 4 candidates
+2025-09-17 14:07:01,035 - INFO - [LOG] Filtered to 3 candidates
+2025-09-17 14:07:01,035 - INFO - [LOG] Using all 3 filtered candidates
+2025-09-17 14:07:01,036 - INFO - [LOG] Improved prompt passed to LLM:
+<|system|>
+You are an expert in sustainability education and engineering curriculum development. 
+Your role is to provide a concise, well-structured answer primarily from your internal knowledge. Use external sources only to support, not dominate, your response.
+
+Please provide an answer that:
+1. Directly addresses the question
+2. Keeps external citations minimal (max 3 brief mentions)
+3. Emphasizes your own knowledge and synthesis of best practices
+4. Suggests practical, implementable steps
+<|user|>
+Based on the following sources, please answer this question: Can you help me incorporate sustainability aspects to my building envelope systems course for architectural engineering?
+
+Previous Conversation Context:
+UPLOADED SYLLABUS CONTEXT:
+Course: Unknown Course
+Course Code: N/A
+Topics: 
+Content Summary: ASEE-EOP AE 444 Building Envelope Systems  
+Ideas in this document: 
+• Building envelope systems mapping 
+• Embodied carbon & Envelope materials 
+• Designing (envelopes) for resilience today and tomorrow 
+• Autodesk Forma and passive design 
+• Building Envelope & Ecosystem services 
+ 
+➢ Building design systems mapping  
+Introduce students to causal loop diagramming using tools like Loopy to map interactions 
+between water, daylight, air, heat, materials, and energy in the building envelope. Stud...
+
+Sources:
+Case Study Green Building and Sustainable Infrastructure: Sustainability Education for Civil Engineers J. T. Kevern, A.M.ASCE1 Abstract: This paper discusses a framework for incorporating sustainable design/thinking as a new civil engineering course and experiences from the pilot offering. Important areas are outlined to aid all engineers in understanding sustainability in context with traditional engineeringprinciples. Green-building rating systems were used to introduce the concepts of sustainability in buildings and infrastructure, highlighted by presentations from green-building professionals. By providing a better understanding of sustainability through education, civil engineers can provide proactive solutions to a growing global infrastructure. DOI: 10.1061/(ASCE)EI.1943-5541.0000048 .© 2011 American Society of Civil Engineers. CE Database subject headings: Engineering education; Sustainable development; Curricula; Teaching methods. Author keywords: Engineering education; Sustainable development; Curricula; Teaching methods. Introduction Society requires that new projects be sustainable while also adher- ing to basic engineering principles such as structural design, economics, safety, and constructability. However, the...
+
+AEI 2019 140 © ASCE Enhancing Sustainability Education within an Architectural Engineering Curriculum Deborah L. Jackman, Ph.D., P.E.1 1Civil and Architectural Engineering and Construction Management Dept., Milwaukee School of Engineering, 1025 North Broadway, Milwaukee, WI 53202 -3109. E -mail: jackman@msoe.edu ABSTRACT The author presents a case study on how incorporating artwork into an environmental science course targe ted at a rchitectural engineerin g students was used to facilitate active learning and to raise the level of engagement of students in the course. Students were given the choice of basing an end -of-term research project on either the building which served as their senior capstone design c ourse subject building, or on a building design or construction topic derived from a collection of industrial art housed in the Grohmann Museum, located on the MSOE campus. Correlations between student final exam scores, final course numerical averages, an d the choice of project...
+
+of the class. Incorporating sustainability into civil engineering curriculum poses a challenge to overcome the already constrained curriculum of 120 to 128 credits in most schools. Two basic strategies have been found in the literature from the faculties attempting to incorporate sustainability [2]. The first approach is the stand -alone method where a separate thre e credit course is offered to educate the students on sustainability while the other is module method. In the latter method, modules are designed to fit into one lecture or over a series of lectures sometimes via guest appearances. Dancz et al. (2017) reported in their study that students incorporated sustainability in senior design only if it is an expectation from the instructor [2]. The authors reported raising the bar of sustainability by engaging a sustainability expert could be a viable option for the instructor to adopt sustainability in their class. Scott et al. (2013)...
+<|assistant|>
+2025-09-17 14:07:01,037 - INFO - [LOG] LLM device: cuda
+2025-09-17 14:07:02,380 - INFO - We will use 90% of the memory on device 0 for storing the model, and 10% for the buffer to avoid OOM. You can set `max_memory` in to a higher value to use more memory (at your own risk).
+2025-09-17 14:07:25,329 - INFO - Generated response with 345 words
+2025-09-17 14:07:25,329 - INFO - Detected truncated response, generating continuation...
+2025-09-17 14:07:43,736 - INFO - Generated response with 285 words
+2025-09-17 14:07:43,736 - INFO - Successfully generated continuation
+2025-09-17 14:07:43,736 - INFO - Generated complete response with 630 words
+2025-09-17 14:07:43,737 - INFO - [LOG] LLM response (first attempt):
+Based on the given sources, here is a concise, well-structured answer that addresses the question: Can you help me incorporate sustainability aspects to my building envelope systems course for architectural engineering?
+
+Sure, here's a possible answer:
+
+1. Directly addressing the question: Yes, we can help you incorporate sustainability aspects to your building envelope systems course for architectural engineering.
+
+2. Keeping external citations minimal (max 3 brief mentions): We can help you incorporate sustainability aspects to your building envelope systems course for architectural engineering by providing you with a concise, well-structured answer that highlights your own knowledge and synthesis of best practices.
+
+3. Emphasizing your own knowledge and synthesis of best practices: We can help you incorporate sustainability aspects to your building envelope systems course for architectural engineering by emphasizing your own knowledge and synthesis of best practices. This will help you to keep external citations minimal and focus on the practical, implementable steps that you can take to incorporate sustainability into your course.
+
+4. Suggesting practical, implementable steps: We can help you incorporate sustainability aspects to your building envelope systems course for architectural engineering by suggesting practical, implementable steps that you can take to incorporate sustainability into your course. This will help you to keep external citations minimal and focus on the steps that you can take to make your course more engaging and effective for your students.
+
+5. Suggesting practical, implementable steps: We can help you incorporate sustainability aspects to your building envelope systems course for architectural engineering by suggesting practical, implementable steps that you can take to incorporate sustainability into your course. This will help you to keep external citations minimal and focus on the steps that you can take to make your course more engaging and effective for your students.
+
+Incorporating sustainability aspects into your building envelope systems course for architectural engineering can be a challenging task, but with our help, you can make it more effective and engaging for your students. Let us help you incorporate sustainability into your course and make it more practical, implementable, and engaging for your students. Incorporating sustainability aspects into your building envelope systems course for architectural engineering can be a challenging task, but with our help, you can make it more effective and engaging for your students. Let us help you incorporate sustainability into your course and make it more practical, implementable, and engaging for your students.
+
+Our expertise in sustainability education and engineering curriculum development will provide you with the necessary tools and resources to incorporate sustainability into your course. We will help you map out the causal loop diagramming tool to map interactions between water, daylight, air, heat, materials, and energy in the building envelope. We will also provide you with designing (envelopes) for resilience today and tomorrow, and Autodesk Forma and passive design to help you design sustainable buildings and infrastructure.
+
+Our framework for incorporating sustainability into your course will help you provide a better understanding of sustainability in context with traditional engineering principles. We will also introduce you to green-building rating systems, highlighted by presentations from green-building professionals. By providing a better understanding of sustainability, you can provide proactive solutions to a growing global infrastructure.
+
+Our expertise in teaching methods will help you incorporate sustainability into your course. We will provide you with techniques such as artwork, which can facilitate active learning and raise the level of engagement of students in the course.
+
+In conclusion, incorporating sustainability aspects into your building envelope systems course for architectural engineering can be a challenging task, but with our help, you can make it more effective and engaging for your students. Let us help you incorporate sustainability into your course and make it more practical, implementable, and engaging for your students. Contact us today to learn more about our services.
+2025-09-17 14:07:43,738 - INFO - [LOG] Query completed in 44.82 seconds
+2025-09-17 14:07:43,740 - INFO - 127.0.0.1 - - [17/Sep/2025 14:07:43] "POST /api/chat HTTP/1.1" 200 -
