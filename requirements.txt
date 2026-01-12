@@ -26,7 +26,7 @@ frozenlist==1.7.0
 fsspec==2025.3.0
 gitdb==4.0.12
 GitPython==3.1.45
-gunicorn==21.2.0
+gunicorn==23.0.0
 hf-xet==1.1.5
 huggingface-hub==0.34.3
 humanfriendly==10.0
