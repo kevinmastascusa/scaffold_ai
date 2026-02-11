@@ -54,7 +54,7 @@ pandas==2.2.2
 pdfminer.six==20250506
 pdfplumber==0.11.7
 pefile==2023.2.7
-pillow==10.3.0
+pillow==12.1.1
 propcache==0.3.2
 protobuf==5.27.4
 psutil==7.0.0
