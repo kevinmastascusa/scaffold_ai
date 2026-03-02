@@ -13,7 +13,7 @@ charset-normalizer==3.4.2
 click==8.2.1
 colorama==0.4.6
 coloredlogs==15.0.1
-cryptography==45.0.5
+cryptography==46.0.5
 datasets==4.0.0
 dill==0.3.8
 et_xmlfile==2.0.0
